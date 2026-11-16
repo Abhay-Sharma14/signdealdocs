@@ -35,15 +35,9 @@ export function magicLink(slug: string) {
   return `https://signdealdocs.com/d/${slug}`;
 }
 
-export function makeSlug(title: string) {
-  const base =
-    title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 42) || "deal";
-  const suffix = crypto.randomUUID().replace(/-/g, "");
-  return `${base}-${suffix}`;
+export function makeSlug(_title: string) {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 export function normalizeDocuments(value: unknown): string[] {

@@ -44,7 +44,13 @@ export async function GET(_request: Request, context: { params: Promise<{ token:
     file_url: await signedUrl(row.file_url),
   })));
   return NextResponse.json({
-    deal: { ...deal, signature_url: await signedUrl(deal.signature_url) },
+    deal: {
+      id: deal.id, slug: deal.slug, client_name: deal.client_name, client_email: deal.client_email,
+      project_title: deal.project_title, currency: deal.currency, amount: deal.amount,
+      status: deal.status, signature_url: await signedUrl(deal.signature_url),
+      signed_at: deal.signed_at, created_at: deal.created_at, proposal: deal.proposal,
+      required_documents: deal.required_documents,
+    },
     files: docs,
   }, { headers: { "Cache-Control": "no-store, private", "Referrer-Policy": "no-referrer" } });
 }
@@ -73,10 +79,10 @@ export async function POST(request: Request, context: { params: Promise<{ token:
     if (uploadError) return NextResponse.json({ error: "Could not save signature." }, { status: 500 });
     const signedAt = new Date().toISOString();
     const nextStatus = deal.required_documents.length === 0 ? "completed" : "signed";
-    const { error } = await getSupabaseAdmin().from("deals").update({
+    const { data: updated, error } = await getSupabaseAdmin().from("deals").update({
       status: nextStatus, signature_url: path, signed_at: signedAt,
-    }).eq("id", deal.id).eq("status", "sent");
-    if (error) {
+    }).eq("id", deal.id).eq("status", "sent").select("id").maybeSingle();
+    if (error || !updated) {
       await getSupabaseAdmin().storage.from(BUCKET).remove([path]);
       return NextResponse.json({ error: "Deal state changed. Refresh and try again." }, { status: 409 });
     }

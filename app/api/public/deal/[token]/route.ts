@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 export const runtime = "nodejs";
 
@@ -17,13 +17,13 @@ type DealRow = {
 
 async function getDeal(token: string) {
   if (!/^[a-z0-9-]{40,100}$/i.test(token)) return null;
-  const { data } = await supabaseAdmin.from("deals").select("*").eq("slug", token).maybeSingle();
+  const { data } = await getSupabaseAdmin().from("deals").select("*").eq("slug", token).maybeSingle();
   return (data as DealRow | null) ?? null;
 }
 
 async function signedUrl(path: string | null) {
   if (!path) return null;
-  const { data } = await supabaseAdmin.storage.from(BUCKET).createSignedUrl(path, 300);
+  const { data } = await getSupabaseAdmin().storage.from(BUCKET).createSignedUrl(path, 300);
   return data?.signedUrl ?? null;
 }
 
@@ -67,17 +67,17 @@ export async function POST(request: Request, context: { params: Promise<{ token:
     if (file.type !== "image/png") return NextResponse.json({ error: "Signature must be a PNG image." }, { status: 400 });
     const path = `${deal.id}/signature-${randomUUID()}.png`;
     const bytes = Buffer.from(await file.arrayBuffer());
-    const { error: uploadError } = await supabaseAdmin.storage.from(BUCKET).upload(path, bytes, {
+    const { error: uploadError } = await getSupabaseAdmin().storage.from(BUCKET).upload(path, bytes, {
       contentType: "image/png", upsert: false,
     });
     if (uploadError) return NextResponse.json({ error: "Could not save signature." }, { status: 500 });
     const signedAt = new Date().toISOString();
     const nextStatus = deal.required_documents.length === 0 ? "completed" : "signed";
-    const { error } = await supabaseAdmin.from("deals").update({
+    const { error } = await getSupabaseAdmin().from("deals").update({
       status: nextStatus, signature_url: path, signed_at: signedAt,
     }).eq("id", deal.id).eq("status", "sent");
     if (error) {
-      await supabaseAdmin.storage.from(BUCKET).remove([path]);
+      await getSupabaseAdmin().storage.from(BUCKET).remove([path]);
       return NextResponse.json({ error: "Deal state changed. Refresh and try again." }, { status: 409 });
     }
     return NextResponse.json({ status: nextStatus, signature_url: await signedUrl(path), signed_at: signedAt });
@@ -93,23 +93,23 @@ export async function POST(request: Request, context: { params: Promise<{ token:
     }
     const path = `${deal.id}/documents/${randomUUID()}`;
     const bytes = Buffer.from(await file.arrayBuffer());
-    const { error: uploadError } = await supabaseAdmin.storage.from(BUCKET).upload(path, bytes, {
+    const { error: uploadError } = await getSupabaseAdmin().storage.from(BUCKET).upload(path, bytes, {
       contentType: file.type, upsert: false,
     });
     if (uploadError) return NextResponse.json({ error: "Could not upload document." }, { status: 500 });
 
-    const { data: inserted, error } = await supabaseAdmin.from("deal_documents").insert({
+    const { data: inserted, error } = await getSupabaseAdmin().from("deal_documents").insert({
       deal_id: deal.id, document_label: label, file_name: file.name.slice(0, 180), file_url: path,
     }).select("id, deal_id, document_label, file_name, file_url, created_at").single();
     if (error || !inserted) {
-      await supabaseAdmin.storage.from(BUCKET).remove([path]);
+      await getSupabaseAdmin().storage.from(BUCKET).remove([path]);
       return NextResponse.json({ error: "Could not save document record." }, { status: 500 });
     }
-    const { data: allDocs } = await supabaseAdmin.from("deal_documents").select("document_label").eq("deal_id", deal.id);
+    const { data: allDocs } = await getSupabaseAdmin().from("deal_documents").select("document_label").eq("deal_id", deal.id);
     const uploadedLabels = new Set((allDocs ?? []).map((item) => item.document_label));
     const complete = deal.required_documents.every((item) => uploadedLabels.has(item));
     if (complete && deal.status !== "completed") {
-      await supabaseAdmin.from("deals").update({ status: "completed" }).eq("id", deal.id).eq("status", "signed");
+      await getSupabaseAdmin().from("deals").update({ status: "completed" }).eq("id", deal.id).eq("status", "signed");
     }
     return NextResponse.json({
       file: { ...inserted, file_url: await signedUrl(path) },

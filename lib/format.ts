@@ -42,7 +42,7 @@ export function makeSlug(title: string) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
       .slice(0, 42) || "deal";
-  const suffix = Math.random().toString(36).slice(2, 8);
+  const suffix = crypto.randomUUID().replace(/-/g, "");
   return `${base}-${suffix}`;
 }
 

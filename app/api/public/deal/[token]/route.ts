@@ -15,6 +15,14 @@ type DealRow = {
   proposal: string | null; required_documents: string[];
 };
 
+function hasValidFileSignature(bytes: Buffer, mime: string) {
+  if (mime === "application/pdf") return bytes.subarray(0, 5).toString() === "%PDF-";
+  if (mime === "image/png") return bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+  if (mime === "image/jpeg") return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  if (mime === "image/webp") return bytes.subarray(0, 4).toString() === "RIFF" && bytes.subarray(8, 12).toString() === "WEBP";
+  return false;
+}
+
 async function getDeal(token: string) {
   if (!/^[a-f0-9]{64}$/i.test(token)) return null;
   const { data } = await getSupabaseAdmin().from("deals").select("*").eq("slug", token).maybeSingle();
@@ -32,7 +40,7 @@ export async function GET(_request: Request, context: { params: Promise<{ token:
   const deal = await getDeal(token);
   if (!deal) return NextResponse.json({ error: "Deal link is invalid or expired." }, { status: 404 });
 
-  const { data: rows, error } = await supabaseAdmin
+  const { data: rows, error } = await getSupabaseAdmin()
     .from("deal_documents")
     .select("id, deal_id, document_label, file_name, file_url, created_at")
     .eq("deal_id", deal.id)
@@ -73,6 +81,7 @@ export async function POST(request: Request, context: { params: Promise<{ token:
     if (file.type !== "image/png") return NextResponse.json({ error: "Signature must be a PNG image." }, { status: 400 });
     const path = `${deal.id}/signature-${randomUUID()}.png`;
     const bytes = Buffer.from(await file.arrayBuffer());
+    if (!hasValidFileSignature(bytes, file.type)) return NextResponse.json({ error: "File content does not match its declared type." }, { status: 400 });
     const { error: uploadError } = await getSupabaseAdmin().storage.from(BUCKET).upload(path, bytes, {
       contentType: "image/png", upsert: false,
     });

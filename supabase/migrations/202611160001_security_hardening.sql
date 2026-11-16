@@ -49,6 +49,23 @@ begin
 end;
 $;
 
+-- Remove every existing table policy first: permissive policies combine with OR.
+do $
+declare
+  policy_row record;
+begin
+  for policy_row in
+    select schemaname, tablename, policyname
+    from pg_policies
+    where schemaname = 'public'
+      and tablename in ('deals', 'deal_documents')
+  loop
+    execute format('drop policy %I on %I.%I',
+      policy_row.policyname, policy_row.schemaname, policy_row.tablename);
+  end loop;
+end;
+$;
+
 -- Remove all legacy anonymous policies (including broad public reads and writes).
 drop policy if exists "public read deals" on public.deals;
 drop policy if exists "public update deals" on public.deals;

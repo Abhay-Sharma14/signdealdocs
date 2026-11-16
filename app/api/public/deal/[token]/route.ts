@@ -16,7 +16,7 @@ type DealRow = {
 };
 
 async function getDeal(token: string) {
-  if (!/^[a-z0-9-]{40,100}$/i.test(token)) return null;
+  if (!/^[a-f0-9]{64}$/i.test(token)) return null;
   const { data } = await getSupabaseAdmin().from("deals").select("*").eq("slug", token).maybeSingle();
   return (data as DealRow | null) ?? null;
 }

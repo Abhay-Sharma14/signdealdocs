@@ -65,6 +65,8 @@ export async function GET(_request: Request, context: { params: Promise<{ token:
 
 export async function POST(request: Request, context: { params: Promise<{ token: string }> }) {
   const { token } = await context.params;
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (contentLength > MAX_FILE_BYTES + 256_000) return NextResponse.json({ error: "Upload is too large." }, { status: 413 });
   const deal = await getDeal(token);
   if (!deal) return NextResponse.json({ error: "Deal link is invalid or expired." }, { status: 404 });
 
@@ -108,6 +110,7 @@ export async function POST(request: Request, context: { params: Promise<{ token:
     }
     const path = `${deal.id}/documents/${randomUUID()}`;
     const bytes = Buffer.from(await file.arrayBuffer());
+    if (!hasValidFileSignature(bytes, file.type)) return NextResponse.json({ error: "File content does not match its declared type." }, { status: 400 });
     const { error: uploadError } = await getSupabaseAdmin().storage.from(BUCKET).upload(path, bytes, {
       contentType: file.type, upsert: false,
     });

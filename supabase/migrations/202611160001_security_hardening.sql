@@ -7,6 +7,48 @@ begin;
 alter table public.deals enable row level security;
 alter table public.deal_documents enable row level security;
 
+-- Permit the server-controlled one-step completion when a deal has no required documents.
+create or replace function public.protect_deal_client_update()
+returns trigger
+language plpgsql
+as $
+begin
+  if auth.uid() is not null and auth.uid() = old.user_id then
+    return new;
+  end if;
+
+  if new.user_id is distinct from old.user_id
+     or new.slug is distinct from old.slug
+     or new.client_name is distinct from old.client_name
+     or new.client_email is distinct from old.client_email
+     or new.project_title is distinct from old.project_title
+     or new.currency is distinct from old.currency
+     or new.amount is distinct from old.amount
+     or new.proposal is distinct from old.proposal
+     or new.required_documents is distinct from old.required_documents
+     or new.created_at is distinct from old.created_at
+     or new.id is distinct from old.id
+  then
+    raise exception 'Clients may only update signature and status';
+  end if;
+
+  if old.status = 'sent' and new.status not in ('signed', 'completed') then
+    raise exception 'Invalid status transition';
+  end if;
+  if old.status = 'signed' and new.status not in ('signed', 'completed') then
+    raise exception 'Invalid status transition';
+  end if;
+  if old.status = 'completed' and new.status <> 'completed' then
+    raise exception 'Invalid status transition';
+  end if;
+  if old.status = 'draft' then
+    raise exception 'Draft deals cannot be updated from the client portal';
+  end if;
+
+  return new;
+end;
+$;
+
 -- Remove all legacy anonymous policies (including broad public reads and writes).
 drop policy if exists "public read deals" on public.deals;
 drop policy if exists "public update deals" on public.deals;

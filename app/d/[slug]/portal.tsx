@@ -5,7 +5,6 @@ import { Logo } from "@/components/logo";
 import { ProposalView } from "@/components/proposal-view";
 import { SignaturePad, type SignaturePadHandle } from "@/components/signature-pad";
 import { formatMoney, formatWhen, normalizeDeal } from "@/lib/format";
-import { supabase } from "@/lib/supabase";
 import type { Deal, DealDocument } from "@/lib/types";
 
 export function Portal({ slug }: { slug: string }) {
@@ -20,48 +19,23 @@ export function Portal({ slug }: { slug: string }) {
 
   useEffect(() => {
     let cancelled = false;
-
     async function load() {
-      const { data, error: queryError } = await supabase
-        .from("deals")
-        .select(
-          "id, slug, client_name, client_email, project_title, currency, amount, status, signature_url, signed_at, created_at, proposal, required_documents",
-        )
-        .eq("slug", slug)
-        .maybeSingle();
-
-      if (cancelled) return;
-      if (queryError || !data) {
-        setMissing(true);
-        setLoading(false);
-        return;
+      try {
+        const response = await fetch(`/api/public/deal/${encodeURIComponent(slug)}`, { cache: "no-store" });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || "Deal link unavailable.");
+        if (cancelled) return;
+        setDeal(normalizeDeal(payload.deal));
+        setFiles((payload.files ?? []) as DealDocument[]);
+      } catch {
+        if (!cancelled) setMissing(true);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      const nextDeal = normalizeDeal(data);
-      setDeal(nextDeal);
-      if (nextDeal.status === "signed" || nextDeal.status === "completed") {
-        await loadFiles(nextDeal.id);
-      }
-      if (!cancelled) setLoading(false);
     }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
+    void load();
+    return () => { cancelled = true; };
   }, [slug]);
-
-  async function loadFiles(dealId: string) {
-    const { data, error: queryError } = await supabase
-      .from("deal_documents")
-      .select("id, deal_id, document_label, file_name, file_url, created_at")
-      .eq("deal_id", dealId)
-      .order("created_at", { ascending: true });
-    if (queryError) {
-      setError(queryError.message);
-      return;
-    }
-    setFiles((data ?? []) as DealDocument[]);
-  }
 
   async function acceptAndSign() {
     if (!deal) return;
@@ -70,96 +44,42 @@ export function Portal({ slug }: { slug: string }) {
       setError("Draw your signature before accepting the proposal.");
       return;
     }
-
     setError("");
     setSigning(true);
-    const path = `${deal.slug}/signature-${Date.now()}.png`;
-    const { error: uploadError } = await supabase.storage
-      .from("deal-vault")
-      .upload(path, blob, { contentType: "image/png", upsert: false });
-
-    if (uploadError) {
+    try {
+      const form = new FormData();
+      form.set("action", "sign");
+      form.set("file", new File([blob], "signature.png", { type: "image/png" }));
+      const response = await fetch(`/api/public/deal/${encodeURIComponent(slug)}`, { method: "POST", body: form });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Could not save signature.");
+      setDeal({ ...deal, status: payload.status, signature_url: payload.signature_url, signed_at: payload.signed_at });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not save signature.");
+    } finally {
       setSigning(false);
-      setError(uploadError.message);
-      return;
     }
-
-    const { data: publicUrl } = supabase.storage.from("deal-vault").getPublicUrl(path);
-    const signedAt = new Date().toISOString();
-    const nextStatus = deal.required_documents.length === 0 ? "completed" : "signed";
-    const { error: updateError } = await supabase
-      .from("deals")
-      .update({
-        status: nextStatus,
-        signature_url: publicUrl.publicUrl,
-        signed_at: signedAt,
-      })
-      .eq("id", deal.id);
-
-    setSigning(false);
-    if (updateError) {
-      setError(updateError.message);
-      return;
-    }
-    setDeal({
-      ...deal,
-      status: nextStatus,
-      signature_url: publicUrl.publicUrl,
-      signed_at: signedAt,
-    });
   }
 
   async function uploadDocument(label: string, file: File | undefined) {
     if (!deal || !file) return;
     setError("");
     setUploadingLabel(label);
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
-    const path = `${deal.slug}/docs/${Date.now()}-${safeName}`;
-    const { error: uploadError } = await supabase.storage
-      .from("deal-vault")
-      .upload(path, file, { contentType: file.type || "application/octet-stream" });
-
-    if (uploadError) {
+    try {
+      const form = new FormData();
+      form.set("action", "document");
+      form.set("label", label);
+      form.set("file", file);
+      const response = await fetch(`/api/public/deal/${encodeURIComponent(slug)}`, { method: "POST", body: form });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Could not upload document.");
+      setFiles((current) => [...current, payload.file as DealDocument]);
+      setDeal((current) => current ? { ...current, status: payload.status } : current);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not upload document.");
+    } finally {
       setUploadingLabel("");
-      setError(uploadError.message);
-      return;
     }
-
-    const { data: publicUrl } = supabase.storage.from("deal-vault").getPublicUrl(path);
-    const { data: inserted, error: insertError } = await supabase
-      .from("deal_documents")
-      .insert({
-        deal_id: deal.id,
-        document_label: label,
-        file_name: file.name,
-        file_url: publicUrl.publicUrl,
-      })
-      .select("id, deal_id, document_label, file_name, file_url, created_at")
-      .single();
-
-    if (insertError || !inserted) {
-      setUploadingLabel("");
-      setError(insertError?.message || "Could not save the document record.");
-      return;
-    }
-
-    const nextFiles = [...files, inserted as DealDocument];
-    const covered = new Set(nextFiles.map((item) => item.document_label));
-    const complete = deal.required_documents.every((item) => covered.has(item));
-    if (complete && deal.status !== "completed") {
-      const { error: updateError } = await supabase
-        .from("deals")
-        .update({ status: "completed" })
-        .eq("id", deal.id);
-      if (updateError) {
-        setError(updateError.message);
-      } else {
-        setDeal({ ...deal, status: "completed" });
-      }
-    }
-
-    setFiles(nextFiles);
-    setUploadingLabel("");
   }
 
   if (loading) {

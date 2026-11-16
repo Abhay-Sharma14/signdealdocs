@@ -50,9 +50,12 @@ export default function NewDealPage() {
     setError("");
     setGenerating(true);
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error("Your session has expired. Please sign in again.");
       const response = await fetch("/api/generate-proposal", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
           clientName,
           clientEmail,

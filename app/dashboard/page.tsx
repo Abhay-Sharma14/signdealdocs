@@ -59,17 +59,27 @@ export default function DashboardPage() {
     setFiles([]);
     setFilesError("");
     setLoadingFiles(true);
-    const { data, error: queryError } = await supabase
-      .from("deal_documents")
-      .select("id, deal_id, document_label, file_name, file_url, created_at")
-      .eq("deal_id", deal.id)
-      .order("created_at", { ascending: true });
-    setLoadingFiles(false);
-    if (queryError) {
-      setFilesError(queryError.message);
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    if (!accessToken) {
+      setLoadingFiles(false);
+      setFilesError("Your session has expired. Please sign in again.");
       return;
     }
-    setFiles((data ?? []) as DealDocument[]);
+    try {
+      const response = await fetch(`/api/owner/deals/${encodeURIComponent(deal.id)}/documents`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        cache: "no-store",
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Could not load documents.");
+      setFiles((payload.files ?? []) as DealDocument[]);
+      setActive({ ...deal, signature_url: payload.signature_url });
+    } catch (cause) {
+      setFilesError(cause instanceof Error ? cause.message : "Could not load documents.");
+    } finally {
+      setLoadingFiles(false);
+    }
   }
 
   async function signOut() {

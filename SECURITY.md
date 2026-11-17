@@ -11,6 +11,8 @@ Keep these variables in the hosting provider's server-side environment only:
 - `SUPABASE_SERVICE_ROLE_KEY` (server only; never prefix with `NEXT_PUBLIC_`)
 - `GEMINI_API_KEY`
 
+AI proposal generation is limited to 10 requests per user per UTC hour after the database migration is applied.
+
 Redeploy after setting the service-role key. Do not commit environment files or keys.
 
 ## Apply the database migration

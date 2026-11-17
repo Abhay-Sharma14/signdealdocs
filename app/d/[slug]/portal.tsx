@@ -6,6 +6,7 @@ import { ProposalView } from "@/components/proposal-view";
 import { SignaturePad, type SignaturePadHandle } from "@/components/signature-pad";
 import { formatMoney, formatWhen, normalizeDeal } from "@/lib/format";
 import type { Deal, DealDocument } from "@/lib/types";
+import { DOCUMENT_ACCEPT, MAX_DOCUMENT_BYTES } from "@/lib/document-types";
 
 export function Portal({ slug }: { slug: string }) {
   const padRef = useRef<SignaturePadHandle>(null);
@@ -63,6 +64,10 @@ export function Portal({ slug }: { slug: string }) {
 
   async function uploadDocument(label: string, file: File | undefined) {
     if (!deal || !file) return;
+    if (file.size < 1 || file.size > MAX_DOCUMENT_BYTES) {
+      setError("Choose a non-empty file up to 25 MB.");
+      return;
+    }
     setError("");
     setUploadingLabel(label);
     try {
@@ -122,7 +127,7 @@ export function Portal({ slug }: { slug: string }) {
             onClick={() => window.print()}
             className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
           >
-            Print / Save Signed PDF
+            Print / Save as PDF
           </button>
         </div>
       </header>
@@ -138,8 +143,7 @@ export function Portal({ slug }: { slug: string }) {
             </span>
           </div>
           <p className="text-xs text-slate-500">
-            No password required. Review scope, sign digitally, and drop your
-            project files below.
+            Access to this deal room is provided through a private link. Review the proposal, sign it, and upload the requested documents.
           </p>
           <ol className="grid gap-2 sm:grid-cols-2">
             <li className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-800">
@@ -178,7 +182,7 @@ export function Portal({ slug }: { slug: string }) {
           <div className="space-y-6 px-6 py-6 sm:px-8">
             <div className="flex items-center justify-between rounded-xl bg-slate-900 px-4 py-3 text-white">
               <span className="text-xs font-semibold text-slate-300">
-                Total Deal Investment
+                Proposed Project Amount
               </span>
               <span className="font-mono text-lg font-extrabold">
                 {formatMoney(deal.amount, deal.currency)}
@@ -215,8 +219,7 @@ export function Portal({ slug }: { slug: string }) {
                 Step 1 — E-Signature Pad
               </h2>
               <p className="mt-1 text-xs text-slate-500">
-                Sign below to lock this agreement and immediately unlock the
-                Document Upload Vault.
+                Review the proposal carefully, then sign below to confirm your acceptance and unlock the document upload area.
               </p>
             </div>
             <div className="relative rounded-xl border border-slate-200 bg-slate-50 p-2">
@@ -246,7 +249,10 @@ export function Portal({ slug }: { slug: string }) {
                 Step 2 — Document Upload Vault
               </h2>
               <p className="mt-1 text-xs text-slate-600">
-                Unlocked after signing. Upload each required document.
+                Unlocked after signing. Upload each required document from your phone, camera or computer.
+              </p>
+              <p className="mt-2 text-[11px] leading-5 text-slate-500">
+                Supported: PDF, Word, Excel, PowerPoint, OpenDocument, RTF, TXT, CSV, JPG, PNG, WebP and HEIC · Up to 25 MB per file.
               </p>
             </div>
             <div className="space-y-3 p-5">
@@ -290,13 +296,30 @@ export function Portal({ slug }: { slug: string }) {
                           </span>
                           <input
                             type="file"
-                            disabled={uploadingLabel === label}
+                            accept={DOCUMENT_ACCEPT}
+                            disabled={Boolean(uploadingLabel)}
                             onChange={(event) => {
                               const file = event.target.files?.[0];
                               void uploadDocument(label, file);
                               event.target.value = "";
                             }}
                             className="block w-full text-xs"
+                          />
+                          <span className="mt-2 block text-[11px] text-slate-500">
+                            On mobile, choose Files or Photos. For a paper document, take a picture:
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                            capture="environment"
+                            aria-label={`Take photo for ${label}`}
+                            disabled={Boolean(uploadingLabel)}
+                            onChange={(event) => {
+                              const file = event.target.files?.[0];
+                              void uploadDocument(label, file);
+                              event.target.value = "";
+                            }}
+                            className="mt-1 block w-full text-xs"
                           />
                         </label>
                       </div>
@@ -307,7 +330,7 @@ export function Portal({ slug }: { slug: string }) {
               {error ? <p className="text-xs text-rose-700">{error}</p> : null}
               {deal.status === "completed" ? (
                 <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800">
-                  Vault complete. This deal is marked completed.
+                  All requested documents have been uploaded. The deal is marked complete.
                 </p>
               ) : null}
             </div>

@@ -180,7 +180,7 @@ export default function NewDealPage() {
                 AI Proposal & Pricing Composer
               </h1>
               <p className="text-[11px] text-slate-500">
-                Enter rough notes; AI drafts localized deliverables & terms
+                Enter your project details to draft a proposal. Review the result before sharing.
               </p>
             </div>
           </div>
@@ -263,7 +263,7 @@ export default function NewDealPage() {
             {proposal ? (
               <label className="block">
                 <span className="mb-1 block font-mono text-[10px] font-bold uppercase tracking-wider text-brand-deep">
-                  AI Executive Scope Output
+                  AI-Generated Proposal — Review and Edit
                 </span>
                 <textarea
                   rows={14}

@@ -295,13 +295,29 @@ export function Portal({ slug }: { slug: string }) {
                           <input
                             type="file"
                             accept={DOCUMENT_ACCEPT}
-                            disabled={uploadingLabel === label}
+                            disabled={Boolean(uploadingLabel)}
                             onChange={(event) => {
                               const file = event.target.files?.[0];
                               void uploadDocument(label, file);
                               event.target.value = "";
                             }}
                             className="block w-full text-xs"
+                          />
+                          <span className="mt-2 block text-[11px] text-slate-500">
+                            On mobile, choose Files or Photos. For a paper document, take a picture:
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                            capture="environment"
+                            aria-label={`Take photo for ${label}`}
+                            disabled={Boolean(uploadingLabel)}
+                            onChange={(event) => {
+                              const file = event.target.files?.[0];
+                              void uploadDocument(label, file);
+                              event.target.value = "";
+                            }}
+                            className="mt-1 block w-full text-xs"
                           />
                         </label>
                       </div>

@@ -4,7 +4,7 @@ const base = process.env.E2E_BASE_URL ?? "http://127.0.0.1:3000";
 
 test("homepage advertises standalone e-signing and defaults to USD", async ({ page }) => {
  await page.goto(base);
- await expect(page.getByRole("link", { name: /E-Sign a PDF/i })).toBeVisible();
+ await expect(page.getByRole("link", { name: /Request an E-Signature/i })).toBeVisible();
  await expect(page.getByText("Only need a signature? Skip the proposal.")).toBeVisible();
  await expect(page.locator("#pricing select")).toHaveValue("US");
 });
@@ -41,7 +41,10 @@ test("unauthenticated signature creation is denied", async ({ request }) => {
 test("mobile homepage shows a usable e-sign entry", async ({ page, isMobile }) => {
  test.skip(!isMobile, "mobile-only assertion");
  await page.goto(base);
- await expect(page.getByRole("link", { name: /E-Sign a PDF/i })).toBeVisible();
+ await expect(page.getByRole("button", { name: /Open menu/i })).toBeVisible();
+ await page.getByRole("button", { name: /Open menu/i }).click();
+ await expect(page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("link", { name: "E-Signatures" })).toBeVisible();
+ await expect(page.getByRole("link", { name: /Request an E-Signature/i })).toBeVisible();
 });
 
 test("signature evidence cannot be read without owner authentication", async ({ request }) => {

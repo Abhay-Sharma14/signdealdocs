@@ -57,8 +57,14 @@ export async function GET(_request: Request, context: { params: Promise<{ token:
 
 export async function POST(request: Request, context: { params: Promise<{ token: string }> }) {
   const { token } = await context.params;
-  const contentLength = Number(request.headers.get("content-length") ?? 0);
-  if (contentLength > MAX_DOCUMENT_BYTES + 256_000) return NextResponse.json({ error: "Upload is too large." }, { status: 413 });
+  const rawLength = request.headers.get("content-length");
+  const contentLength = rawLength === null ? null : Number(rawLength);
+  if (contentLength !== null && (!Number.isSafeInteger(contentLength) || contentLength < 0)) {
+    return NextResponse.json({ error: "Invalid upload length." }, { status: 400 });
+  }
+  if (contentLength !== null && contentLength > MAX_DOCUMENT_BYTES + 256_000) {
+    return NextResponse.json({ error: "Upload is too large." }, { status: 413 });
+  }
   const deal = await getDeal(token);
   if (!deal) return NextResponse.json({ error: "Deal link is invalid or expired." }, { status: 404 });
 

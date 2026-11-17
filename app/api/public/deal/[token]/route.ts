@@ -12,13 +12,16 @@ type DealRow = {
   id: string; slug: string; client_name: string; client_email: string;
   project_title: string; currency: string; amount: number; status: string;
   signature_url: string | null; signed_at: string | null; created_at: string;
+  link_expires_at?: string | null; link_revoked_at?: string | null;
   proposal: string | null; required_documents: string[];
 };
 
 async function getDeal(token: string) {
   if (!/^[a-f0-9]{64}$/i.test(token)) return null;
   const { data } = await getSupabaseAdmin().from("deals").select("*").eq("slug", token).maybeSingle();
-  return (data as DealRow | null) ?? null;
+  const deal = (data as DealRow | null) ?? null;
+  if (!deal || deal.link_revoked_at || (deal.link_expires_at && new Date(deal.link_expires_at).getTime() <= Date.now())) return null;
+  return deal;
 }
 
 async function signedUrl(path: string | null) {

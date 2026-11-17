@@ -6,7 +6,7 @@ import { ProposalView } from "@/components/proposal-view";
 import { SignaturePad, type SignaturePadHandle } from "@/components/signature-pad";
 import { formatMoney, formatWhen, normalizeDeal } from "@/lib/format";
 import type { Deal, DealDocument } from "@/lib/types";
-import { DOCUMENT_ACCEPT } from "@/lib/document-upload";
+import { DOCUMENT_ACCEPT } from "@/lib/document-types";
 
 export function Portal({ slug }: { slug: string }) {
   const padRef = useRef<SignaturePadHandle>(null);

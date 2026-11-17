@@ -49,6 +49,13 @@ begin
 end;
 $;
 
+-- Ensure the client-update guard is installed even on databases created manually.
+drop trigger if exists deals_protect_client_update on public.deals;
+create trigger deals_protect_client_update
+  before update on public.deals
+  for each row
+  execute function public.protect_deal_client_update();
+
 -- Remove every existing table policy first: permissive policies combine with OR.
 do $
 declare

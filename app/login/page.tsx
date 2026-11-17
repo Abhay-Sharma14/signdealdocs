@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/logo";
+import { AppFooter } from "@/components/app-footer";
 import { supabase } from "@/lib/supabase";
 
 type Mode = "sign-in" | "sign-up";
@@ -166,6 +167,7 @@ export default function LoginPage() {
           </form>
         </section>
       </main>
+      <AppFooter />
     </div>
   );
 }

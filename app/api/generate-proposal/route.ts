@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { isCurrency } from "@/lib/types";
+import { createClient } from "@supabase/supabase-js";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 type GenerateBody = {
   clientName?: string;
@@ -12,6 +14,35 @@ type GenerateBody = {
 };
 
 export async function POST(request: Request) {
+  const authorization = request.headers.get("authorization") ?? "";
+  const accessToken = authorization.replace(/^Bearer\\s+/i, "");
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!accessToken || !supabaseUrl || !anonKey) {
+    return NextResponse.json({ error: "Sign in to generate a proposal." }, { status: 401 });
+  }
+  const authClient = createClient(supabaseUrl, anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data: { user }, error: authError } = await authClient.auth.getUser(accessToken);
+  if (authError || !user) return NextResponse.json({ error: "Your session is invalid. Sign in again." }, { status: 401 });
+
+  // Enforce a per-user hourly quota server-side so a leaked session cannot
+  // generate unbounded third-party AI charges.
+  const { data: withinQuota, error: quotaError } = await getSupabaseAdmin()
+    .rpc("consume_ai_proposal_quota", { p_user_id: user.id });
+  if (quotaError) {
+    return NextResponse.json({ error: "AI generation is temporarily unavailable." }, { status: 503 });
+  }
+  if (!withinQuota) {
+    return NextResponse.json(
+      { error: "You have reached the proposal generation limit. Try again later." },
+      { status: 429, headers: { "Retry-After": "3600" } },
+    );
+  }
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (contentLength > 24_000) return NextResponse.json({ error: "Request is too large." }, { status: 413 });
+
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) {
     return NextResponse.json({ error: "Missing GEMINI_API_KEY" }, { status: 500 });
@@ -34,7 +65,7 @@ export async function POST(request: Request) {
     ? body.requiredDocuments.map((item) => String(item).trim()).filter(Boolean)
     : [];
 
-  if (!clientName || !clientEmail || !projectTitle || !brief) {
+  if (!clientName || !clientEmail || !projectTitle || !brief || clientName.length > 120 || clientEmail.length > 254 || projectTitle.length > 160 || brief.length > 12000 || requiredDocuments.length > 20 || requiredDocuments.some((item) => item.length > 120)) {
     return NextResponse.json(
       { error: "Client, project title, and project brief are required." },
       { status: 400 },

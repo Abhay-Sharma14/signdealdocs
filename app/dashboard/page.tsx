@@ -30,6 +30,7 @@ export default function DashboardPage() {
   const [files, setFiles] = useState<DealDocument[]>([]);
   const [filesError, setFilesError] = useState("");
   const [loadingFiles, setLoadingFiles] = useState(false);
+  const [signatureFailed, setSignatureFailed] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -92,6 +93,7 @@ export default function DashboardPage() {
     setActive(deal);
     setFiles([]);
     setFilesError("");
+    setSignatureFailed(false);
     setLoadingFiles(true);
     const { data: sessionData } = await supabase.auth.getSession();
     const accessToken = sessionData.session?.access_token;
@@ -101,16 +103,24 @@ export default function DashboardPage() {
       return;
     }
     try {
-      const response = await fetch(`/api/owner/deals/${encodeURIComponent(deal.id)}/documents`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        cache: "no-store",
-      });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      let response: Response;
+      try {
+        response = await fetch(`/api/owner/deals/${encodeURIComponent(deal.id)}/documents`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          cache: "no-store",
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "Could not load documents.");
       setFiles((payload.files ?? []) as DealDocument[]);
       setActive({ ...deal, signature_url: payload.signature_url });
     } catch (cause) {
-      setFilesError(cause instanceof Error ? cause.message : "Could not load documents.");
+      setFilesError(cause instanceof Error && cause.name === "AbortError" ? "Document loading timed out. Please try opening this deal again." : cause instanceof Error ? cause.message : "Could not load documents.");
     } finally {
       setLoadingFiles(false);
     }
@@ -290,12 +300,15 @@ export default function DashboardPage() {
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 Signature
               </h3>
-              {active.signature_url ? (
+              {loadingFiles ? (
+                <p className="rounded-xl bg-slate-50 p-3 text-sm text-slate-500">Loading secure signature…</p>
+              ) : active.signature_url && !signatureFailed ? (
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                   {/* Remote signature PNG from the deal vault. */}
                   <img
                     src={active.signature_url}
                     alt={`Signature for ${active.client_name}`}
+                    onError={() => setSignatureFailed(true)}
                     className="max-h-36 w-full object-contain"
                   />
                   <p className="mt-2 text-[11px] text-slate-500">
@@ -303,7 +316,7 @@ export default function DashboardPage() {
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-slate-500">The client has not signed yet.</p>
+                <p className="text-sm text-slate-500">{signatureFailed ? "Signature preview is unavailable. Close and reopen this deal to retry." : active.signed_at ? "The signature image is temporarily unavailable." : "The client has not signed yet."}</p>
               )}
             </div>
 

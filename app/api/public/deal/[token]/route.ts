@@ -62,8 +62,16 @@ export async function POST(request: Request, context: { params: Promise<{ token:
   const deal = await getDeal(token);
   if (!deal) return NextResponse.json({ error: "Deal link is invalid or expired." }, { status: 404 });
 
-  const form = await request.formData();
+  let form: FormData;
+  try {
+    form = await request.formData();
+  } catch {
+    return NextResponse.json({ error: "Invalid upload form." }, { status: 400 });
+  }
   const action = String(form.get("action") ?? "");
+  if (action !== "sign" && action !== "document") {
+    return NextResponse.json({ error: "Unsupported action." }, { status: 400 });
+  }
   const file = form.get("file");
   if (!(file instanceof File)) return NextResponse.json({ error: "A file is required." }, { status: 400 });
   if (file.size < 1 || file.size > MAX_DOCUMENT_BYTES) {

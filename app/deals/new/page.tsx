@@ -127,6 +127,23 @@ export default function NewDealPage() {
     setCopied(true);
   }
 
+  function shareByEmail() {
+    const url = magicLink(publishedSlug);
+    const subject = encodeURIComponent(`Proposal for ${projectTitle}`);
+    const body = encodeURIComponent(
+      `Hello ${clientName},\\n\\nPlease review your proposal and complete the signing and document steps using this secure link:\\n${url}\\n\\nRegards`,
+    );
+    window.location.href = `mailto:${encodeURIComponent(clientEmail)}?subject=${subject}&body=${body}`;
+  }
+
+  function shareByWhatsApp() {
+    const url = magicLink(publishedSlug);
+    const message = encodeURIComponent(
+      `Hello ${clientName}, please review your proposal and complete the signing and document steps using this secure link: ${url}`,
+    );
+    window.open(`https://wa.me/?text=${message}`, "_blank", "noopener,noreferrer");
+  }
+
   if (!ready) {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-slate-500">
@@ -279,21 +296,38 @@ export default function NewDealPage() {
                 <p className="mt-1 truncate font-mono text-xs text-emerald-800">
                   {magicLink(publishedSlug)}
                 </p>
-                <div className="mt-2 flex gap-2">
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={shareByEmail}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold text-emerald-900 ring-1 ring-emerald-200 hover:bg-emerald-100"
+                  >
+                    <span aria-hidden="true">✉</span> Share by Email
+                  </button>
+                  <button
+                    type="button"
+                    onClick={shareByWhatsApp}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#e7f9ef] px-3 py-2 text-xs font-bold text-[#075e3b] ring-1 ring-[#b7e7cd] hover:bg-[#d4f3e2]"
+                  >
+                    <span aria-hidden="true">◉</span> Share on WhatsApp
+                  </button>
                   <button
                     type="button"
                     onClick={copyLink}
-                    className="rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-emerald-900"
+                    className="rounded-lg bg-white px-3 py-2 text-xs font-bold text-emerald-900 ring-1 ring-emerald-200 hover:bg-emerald-100"
                   >
                     {copied ? "Copied" : "Copy Client Magic Link"}
                   </button>
                   <Link
                     href="/dashboard"
-                    className="rounded-lg px-3 py-1.5 text-xs font-semibold text-emerald-900 underline"
+                    className="rounded-lg px-3 py-2 text-center text-xs font-semibold text-emerald-900 underline"
                   >
                     View dashboard
                   </Link>
                 </div>
+                <p className="mt-2 text-[11px] leading-5 text-emerald-800">
+                  Email and WhatsApp open a pre-filled message for you to review and send. No message is sent automatically.
+                </p>
               </div>
             ) : null}
           </div>

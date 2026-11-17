@@ -15,7 +15,7 @@ type GenerateBody = {
 
 export async function POST(request: Request) {
   const authorization = request.headers.get("authorization") ?? "";
-  const accessToken = authorization.replace(/^Bearer\\s+/i, "");
+  const accessToken = authorization.replace(/^Bearer\s+/i, "");
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!accessToken || !supabaseUrl || !anonKey) {

@@ -1,32 +1,27 @@
 import Link from "next/link";
 
-export function Logo({ href="/dashboard" }: { href?: string }) {
+export function BrandMark({ className = "h-9 w-9" }: { className?: string }) {
   return (
-    <Link href={href} className="flex items-center gap-3 shrink-0">
-      <span
-        className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-white"
-        style={{ boxShadow: "0 4px 14px var(--brand-glow)" }}
-      >
-        <svg
-          className="h-5 w-5"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <polyline points="14 2 14 8 20 8" />
-          <path d="M9 15l2 2 4-4" />
-        </svg>
-      </span>
-      <span className="flex items-center gap-1.5">
-        <span className="font-display text-lg font-extrabold tracking-tight text-slate-950 sm:text-xl">
-          SignDealDocs
-        </span>
-      </span>
+    <svg className={className} viewBox="0 0 48 48" fill="none" role="img" aria-label="SignDealDocs brand mark">
+      <defs>
+        <linearGradient id="sdd-brand" x1="3" y1="2" x2="46" y2="47" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#6558F5" /><stop offset="1" stopColor="#3128A6" />
+        </linearGradient>
+      </defs>
+      <rect x="1" y="1" width="46" height="46" rx="14" fill="url(#sdd-brand)" />
+      <path d="M14 12h13l7 7v16H14V12Z" stroke="white" strokeWidth="2.5" strokeLinejoin="round" />
+      <path d="M27 12v8h7" stroke="white" strokeWidth="2.5" strokeLinejoin="round" />
+      <path d="m18 28 4 4 9-10" stroke="#A7F3D0" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M17 37h16" stroke="white" strokeOpacity=".6" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function Logo({ href = "/dashboard" }: { href?: string }) {
+  return (
+    <Link href={href} className="flex shrink-0 items-center gap-2.5" aria-label="SignDealDocs home">
+      <BrandMark className="h-9 w-9 shrink-0 drop-shadow-sm" />
+      <span className="font-display text-lg font-extrabold tracking-tight text-slate-950 sm:text-xl">SignDealDocs</span>
     </Link>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useLocale } from "@/components/locale-provider";
@@ -8,6 +9,7 @@ import { useLocale } from "@/components/locale-provider";
 export default function HomePage() {
   const { t, formatCurrency } = useLocale();
   const year = new Date().getFullYear();
+  const [billingCountry, setBillingCountry] = useState<"IN" | "US" | "GB" | "EU" | "OTHER">("IN");
   const features = [
     { number: "01", icon: "✦", title: t("feature1"), copy: t("feature1d") },
     { number: "02", icon: "✍", title: t("feature2"), copy: t("feature2d") },
@@ -132,6 +134,16 @@ export default function HomePage() {
             <p className="mt-3 text-sm leading-7 text-slate-600">{t("pricingCopy")}</p>
             <p className="mt-3 inline-flex rounded-full border border-violet-100 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800">Paid plans are a preview · Subscriptions are not available yet</p>
           </div>
+          <div className="mx-auto mt-7 flex max-w-sm items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+            <label htmlFor="billing-country" className="text-sm font-semibold text-slate-700">Billing country</label>
+            <select id="billing-country" value={billingCountry} onChange={(event) => setBillingCountry(event.target.value as typeof billingCountry)} className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+              <option value="IN">India (INR)</option>
+              <option value="US">United States (USD)</option>
+              <option value="GB">United Kingdom (GBP)</option>
+              <option value="EU">Europe (EUR)</option>
+              <option value="OTHER">Other countries</option>
+            </select>
+          </div>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {[
               { name: t("free"), price: "$0", india: "₹0", subtitle: "Explore the workflow", features: ["Create and review proposals", "Share a client deal link", "Collect signatures and documents"], featured: false, available: true },
@@ -144,10 +156,10 @@ export default function HomePage() {
                 <h3 className="text-lg font-extrabold text-slate-950">{plan.name}</h3>
                 <p className="mt-1 min-h-10 text-sm leading-5 text-slate-500">{plan.subtitle}</p>
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold tracking-tight text-slate-950">{plan.price}</span>
-                  <span className="text-xs text-slate-500">/ month</span>
+                  <span className="text-4xl font-extrabold tracking-tight text-slate-950">{billingCountry === "IN" ? plan.india : billingCountry === "US" ? plan.price : plan.available ? "Free" : "Coming soon"}</span>
+                  {(billingCountry === "IN" || billingCountry === "US") && <span className="text-xs text-slate-500">/ month</span>}
                 </div>
-                <p className="mt-1 text-xs text-slate-500">{plan.india} / month in India · indicative</p>
+                <p className="mt-1 text-xs text-slate-500">{billingCountry === "IN" ? "India · INR · indicative" : billingCountry === "US" ? "United States · USD · indicative" : "Local paid pricing has not been announced"}</p>
                 <div className="my-5 border-t border-slate-100" />
                 <ul className="flex-1 space-y-3">
                   {plan.features.map((feature) => <li key={feature} className="flex gap-2 text-sm leading-6 text-slate-600"><span className="shrink-0 font-bold text-indigo-600">✓</span><span>{feature}</span></li>)}
@@ -161,7 +173,7 @@ export default function HomePage() {
             ))}
           </div>
           <p className="mx-auto mt-6 max-w-4xl text-center text-xs leading-6 text-slate-500">
-            Proposed monthly prices shown in USD, with indicative India pricing. Final pricing, quotas, feature availability, taxes, and billing terms will be confirmed before subscriptions launch. No paid checkout is active.
+            Pricing reflects the selected billing country, independently of the website language. India and US amounts are proposed, not final. Other regions will be announced later. Taxes, quotas, features, and billing terms are subject to confirmation. No paid checkout is active.
           </p>
         </section>
 

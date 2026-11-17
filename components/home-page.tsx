@@ -44,7 +44,7 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             <div className="hidden sm:block"><LanguageSwitcher compact /></div>
             <Link href="/login" className="hidden rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 md:inline-flex">{t("login")}</Link>
-            <Link href="/login" className="hidden rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 sm:inline-flex">Get started free</Link>
+            <Link href="/login" className="hidden rounded-xl bg-[#4338CA] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#3730A3] sm:inline-flex">Get started free</Link>
             <button type="button" aria-label={mobileMenuOpen ? "Close menu" : "Open menu"} aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-xl text-slate-800 lg:hidden">{mobileMenuOpen ? "×" : "☰"}</button>
           </div>
         </div>
@@ -64,9 +64,9 @@ export default function HomePage() {
         <section className="relative isolate overflow-hidden bg-gradient-to-br from-white via-white to-indigo-50/70">
           <div className="pointer-events-none absolute -right-40 top-12 -z-10 h-[550px] w-[550px] rounded-full bg-indigo-100/60 blur-3xl" />
           <div className="mx-auto grid max-w-7xl items-start gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[.95fr_1.05fr] lg:gap-12 lg:px-8 lg:py-20">
-            <div className="space-y-6 lg:pt-12">
-              <p className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2 text-xs font-extrabold uppercase tracking-[.12em] text-indigo-700"><span aria-hidden="true">✦</span> The complete deal workspace</p>
-              <h1 className="max-w-2xl text-[clamp(2.5rem,4.3vw,4rem)] font-extrabold leading-[1.07] tracking-[-.055em] text-slate-950">Create proposals.<br />Get signatures.<br /><span className="text-indigo-600">Close deals.</span></h1>
+            <div className="space-y-5 lg:pt-5">
+              <p className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2 text-xs font-extrabold uppercase tracking-[.12em] text-indigo-700"><span aria-hidden="true">✦</span> Proposals · Signatures · Client Documents</p>
+              <h1 className="max-w-2xl text-[clamp(2.5rem,4.3vw,4rem)] font-extrabold leading-[1.07] tracking-[-.055em] text-[#101A33]">Create proposals.<br />Get signatures.<br /><span className="text-indigo-600">Close deals.</span></h1>
               <p className="max-w-xl text-base leading-8 text-slate-600 sm:text-lg">Create professional proposals, request electronic signatures and manage client documents in one simple workspace.</p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/login" className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200/70 transition hover:bg-indigo-700">Get started free <span className="ml-2" aria-hidden="true">→</span></Link>
@@ -75,35 +75,44 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium text-slate-600"><span>✓ Free to get started</span><span>✓ No credit card required</span><span>✓ Simple client sharing</span></div>
             </div>
             <div className="relative min-w-0">
-              <div className="absolute -inset-4 rounded-[2rem] bg-indigo-100/60 blur-2xl" />
-              <div className="relative overflow-hidden rounded-[1.6rem] border border-indigo-100 bg-white shadow-[0_25px_75px_-25px_rgba(54,46,130,.28)]">
-                <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-6">
-                  <div><p className="text-[11px] font-bold uppercase tracking-widest text-indigo-600">Workspace preview</p><h2 className="mt-1 text-lg font-extrabold text-slate-950">Your deals at a glance</h2></div>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-600">Illustrative data</span>
+              <div className="absolute -inset-3 rounded-[2rem] bg-indigo-100/70 blur-2xl" />
+              <div className="relative overflow-hidden rounded-[1.6rem] border border-indigo-200 bg-white shadow-[0_20px_65px_-24px_rgba(67,56,202,.30)]">
+                <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                  <div className="flex items-center gap-2"><span className="rounded-lg bg-indigo-100 px-2 py-1 text-indigo-700">▤</span><span className="text-sm font-extrabold text-slate-900">Service Agreement</span></div>
+                  <span className="rounded-full bg-amber-50 px-3 py-1 text-[10px] font-bold text-amber-800">Awaiting signature</span>
                 </div>
-                <div className="grid grid-cols-3 gap-2 bg-slate-50/70 p-4 sm:gap-3 sm:p-5">
-                  {[{n:"12",label:"Active deals",tone:"text-blue-700 bg-blue-50"},{n:"8",label:"Sign requests",tone:"text-indigo-700 bg-indigo-50"},{n:"5",label:"Clients",tone:"text-emerald-700 bg-emerald-50"}].map((item)=><div key={item.label} className="min-w-0 rounded-xl border border-slate-100 bg-white p-3 sm:p-4"><div className={`mb-3 inline-flex h-8 w-8 items-center justify-center rounded-lg text-lg font-extrabold ${item.tone}`}>✓</div><p className="text-2xl font-extrabold tracking-tight text-slate-950">{item.n}</p><p className="mt-1 text-[11px] font-medium text-slate-500">{item.label}</p></div>)}
-                </div>
-                <div className="grid gap-4 p-4 sm:p-5 xl:grid-cols-[1.2fr_.8fr]">
-                  <div className="rounded-xl border border-slate-200 p-4"><div className="flex items-center justify-between gap-2"><h3 className="text-sm font-bold text-slate-900">Recent proposals</h3><span className="text-[10px] font-semibold text-indigo-600">Sample</span></div>
-                    {[{name:"IT services proposal",status:"Awaiting signature",tone:"bg-amber-50 text-amber-700"},{name:"Website redesign",status:"Signed",tone:"bg-emerald-50 text-emerald-700"},{name:"Support agreement",status:"In review",tone:"bg-blue-50 text-blue-700"}].map((item)=><div key={item.name} className="flex items-center justify-between gap-2 border-b border-slate-100 py-3 last:border-0"><div className="flex min-w-0 items-center gap-2"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">▤</span><span className="truncate text-xs font-semibold text-slate-800">{item.name}</span></div><span className={`shrink-0 rounded-full px-2 py-1 text-[9px] font-semibold ${item.tone}`}>{item.status}</span></div>)}
+                <div className="grid grid-cols-[92px_1fr] sm:grid-cols-[130px_1fr]">
+                  <div className="space-y-3 border-r border-slate-100 bg-slate-50 p-3 sm:p-4">
+                    {["Proposal","Documents","Signature"].map((label,i)=><div key={label} className={`rounded-lg px-2 py-3 text-[10px] font-semibold sm:text-xs ${i===2?"bg-indigo-100 text-indigo-800":"text-slate-600"}`}>{label}</div>)}
                   </div>
-                  <div className="rounded-xl border border-slate-200 p-4"><h3 className="text-sm font-bold text-slate-900">Signature progress</h3><div className="mx-auto my-5 flex h-24 w-24 items-center justify-center rounded-full border-[9px] border-indigo-500 bg-indigo-50 text-2xl font-extrabold text-indigo-700">75%</div><p className="text-center text-xs text-slate-500">3 of 4 documents signed</p></div>
+                  <div className="min-w-0 p-5 sm:p-7">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-600">Document preview · Sample</p>
+                    <h2 className="mt-3 text-lg font-extrabold text-slate-950">Service agreement</h2>
+                    <div className="mt-5 space-y-3">
+                      {["w-full","w-11/12","w-4/5","w-full","w-3/5"].map((w,i)=><div key={i} className={`h-2 rounded-full bg-slate-200 ${w}`}/>)}
+                    </div>
+                    <div className="mt-8 rounded-xl border border-dashed border-indigo-300 bg-indigo-50/40 p-4">
+                      <p className="text-xs font-semibold text-slate-600">Client signature</p>
+                      <svg viewBox="0 0 280 70" className="mt-2 h-16 w-full" role="img" aria-label="Illustrative handwritten signature">
+                        <path d="M16 51 C38 15 40 15 36 46 C50 28 57 12 64 25 C70 44 48 56 91 36 C106 29 110 43 123 33 C137 15 149 58 170 30 C180 20 186 42 203 34 C216 28 230 24 252 37" fill="none" stroke="#4338CA" strokeWidth="3.5" strokeLinecap="round"/>
+                      </svg>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between gap-2"><span className="text-xs text-slate-500">Review · Sign · Complete</span><span className="rounded-lg bg-indigo-600 px-3 py-2 text-xs font-bold text-white">E-Signature</span></div>
+                  </div>
                 </div>
-                <div className="border-t border-slate-100 bg-slate-50 px-5 py-4"><p className="mb-3 text-xs font-bold text-slate-800">Document workflow</p><div className="grid grid-cols-4 gap-1 text-center text-[10px] font-semibold text-slate-600">{["Upload","Prepare","Request signature","Complete"].map((step,i)=><div key={step} className="min-w-0"><div className="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-700">{i+1}</div>{step}</div>)}</div></div>
               </div>
             </div>
           </div>
         </section>
-        <section id="product" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <section id="product" className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
           <div className="max-w-2xl"><p className="text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">{t("sectionLabel")}</p><h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">{t("sectionTitle")}</h2></div>
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
             {features.map((item)=><article key={item.number} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-xl font-bold text-indigo-700">{item.icon}</div><h3 className="mt-5 text-lg font-extrabold text-slate-950">{item.title}</h3><p className="mt-2 text-sm leading-7 text-slate-600">{item.copy}</p></article>)}
           </div>
         </section>
 
         <section className="border-y border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50">
-          <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[.95fr_1.05fr] lg:gap-12 lg:px-8 lg:py-16">
+          <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[.95fr_1.05fr] lg:gap-12 lg:px-8 lg:py-12">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[.17em] text-indigo-700">Standalone E-Signature</p>
               <h2 className="mt-3 max-w-xl text-3xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-4xl">Only need a signature? Skip the proposal.</h2>
@@ -127,38 +136,19 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <section id="how-it-works" className="border-y border-slate-200/70 bg-white/70">
-          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">{t("howTitle")}</h2>
-            <div className="relative mt-10 grid gap-5 md:grid-cols-3 md:gap-6">
-              {steps.map((step, index) => (
-                <article
-                  key={step.number}
-                  className="group relative flex min-h-[240px] flex-col rounded-[1.5rem] border border-slate-200/90 bg-white p-6 shadow-[0_12px_35px_-25px_rgba(44,38,119,.35)] transition duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-[0_20px_45px_-24px_rgba(78,61,187,.35)] sm:p-7"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-violet-100 text-indigo-700">
-                      {index === 0 ? (
-                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10Z"/><path d="M13 3v7h7M8 15h8M8 18h5"/></svg>
-                      ) : index === 1 ? (
-                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                      ) : (
-                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M20 7 10 17l-5-5"/><path d="M12 3a9 9 0 1 0 9 9"/></svg>
-                      )}
-                    </div>
-
-                  </div>
-                  <h3 className="mt-7 text-xl font-extrabold tracking-tight text-slate-950">{step.title}</h3>
-                  <p className="mt-2 max-w-sm text-sm leading-7 text-slate-600">{step.copy}</p>
-                  <div className="mt-auto pt-6"><div className="h-px w-full bg-gradient-to-r from-indigo-200 via-violet-100 to-transparent" /></div>
-
-                </article>
-              ))}
+        <section id="how-it-works" className="border-y border-slate-200 bg-white">
+          <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
+            <p className="text-center text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">How it works</p>
+            <h2 className="mt-2 text-center text-2xl font-extrabold tracking-tight text-[#101A33] sm:text-3xl">From draft to signed deal in 3 simple steps.</h2>
+            <div className="mt-6 grid gap-3 md:grid-cols-3">
+              {steps.map((step,index)=><article key={step.number} className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-sm font-extrabold text-indigo-700">{index+1}</span>
+                <div><h3 className="text-base font-extrabold text-[#101A33]">{step.title}</h3><p className="mt-1 text-sm leading-6 text-slate-600">{step.copy}</p></div>
+              </article>)}
             </div>
           </div>
         </section>
-
-        <section id="pricing" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <section id="pricing" className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">{t("pricingEyebrow")}</p>
             <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">{t("pricingTitle")}</h2>
@@ -175,12 +165,11 @@ export default function HomePage() {
               <option value="OTHER">Other countries</option>
             </select>
           </div>
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-7 grid gap-4 md:grid-cols-3">
             {[
               { name: t("free"), price: "$0", india: "₹0", subtitle: "Explore the workflow", features: ["Create and review proposals", "Share a client deal link", "Collect signatures and documents"], featured: false, available: true },
-              { name: "Starter", price: "$4.99", india: "₹299", subtitle: "For independent professionals", features: ["Everything in Free", "More deals and AI proposals (planned)", "Reusable proposal templates (planned)"], featured: false, available: false },
-              { name: "Professional", price: "$12.99", india: "₹799", subtitle: "For busy freelancers and agencies", features: ["Everything in Starter", "Signature audit history (planned)", "Client-link controls (planned)"], featured: true, available: false },
-              { name: "Business", price: "$24.99", india: "₹1,499", subtitle: "For growing teams", features: ["Everything in Professional", "Team workspaces and roles (planned)", "Advanced reporting (planned)"], featured: false, available: false },
+              { name: "Pro", price: "$9.99", india: "₹599", subtitle: "For professionals and growing businesses", features: ["Everything in Free", "More deals and AI proposals (planned)", "Reusable templates (planned)", "Signature audit history (planned)"], featured: true, available: false },
+              { name: "Business", price: "$24.99", india: "₹1,499", subtitle: "For growing teams", features: ["Everything in Pro", "Team workspaces and roles (planned)", "Advanced reporting (planned)"], featured: false, available: false },
             ].map((plan) => (
               <article key={plan.name} className={`relative flex flex-col rounded-[1.5rem] border p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg ${plan.featured ? "border-indigo-400 bg-gradient-to-b from-violet-50 to-white ring-1 ring-indigo-200" : "border-slate-200 bg-white"}`}>
                 {plan.featured && <span className="absolute -top-3 left-5 rounded-full bg-indigo-600 px-3 py-1 text-[11px] font-bold text-white">Popular option</span>}

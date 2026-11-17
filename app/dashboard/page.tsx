@@ -25,6 +25,7 @@ export default function DashboardPage() {
   const [copiedSlug, setCopiedSlug] = useState("");
   const [linkSettings, setLinkSettings] = useState<Record<string, { revoked: boolean; expires: string | null }>>({});
   const [savingLink, setSavingLink] = useState("");
+  const [currentTime, setCurrentTime] = useState<number | null>(null);
   const [linkControlsReady, setLinkControlsReady] = useState(false);
   const [active, setActive] = useState<Deal | null>(null);
   const [files, setFiles] = useState<DealDocument[]>([]);
@@ -33,6 +34,7 @@ export default function DashboardPage() {
   const [signatureFailed, setSignatureFailed] = useState(false);
 
   useEffect(() => {
+    setCurrentTime(Date.now());
     supabase.auth.getSession().then(async ({ data }) => {
       const user = data.session?.user;
       if (!user) {
@@ -236,7 +238,7 @@ export default function DashboardPage() {
                           <button
                             type="button"
                             onClick={() => copyLink(deal.slug)}
-                            disabled={Boolean(linkSettings[deal.id]?.revoked) || Boolean(linkSettings[deal.id]?.expires && new Date(linkSettings[deal.id].expires!).getTime() <= Date.now())}
+                            disabled={Boolean(linkSettings[deal.id]?.revoked) || Boolean(linkSettings[deal.id]?.expires && currentTime !== null && new Date(linkSettings[deal.id].expires!).getTime() <= currentTime)}
                             className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-200"
                           >
                             {copiedSlug === deal.slug ? "Copied" : "Copy Client Magic Link"}

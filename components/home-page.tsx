@@ -18,9 +18,9 @@ export default function HomePage() {
     { number: "03", icon: "▤", title: t("feature3"), copy: t("feature3d") },
   ];
   const steps = [
-    { number: "01", title: t("how1"), copy: t("how1d") },
-    { number: "02", title: t("how2"), copy: t("how2d") },
-    { number: "03", title: t("how3"), copy: t("how3d") },
+    { icon: "✎", title: t("how1"), copy: t("how1d") },
+    { icon: "↗", title: t("how2"), copy: t("how2d") },
+    { icon: "✓", title: t("how3"), copy: t("how3d") },
   ];
 
   return (
@@ -88,8 +88,10 @@ export default function HomePage() {
                   <div className="min-w-0 p-5 sm:p-7">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-600">Document preview · Sample</p>
                     <h2 className="mt-3 text-lg font-extrabold text-slate-950">Service agreement</h2>
-                    <div className="mt-5 space-y-3">
-                      {["w-full","w-11/12","w-4/5","w-full","w-3/5"].map((w,i)=><div key={i} className={`h-2 rounded-full bg-slate-200 ${w}`}/>)}
+                    <div className="mt-5 space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-700">
+                      <p><span className="font-bold text-slate-900">Prepared for:</span> Example Client</p>
+                      <p><span className="font-bold text-slate-900">Scope:</span> Website design and delivery</p>
+                      <p><span className="font-bold text-slate-900">Agreement:</span> Review the project scope, approve the terms, and sign to confirm acceptance.</p>
                     </div>
                     <div className="mt-8 rounded-xl border border-dashed border-indigo-300 bg-indigo-50/40 p-4">
                       <p className="text-xs font-semibold text-slate-600">Client signature</p>
@@ -125,12 +127,17 @@ export default function HomePage() {
               <div className="grid gap-4 p-5 sm:grid-cols-[1fr_.85fr]">
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                   <div className="mb-4 flex items-center gap-2"><span className="rounded-lg bg-indigo-100 px-2 py-1 text-sm text-indigo-700">▤</span><span className="text-xs font-bold text-slate-800">Service agreement.pdf</span></div>
-                  <div className="space-y-2"><div className="h-2 w-4/5 rounded-full bg-slate-200"/><div className="h-2 w-full rounded-full bg-slate-200"/><div className="h-2 w-3/4 rounded-full bg-slate-200"/><div className="mt-4 h-2 w-5/6 rounded-full bg-slate-200"/><div className="h-2 w-2/3 rounded-full bg-slate-200"/></div>
+                  <div className="space-y-2 rounded-lg bg-white p-3 text-[11px] leading-5 text-slate-700">
+                    <p className="font-bold text-slate-900">Service Agreement</p>
+                    <p><span className="font-semibold">Client:</span> Example Client</p>
+                    <p><span className="font-semibold">Project:</span> Website design</p>
+                    <p>Review the scope and terms before signing.</p>
+                  </div>
                   <div className="mt-6 rounded-lg border border-dashed border-indigo-300 bg-white px-3 py-4 text-center text-xs font-semibold text-indigo-600">Signature area</div>
                 </div>
                 <div className="flex flex-col justify-center gap-3">
                   <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">Simple signing flow</p>
-                  {["Upload your PDF","Share a private link","Client reviews and signs"].map((step,i)=><div key={step} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-extrabold text-indigo-700">{i+1}</span><span className="text-xs font-semibold text-slate-800">{step}</span></div>)}
+                  {["Upload your PDF","Share a private link","Client reviews and signs"].map((step,i)=><div key={step} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-extrabold text-indigo-700">{["↥","↗","✓"][i]}</span><span className="text-xs font-semibold text-slate-800">{step}</span></div>)}
                 </div>
               </div>
             </div>
@@ -141,8 +148,8 @@ export default function HomePage() {
             <p className="text-center text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">How it works</p>
             <h2 className="mt-2 text-center text-2xl font-extrabold tracking-tight text-[#101A33] sm:text-3xl">From draft to signed deal in 3 simple steps.</h2>
             <div className="mt-6 grid gap-3 md:grid-cols-3">
-              {steps.map((step,index)=><article key={step.number} className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-sm font-extrabold text-indigo-700">{index+1}</span>
+              {steps.map((step)=><article key={step.title} className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-sm font-extrabold text-indigo-700">{step.icon}</span>
                 <div><h3 className="text-base font-extrabold text-[#101A33]">{step.title}</h3><p className="mt-1 text-sm leading-6 text-slate-600">{step.copy}</p></div>
               </article>)}
             </div>

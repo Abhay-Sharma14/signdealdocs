@@ -52,7 +52,7 @@ export default function DashboardPage() {
 
       if (queryError?.code === "42703") {
         const fallback = await supabase.from("deals").select("id, slug, client_name, client_email, project_title, currency, amount, status, signature_url, signed_at, created_at, proposal, required_documents").eq("user_id", user.id).order("created_at", { ascending: false });
-        rows = fallback.data;
+        rows = (fallback.data ?? []).map((row) => ({ ...row, link_expires_at: null, link_revoked_at: null }));
         queryError = fallback.error;
       } else if (!queryError) {
         setLinkControlsReady(true);

@@ -127,7 +127,7 @@ export function Portal({ slug }: { slug: string }) {
             onClick={() => window.print()}
             className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
           >
-            Print / Save Signed PDF
+            Print / Save as PDF
           </button>
         </div>
       </header>
@@ -143,8 +143,7 @@ export function Portal({ slug }: { slug: string }) {
             </span>
           </div>
           <p className="text-xs text-slate-500">
-            No password required. Review scope, sign digitally, and drop your
-            project files below.
+            Access to this deal room is provided through a private link. Review the proposal, sign it, and upload the requested documents.
           </p>
           <ol className="grid gap-2 sm:grid-cols-2">
             <li className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-800">
@@ -183,7 +182,7 @@ export function Portal({ slug }: { slug: string }) {
           <div className="space-y-6 px-6 py-6 sm:px-8">
             <div className="flex items-center justify-between rounded-xl bg-slate-900 px-4 py-3 text-white">
               <span className="text-xs font-semibold text-slate-300">
-                Total Deal Investment
+                Proposed Project Amount
               </span>
               <span className="font-mono text-lg font-extrabold">
                 {formatMoney(deal.amount, deal.currency)}
@@ -220,8 +219,7 @@ export function Portal({ slug }: { slug: string }) {
                 Step 1 — E-Signature Pad
               </h2>
               <p className="mt-1 text-xs text-slate-500">
-                Sign below to lock this agreement and immediately unlock the
-                Document Upload Vault.
+                Review the proposal carefully, then sign below to confirm your acceptance and unlock the document upload area.
               </p>
             </div>
             <div className="relative rounded-xl border border-slate-200 bg-slate-50 p-2">
@@ -332,7 +330,7 @@ export function Portal({ slug }: { slug: string }) {
               {error ? <p className="text-xs text-rose-700">{error}</p> : null}
               {deal.status === "completed" ? (
                 <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800">
-                  Vault complete. This deal is marked completed.
+                  All requested documents have been uploaded. The deal is marked complete.
                 </p>
               ) : null}
             </div>

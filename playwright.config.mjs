@@ -5,7 +5,7 @@ export default defineConfig({
  expect: { timeout: 10_000 },
  retries: process.env.CI ? 1 : 0,
  reporter: process.env.CI ? "github" : "list",
- use: { trace, screenshot: "only-on-failure" },
+ use: { trace: "retain-on-failure", screenshot: "only-on-failure" },
  projects: [
   { name: "desktop-chromium", use: { ...devices["Desktop Chrome"] } },
   { name: "mobile-chromium", use: { ...devices["Pixel 7"] } },

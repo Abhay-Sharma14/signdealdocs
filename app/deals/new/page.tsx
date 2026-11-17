@@ -167,7 +167,7 @@ export default function NewDealPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Logo href="/dashboard" />
@@ -180,7 +180,7 @@ export default function NewDealPage() {
         </div>
       </header>
 
-      <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 lg:grid-cols-12 sm:px-6 lg:px-8">
+      <main className="mx-auto flex-1 grid w-full max-w-7xl gap-6 px-4 py-8 lg:grid-cols-12 sm:px-6 lg:px-8">
         <form
           onSubmit={publishDeal}
           className="space-y-5 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs lg:col-span-7"

@@ -120,10 +120,22 @@ values (
   'deal-vault',
   'deal-vault',
   false,
-  10485760,
-  array['application/pdf', 'image/png', 'image/jpeg', 'image/webp']::text[]
+  26214400,
+  array[
+    'application/pdf', 'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'application/vnd.oasis.opendocument.text',
+    'application/vnd.oasis.opendocument.spreadsheet',
+    'application/vnd.oasis.opendocument.presentation',
+    'application/rtf', 'text/plain', 'text/csv',
+    'image/png', 'image/jpeg', 'image/webp', 'image/heic', 'image/heif'
+  ]::text[]
 )
 on conflict (id) do update
 set public = false,
-    file_size_limit = 10485760,
+    file_size_limit = excluded.file_size_limit,
     allowed_mime_types = excluded.allowed_mime_types;

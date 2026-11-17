@@ -247,7 +247,10 @@ export function Portal({ slug }: { slug: string }) {
                 Step 2 — Document Upload Vault
               </h2>
               <p className="mt-1 text-xs text-slate-600">
-                Unlocked after signing. Upload each required document.
+                Unlocked after signing. Upload each required document from your phone, camera or computer.
+              </p>
+              <p className="mt-2 text-[11px] leading-5 text-slate-500">
+                Supported: PDF, Word, Excel, PowerPoint, OpenDocument, RTF, TXT, CSV, JPG, PNG, WebP and HEIC · Up to 25 MB per file.
               </p>
             </div>
             <div className="space-y-3 p-5">

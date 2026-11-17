@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
-import { getDocumentMime, hasValidDocumentSignature, MAX_DOCUMENT_BYTES } from "@/lib/document-upload";
+import { getDocumentMime, hasValidDocumentSignature } from "@/lib/document-upload";
+import { MAX_DOCUMENT_BYTES } from "@/lib/document-types";
 
 export const runtime = "nodejs";
 

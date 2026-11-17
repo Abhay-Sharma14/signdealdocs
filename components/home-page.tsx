@@ -27,7 +27,7 @@ export default function HomePage() {
     <div className="flex min-h-screen flex-col overflow-hidden">
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
         <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-          <Logo href="/" />
+          <Logo />
           <nav aria-label="Main navigation" className="hidden items-center gap-8 lg:flex">
             <div className="relative">
               <button type="button" aria-expanded={platformOpen} aria-controls="platform-menu" onClick={() => setPlatformOpen(!platformOpen)} className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-indigo-700">Platform <span aria-hidden="true" className={platformOpen ? "rotate-180 transition-transform" : "transition-transform"}>⌄</span></button>

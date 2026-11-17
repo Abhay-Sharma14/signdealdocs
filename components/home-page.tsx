@@ -9,7 +9,7 @@ import { useLocale } from "@/components/locale-provider";
 export default function HomePage() {
   const { t, formatCurrency } = useLocale();
   const year = new Date().getFullYear();
-  const [billingCountry, setBillingCountry] = useState<"IN" | "US" | "GB" | "EU" | "OTHER">("IN");
+  const [billingCountry, setBillingCountry] = useState<"IN" | "US" | "GB" | "EU" | "OTHER">("US");
   const features = [
     { number: "01", icon: "✦", title: t("feature1"), copy: t("feature1d") },
     { number: "02", icon: "✍", title: t("feature2"), copy: t("feature2d") },

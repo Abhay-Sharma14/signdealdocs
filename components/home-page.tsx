@@ -9,6 +9,8 @@ import { useLocale } from "@/components/locale-provider";
 export default function HomePage() {
   const { t, formatCurrency } = useLocale();
   const year = new Date().getFullYear();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [platformOpen, setPlatformOpen] = useState(false);
   const [billingCountry, setBillingCountry] = useState<"IN" | "US" | "GB" | "EU" | "OTHER">("US");
   const features = [
     { number: "01", icon: "✦", title: t("feature1"), copy: t("feature1d") },
@@ -23,81 +25,76 @@ export default function HomePage() {
 
   return (
     <div className="flex min-h-screen flex-col overflow-hidden">
-      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
         <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-          <Logo />
-          <nav className="hidden items-center gap-7 md:flex">
-            <a href="#product" className="text-sm font-semibold text-slate-600 hover:text-slate-950">{t("navProduct")}</a>
-            <Link href="/signatures/new" className="text-sm font-semibold text-indigo-700 hover:text-indigo-900">E-Signatures</Link>
-            <a href="#how-it-works" className="text-sm font-semibold text-slate-600 hover:text-slate-950">{t("navHow")}</a>
-            <a href="#pricing" className="text-sm font-semibold text-slate-600 hover:text-slate-950">{t("navPricing")}</a>
+          <Logo href="/" />
+          <nav aria-label="Main navigation" className="hidden items-center gap-8 lg:flex">
+            <div className="relative">
+              <button type="button" aria-expanded={platformOpen} aria-controls="platform-menu" onClick={() => setPlatformOpen(!platformOpen)} className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-indigo-700">Platform <span aria-hidden="true" className={platformOpen ? "rotate-180 transition-transform" : "transition-transform"}>⌄</span></button>
+              {platformOpen && <div id="platform-menu" className="absolute left-0 top-full mt-4 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+                <a href="#product" onClick={() => setPlatformOpen(false)} className="block rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-indigo-50">AI proposals <span className="block text-xs font-normal text-slate-500">Create and share proposals</span></a>
+                <Link href="/signatures/new" onClick={() => setPlatformOpen(false)} className="block rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-indigo-50">E-Signatures <span className="block text-xs font-normal text-slate-500">Request a PDF signature</span></Link>
+                <a href="#how-it-works" onClick={() => setPlatformOpen(false)} className="block rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-indigo-50">Client workspace <span className="block text-xs font-normal text-slate-500">Documents and deal workflow</span></a>
+              </div>}
+            </div>
+            <Link href="/signatures/new" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">E-Signatures</Link>
+            <a href="#how-it-works" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">{t("navHow")}</a>
+            <a href="#pricing" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">{t("navPricing")}</a>
           </nav>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher compact />
-            <Link href="/login" className="hidden rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 sm:inline-flex">{t("login")}</Link>
-            <Link href="/login" className="rounded-xl bg-brand px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#4338ca] sm:px-4 sm:text-sm">{t("start")}</Link>
+            <div className="hidden sm:block"><LanguageSwitcher compact /></div>
+            <Link href="/login" className="hidden rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 md:inline-flex">{t("login")}</Link>
+            <Link href="/login" className="hidden rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 sm:inline-flex">Get started free</Link>
+            <button type="button" aria-label={mobileMenuOpen ? "Close menu" : "Open menu"} aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-xl text-slate-800 lg:hidden">{mobileMenuOpen ? "×" : "☰"}</button>
           </div>
         </div>
+        {mobileMenuOpen && <nav id="mobile-navigation" aria-label="Mobile navigation" className="border-t border-slate-100 bg-white px-5 py-4 shadow-lg lg:hidden">
+          <div className="mx-auto flex max-w-7xl flex-col gap-1">
+            <a href="#product" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">Platform</a>
+            <Link href="/signatures/new" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">E-Signatures</Link>
+            <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">{t("navHow")}</a>
+            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">{t("navPricing")}</a>
+            <div className="px-3 py-2"><LanguageSwitcher compact /></div>
+            <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">Log in</Link>
+            <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-xl bg-indigo-600 px-4 py-3 text-center text-sm font-bold text-white">Get started free</Link>
+          </div>
+        </nav>}
       </header>
-
       <main className="flex-1">
-        <section className="relative isolate">
-          <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_15%_10%,rgba(99,102,241,.13),transparent_42%),radial-gradient(ellipse_at_85%_35%,rgba(16,185,129,.10),transparent_38%)]" />
-          <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1.02fr_.98fr] lg:px-8 lg:py-28">
+        <section className="relative isolate overflow-hidden bg-gradient-to-br from-white via-white to-indigo-50/70">
+          <div className="pointer-events-none absolute -right-40 top-12 -z-10 h-[550px] w-[550px] rounded-full bg-indigo-100/60 blur-3xl" />
+          <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[.95fr_1.05fr] lg:gap-10 lg:px-8 lg:py-28">
             <div className="space-y-7">
-              <div className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white/80 px-3 py-1.5 text-xs font-bold uppercase tracking-[.12em] text-indigo-700 shadow-sm">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" /> {t("eyebrow")}
-              </div>
-              <h1 className="max-w-2xl text-4xl font-extrabold leading-[1.08] tracking-[-.045em] text-slate-950 sm:text-5xl lg:text-[3.65rem]">{t("title")}</h1>
-              <p className="max-w-xl text-base leading-8 text-slate-600 sm:text-lg">{t("subtitle")}</p>
+              <p className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2 text-xs font-extrabold uppercase tracking-[.12em] text-indigo-700"><span aria-hidden="true">✦</span> The complete deal workspace</p>
+              <h1 className="max-w-2xl text-[clamp(2.65rem,5vw,4.5rem)] font-extrabold leading-[1.07] tracking-[-.055em] text-slate-950">Create proposals.<br />Get signatures.<br /><span className="text-indigo-600">Close deals.</span></h1>
+              <p className="max-w-xl text-base leading-8 text-slate-600 sm:text-lg">Create professional proposals, request electronic signatures and manage client documents in one simple workspace.</p>
               <div className="flex flex-wrap gap-3">
-                <Link href="/login" className="inline-flex items-center justify-center rounded-xl bg-brand px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:bg-[#4338ca]">{t("primary")} <span className="ml-2">→</span></Link>
-                <a href="#how-it-works" className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">{t("secondary")}</a>
-                <Link href="/signatures/new" className="inline-flex items-center justify-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-3.5 text-sm font-bold text-indigo-700 transition hover:border-indigo-300 hover:bg-indigo-100"><span aria-hidden="true">✍</span> E-Sign a PDF</Link>
+                <Link href="/login" className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200/70 transition hover:bg-indigo-700">Get started free <span className="ml-2" aria-hidden="true">→</span></Link>
+                <a href="#how-it-works" className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 transition hover:border-indigo-200 hover:bg-indigo-50">See how it works</a>
               </div>
-              <p className="text-xs font-medium text-slate-500">✓ {t("trust")}</p>
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium text-slate-600"><span>✓ Free to get started</span><span>✓ No credit card required</span><span>✓ Simple client sharing</span></div>
             </div>
-
-            <div className="relative mx-auto w-full max-w-xl">
-              <div className="absolute -inset-5 rounded-[2rem] bg-gradient-to-br from-indigo-200/60 via-white to-emerald-100/70 blur-2xl" />
-              <article className="relative overflow-hidden rounded-[1.65rem] border border-slate-200 bg-white shadow-[0_30px_90px_-35px_rgba(15,23,42,.32)]">
-                <div className="bg-slate-950 px-6 py-6 text-white sm:px-8">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[.18em] text-indigo-200">{t("preview")}</p>
-                    <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-200">● Secure workspace</span>
-                  </div>
-                  <h2 className="mt-5 text-2xl font-extrabold leading-tight sm:text-3xl">{t("previewTitle")}</h2>
-                  <p className="mt-2 text-sm text-slate-300">{t("prepared")}</p>
+            <div className="relative min-w-0">
+              <div className="absolute -inset-4 rounded-[2rem] bg-indigo-100/60 blur-2xl" />
+              <div className="relative overflow-hidden rounded-[1.6rem] border border-indigo-100 bg-white shadow-[0_25px_75px_-25px_rgba(54,46,130,.28)]">
+                <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-6">
+                  <div><p className="text-[11px] font-bold uppercase tracking-widest text-indigo-600">Workspace preview</p><h2 className="mt-1 text-lg font-extrabold text-slate-950">Your deals at a glance</h2></div>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-600">Illustrative data</span>
                 </div>
-                <div className="space-y-5 p-6 sm:p-8">
-                  <div className="flex items-center justify-between rounded-2xl bg-slate-950 px-5 py-4 text-white">
-                    <span className="text-sm font-medium text-slate-300">{t("investment")}</span>
-                    <span className="text-2xl font-extrabold tracking-tight">{formatCurrency(3200)}</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[t("review"), t("sign"), t("upload")].map((label, index) => (
-                      <div key={label} className="flex min-w-0 flex-col items-center justify-center gap-2.5 rounded-2xl border border-slate-200/80 bg-white px-2 py-4 text-center shadow-[0_6px_18px_-12px_rgba(30,41,59,.25)]">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                          {index === 0 ? (
-                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>
-                          ) : index === 1 ? (
-                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="m15 5 4 4M4 20l4.5-1 11-11a2.12 2.12 0 0 0-3-3l-11 11L4 20ZM3 22h18"/></svg>
-                          ) : (
-                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 16V3m0 0L8 7m4-4 4 4M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
-                          )}
-                        </span>
-                        <span className="text-xs font-bold text-slate-800">{label}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs leading-6 text-slate-500">One link. One clear process. Less chasing and fewer scattered emails.</p>
+                <div className="grid grid-cols-3 gap-2 bg-slate-50/70 p-4 sm:gap-3 sm:p-5">
+                  {[{n:"12",label:"Active deals",tone:"text-blue-700 bg-blue-50"},{n:"8",label:"Sign requests",tone:"text-indigo-700 bg-indigo-50"},{n:"5",label:"Clients",tone:"text-emerald-700 bg-emerald-50"}].map((item)=><div key={item.label} className="min-w-0 rounded-xl border border-slate-100 bg-white p-3 sm:p-4"><div className={`mb-3 inline-flex h-8 w-8 items-center justify-center rounded-lg text-lg font-extrabold ${item.tone}`}>✓</div><p className="text-2xl font-extrabold tracking-tight text-slate-950">{item.n}</p><p className="mt-1 text-[11px] font-medium text-slate-500">{item.label}</p></div>)}
                 </div>
-              </article>
-              <div className="absolute -bottom-5 -left-3 hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-xl sm:block"><p className="text-xs font-bold text-slate-900">✓ Deal workflow</p><p className="mt-0.5 text-[10px] text-slate-500">Proposal · Agreement · Documents</p></div>
+                <div className="grid gap-4 p-4 sm:p-5 xl:grid-cols-[1.2fr_.8fr]">
+                  <div className="rounded-xl border border-slate-200 p-4"><div className="flex items-center justify-between gap-2"><h3 className="text-sm font-bold text-slate-900">Recent proposals</h3><span className="text-[10px] font-semibold text-indigo-600">Sample</span></div>
+                    {[{name:"IT services proposal",status:"Awaiting signature",tone:"bg-amber-50 text-amber-700"},{name:"Website redesign",status:"Signed",tone:"bg-emerald-50 text-emerald-700"},{name:"Support agreement",status:"In review",tone:"bg-blue-50 text-blue-700"}].map((item)=><div key={item.name} className="flex items-center justify-between gap-2 border-b border-slate-100 py-3 last:border-0"><div className="flex min-w-0 items-center gap-2"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">▤</span><span className="truncate text-xs font-semibold text-slate-800">{item.name}</span></div><span className={`shrink-0 rounded-full px-2 py-1 text-[9px] font-semibold ${item.tone}`}>{item.status}</span></div>)}
+                  </div>
+                  <div className="rounded-xl border border-slate-200 p-4"><h3 className="text-sm font-bold text-slate-900">Signature progress</h3><div className="mx-auto my-5 flex h-24 w-24 items-center justify-center rounded-full border-[9px] border-indigo-500 bg-indigo-50 text-2xl font-extrabold text-indigo-700">75%</div><p className="text-center text-xs text-slate-500">3 of 4 documents signed</p></div>
+                </div>
+                <div className="border-t border-slate-100 bg-slate-50 px-5 py-4"><p className="mb-3 text-xs font-bold text-slate-800">Document workflow</p><div className="grid grid-cols-4 gap-1 text-center text-[10px] font-semibold text-slate-600">{["Upload","Prepare","Request signature","Complete"].map((step,i)=><div key={step} className="min-w-0"><div className="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-700">{i+1}</div>{step}</div>)}</div></div>
+              </div>
             </div>
           </div>
         </section>
-
         <section id="product" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
           <div className="max-w-2xl"><p className="text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">{t("sectionLabel")}</p><h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">{t("sectionTitle")}</h2></div>
           <div className="mt-10 grid gap-4 md:grid-cols-3">

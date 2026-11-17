@@ -28,6 +28,7 @@ export default function HomePage() {
           <Logo />
           <nav className="hidden items-center gap-7 md:flex">
             <a href="#product" className="text-sm font-semibold text-slate-600 hover:text-slate-950">{t("navProduct")}</a>
+            <Link href="/signatures/new" className="text-sm font-semibold text-indigo-700 hover:text-indigo-900">E-Signatures</Link>
             <a href="#how-it-works" className="text-sm font-semibold text-slate-600 hover:text-slate-950">{t("navHow")}</a>
             <a href="#pricing" className="text-sm font-semibold text-slate-600 hover:text-slate-950">{t("navPricing")}</a>
           </nav>
@@ -52,6 +53,7 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-3">
                 <Link href="/login" className="inline-flex items-center justify-center rounded-xl bg-brand px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:bg-[#4338ca]">{t("primary")} <span className="ml-2">→</span></Link>
                 <a href="#how-it-works" className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">{t("secondary")}</a>
+                <Link href="/signatures/new" className="inline-flex items-center justify-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-3.5 text-sm font-bold text-indigo-700 transition hover:border-indigo-300 hover:bg-indigo-100"><span aria-hidden="true">✍</span> E-Sign a PDF</Link>
               </div>
               <p className="text-xs font-medium text-slate-500">✓ {t("trust")}</p>
             </div>
@@ -100,6 +102,17 @@ export default function HomePage() {
           <div className="max-w-2xl"><p className="text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">{t("sectionLabel")}</p><h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">{t("sectionTitle")}</h2></div>
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {features.map((item)=><article key={item.number} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"><div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-xl font-bold text-indigo-700">{item.icon}</div><h3 className="mt-5 text-lg font-extrabold text-slate-950">{item.title}</h3><p className="mt-2 text-sm leading-7 text-slate-600">{item.copy}</p></article>)}
+          </div>
+        </section>
+
+        <section className="border-y border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50">
+          <div className="mx-auto grid max-w-7xl items-center gap-7 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_auto] lg:px-8">
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[.17em] text-indigo-700">Standalone E-Signature</p>
+              <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">Only need a signature? Skip the proposal.</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">Upload a PDF, enter your signer's details and share a private link. They can draw or upload their signature without creating an account. Currently in beta: signatures are recorded separately; embedded signed PDFs are coming next.</p>
+            </div>
+            <Link href="/signatures/new" className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-md hover:bg-indigo-700">Request an E-Signature →</Link>
           </div>
         </section>
 

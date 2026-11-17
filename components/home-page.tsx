@@ -73,7 +73,20 @@ export default function HomePage() {
                     <span className="text-2xl font-extrabold tracking-tight">{formatCurrency(3200)}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
-                    {[t("review"),t("sign"),t("upload")].map((label,index)=><div key={label} className="rounded-xl border border-slate-200 bg-slate-50 px-2 py-3 text-center"><span className="block text-[10px] font-bold text-indigo-600">0{index+1}</span><span className="mt-1 block text-xs font-bold text-slate-800">{label}</span></div>)}
+                    {[t("review"), t("sign"), t("upload")].map((label, index) => (
+                      <div key={label} className="flex min-w-0 flex-col items-center justify-center gap-2.5 rounded-2xl border border-slate-200/80 bg-white px-2 py-4 text-center shadow-[0_6px_18px_-12px_rgba(30,41,59,.25)]">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                          {index === 0 ? (
+                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>
+                          ) : index === 1 ? (
+                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="m15 5 4 4M4 20l4.5-1 11-11a2.12 2.12 0 0 0-3-3l-11 11L4 20ZM3 22h18"/></svg>
+                          ) : (
+                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 16V3m0 0L8 7m4-4 4 4M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+                          )}
+                        </span>
+                        <span className="text-xs font-bold text-slate-800">{label}</span>
+                      </div>
+                    ))}
                   </div>
                   <p className="text-xs leading-6 text-slate-500">One link. One clear process. Less chasing and fewer scattered emails.</p>
                 </div>

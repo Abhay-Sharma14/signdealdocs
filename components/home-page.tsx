@@ -63,10 +63,10 @@ export default function HomePage() {
       <main className="flex-1">
         <section className="relative isolate overflow-hidden bg-gradient-to-br from-white via-white to-indigo-50/70">
           <div className="pointer-events-none absolute -right-40 top-12 -z-10 h-[550px] w-[550px] rounded-full bg-indigo-100/60 blur-3xl" />
-          <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[.95fr_1.05fr] lg:gap-10 lg:px-8 lg:py-28">
-            <div className="space-y-7">
+          <div className="mx-auto grid max-w-7xl items-start gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[.95fr_1.05fr] lg:gap-12 lg:px-8 lg:py-20">
+            <div className="space-y-6 lg:pt-12">
               <p className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2 text-xs font-extrabold uppercase tracking-[.12em] text-indigo-700"><span aria-hidden="true">✦</span> The complete deal workspace</p>
-              <h1 className="max-w-2xl text-[clamp(2.65rem,5vw,4.5rem)] font-extrabold leading-[1.07] tracking-[-.055em] text-slate-950">Create proposals.<br />Get signatures.<br /><span className="text-indigo-600">Close deals.</span></h1>
+              <h1 className="max-w-2xl text-[clamp(2.5rem,4.3vw,4rem)] font-extrabold leading-[1.07] tracking-[-.055em] text-slate-950">Create proposals.<br />Get signatures.<br /><span className="text-indigo-600">Close deals.</span></h1>
               <p className="max-w-xl text-base leading-8 text-slate-600 sm:text-lg">Create professional proposals, request electronic signatures and manage client documents in one simple workspace.</p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/login" className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200/70 transition hover:bg-indigo-700">Get started free <span className="ml-2" aria-hidden="true">→</span></Link>
@@ -103,16 +103,30 @@ export default function HomePage() {
         </section>
 
         <section className="border-y border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50">
-          <div className="mx-auto grid max-w-7xl items-center gap-7 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_auto] lg:px-8">
+          <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[.95fr_1.05fr] lg:gap-12 lg:px-8 lg:py-16">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[.17em] text-indigo-700">Standalone E-Signature</p>
-              <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">Only need a signature? Skip the proposal.</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">Upload a PDF, enter your signer&apos;s details and share a private link. They can draw or upload their signature without creating an account. Currently in beta: signatures are recorded separately; embedded signed PDFs are coming next.</p>
+              <h2 className="mt-3 max-w-xl text-3xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-4xl">Only need a signature? Skip the proposal.</h2>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">Upload a PDF, add signer details and share a private signing link. Your client can review and sign without creating an account.</p>
+              <p className="mt-3 max-w-xl text-xs leading-6 text-slate-500">Beta: signatures are stored separately. Embedded signed PDFs and verified signer identity are not available yet.</p>
+              <Link href="/signatures/new" className="mt-6 inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-indigo-700">Request an E-Signature <span aria-hidden="true" className="ml-2">→</span></Link>
             </div>
-            <Link href="/signatures/new" className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-md hover:bg-indigo-700">Request an E-Signature →</Link>
+            <div className="overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-[0_18px_55px_-30px_rgba(79,70,229,.35)]">
+              <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4"><span className="text-sm font-bold text-slate-900">Signature request</span><span className="rounded-full bg-indigo-50 px-3 py-1 text-[10px] font-bold text-indigo-700">Illustrative preview</span></div>
+              <div className="grid gap-4 p-5 sm:grid-cols-[1fr_.85fr]">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="mb-4 flex items-center gap-2"><span className="rounded-lg bg-indigo-100 px-2 py-1 text-sm text-indigo-700">▤</span><span className="text-xs font-bold text-slate-800">Service agreement.pdf</span></div>
+                  <div className="space-y-2"><div className="h-2 w-4/5 rounded-full bg-slate-200"/><div className="h-2 w-full rounded-full bg-slate-200"/><div className="h-2 w-3/4 rounded-full bg-slate-200"/><div className="mt-4 h-2 w-5/6 rounded-full bg-slate-200"/><div className="h-2 w-2/3 rounded-full bg-slate-200"/></div>
+                  <div className="mt-6 rounded-lg border border-dashed border-indigo-300 bg-white px-3 py-4 text-center text-xs font-semibold text-indigo-600">Signature area</div>
+                </div>
+                <div className="flex flex-col justify-center gap-3">
+                  <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">Simple signing flow</p>
+                  {["Upload your PDF","Share a private link","Client reviews and signs"].map((step,i)=><div key={step} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-extrabold text-indigo-700">{i+1}</span><span className="text-xs font-semibold text-slate-800">{step}</span></div>)}
+                </div>
+              </div>
+            </div>
           </div>
         </section>
-
         <section id="how-it-works" className="border-y border-slate-200/70 bg-white/70">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
             <h2 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">{t("howTitle")}</h2>
@@ -149,7 +163,7 @@ export default function HomePage() {
             <p className="text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">{t("pricingEyebrow")}</p>
             <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">{t("pricingTitle")}</h2>
             <p className="mt-3 text-sm leading-7 text-slate-600">{t("pricingCopy")}</p>
-            <p className="mt-3 inline-flex rounded-full border border-violet-100 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800">Paid plans are a preview · Subscriptions are not available yet</p>
+            <p className="mt-3 inline-flex rounded-full border border-violet-100 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800">Preview pricing · Paid subscriptions are not yet available</p>
           </div>
           <div className="mx-auto mt-7 flex max-w-sm items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
             <label htmlFor="billing-country" className="text-sm font-semibold text-slate-700">Billing country</label>
@@ -161,7 +175,7 @@ export default function HomePage() {
               <option value="OTHER">Other countries</option>
             </select>
           </div>
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {[
               { name: t("free"), price: "$0", india: "₹0", subtitle: "Explore the workflow", features: ["Create and review proposals", "Share a client deal link", "Collect signatures and documents"], featured: false, available: true },
               { name: "Starter", price: "$4.99", india: "₹299", subtitle: "For independent professionals", features: ["Everything in Free", "More deals and AI proposals (planned)", "Reusable proposal templates (planned)"], featured: false, available: false },
@@ -176,7 +190,7 @@ export default function HomePage() {
                   <span className="text-4xl font-extrabold tracking-tight text-slate-950">{billingCountry === "IN" ? plan.india : billingCountry === "US" ? plan.price : plan.available ? "Free" : "Coming soon"}</span>
                   {(billingCountry === "IN" || billingCountry === "US") && <span className="text-xs text-slate-500">/ month</span>}
                 </div>
-                <p className="mt-1 text-xs text-slate-500">{billingCountry === "IN" ? "India · INR · indicative" : billingCountry === "US" ? "United States · USD · indicative" : "Local paid pricing has not been announced"}</p>
+                
                 <div className="my-5 border-t border-slate-100" />
                 <ul className="flex-1 space-y-3">
                   {plan.features.map((feature) => <li key={feature} className="flex gap-2 text-sm leading-6 text-slate-600"><span className="shrink-0 font-bold text-indigo-600">✓</span><span>{feature}</span></li>)}
@@ -190,7 +204,7 @@ export default function HomePage() {
             ))}
           </div>
           <p className="mx-auto mt-6 max-w-4xl text-center text-xs leading-6 text-slate-500">
-            Pricing reflects the selected billing country, independently of the website language. India and US amounts are proposed, not final. Other regions will be announced later. Taxes, quotas, features, and billing terms are subject to confirmation. No paid checkout is active.
+            Preview pricing only. Paid subscriptions are not yet available. Prices, features and taxes may change before launch.
           </p>
         </section>
 

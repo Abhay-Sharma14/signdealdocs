@@ -6,16 +6,16 @@ import { useLocale } from "@/components/locale-provider";
 export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
   const { locale, setLocale } = useLocale();
   return (
-    <label className={compact ? "inline-flex items-center" : "inline-flex items-center gap-2"}>
+    <label className={compact ? "inline-flex shrink-0 items-center" : "inline-flex items-center gap-2"}>
       {!compact && <span className="text-xs font-semibold text-slate-500">Language</span>}
       <select
         aria-label="Choose language"
         value={locale}
         onChange={(event) => setLocale(event.target.value as typeof locale)}
-        className={compact ? "w-[112px] max-w-[30vw] rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-medium text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 sm:w-[132px]" : "max-w-[175px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"}
+        className={compact ? "w-[88px] rounded-md border border-slate-200 bg-white px-1.5 py-1 text-[11px] font-medium text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 sm:w-[100px]" : "max-w-[175px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"}
       >
         {SUPPORTED_LOCALES.map((item) => (
-          <option key={item.code} value={item.code}>{item.flag} {item.label}</option>
+          <option key={item.code} value={item.code}>{compact ? `${item.flag} ${item.code}` : `${item.flag} ${item.label}`}</option>
         ))}
       </select>
     </label>

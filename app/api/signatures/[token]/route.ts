@@ -1,0 +1,46 @@
+import { randomUUID } from "node:crypto";
+import { NextResponse } from "next/server";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
+export const runtime="nodejs";
+const bucket="deal-vault";
+type Context={params:Promise<{token:string}>};
+async function find(token:string){
+ if(!/^[a-f0-9]{64}$/.test(token))return null;
+ const {data}=await getSupabaseAdmin().from("signature_requests").select("*").eq("token",token).maybeSingle();
+ if(!data||data.revoked_at||new Date(data.expires_at).getTime()<=Date.now())return null;
+ return data;
+}
+export async function GET(_request:Request,{params}:Context){
+ const {token}=await params;
+ const row=await find(token);
+ if(!row)return NextResponse.json({error:"This signature link is unavailable or expired."},{status:404});
+ const storage=getSupabaseAdmin().storage.from(bucket);
+ const {data:pdf}=await storage.createSignedUrl(row.document_path,300);
+ const {data:signature}=row.signature_path?await storage.createSignedUrl(row.signature_path,300):{data:null};
+ return NextResponse.json({title:row.title,signer_name:row.signer_name,original_name:row.original_name,pdf_url:pdf?.signedUrl??null,signature_url:signature?.signedUrl??null,signed_at:row.signed_at},{headers:{"Cache-Control":"no-store, private","Referrer-Policy":"no-referrer"}});
+}
+export async function POST(request:Request,{params}:Context){
+ const {token}=await params;
+ const row=await find(token);
+ if(!row)return NextResponse.json({error:"Link unavailable."},{status:404});
+ if(row.signed_at)return NextResponse.json({error:"Already signed."},{status:409});
+ const length=Number(request.headers.get("content-length")??"0");
+ if(length>400_000)return NextResponse.json({error:"Signature too large."},{status:413});
+ let form:FormData;
+ try{form=await request.formData();}catch{return NextResponse.json({error:"Invalid signature."},{status:400});}
+ const name=String(form.get("name")??"").trim();
+ const consent=form.get("consent")==="yes";
+ const file=form.get("signature");
+ if(name.toLocaleLowerCase()!==String(row.signer_name).trim().toLocaleLowerCase()||!consent||!(file instanceof File)||file.size<40||file.size>250_000||file.type!=="image/png")
+ return NextResponse.json({error:"Confirm signer name, consent and drawn signature."},{status:400});
+ const bytes=Buffer.from(await file.arrayBuffer());
+ if(!bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])))return NextResponse.json({error:"Invalid PNG signature."},{status:415});
+ const path=`signatures/${row.owner_id}/${randomUUID()}-signed.png`;
+ const storage=getSupabaseAdmin().storage.from(bucket);
+ const {error:uploadError}=await storage.upload(path,bytes,{contentType:"image/png",upsert:false});
+ if(uploadError)return NextResponse.json({error:"Could not store signature."},{status:500});
+ const signedAt=new Date().toISOString();
+ const {data,error}=await getSupabaseAdmin().from("signature_requests").update({signature_path:path,signed_at:signedAt,consent_text:"I reviewed the document and agree to sign electronically."}).eq("id",row.id).is("signed_at",null).is("revoked_at",null).gt("expires_at",signedAt).select("id").maybeSingle();
+ if(error||!data){await storage.remove([path]);return NextResponse.json({error:"Request changed; reload and try again."},{status:409});}
+ return NextResponse.json({signed_at:signedAt},{headers:{"Cache-Control":"no-store"}});
+}

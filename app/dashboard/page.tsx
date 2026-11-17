@@ -97,7 +97,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
           <Logo href="/dashboard" />
@@ -114,7 +114,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto flex-1 w-full max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200/90 bg-white p-5 sm:flex-row sm:items-center">
           <div>
             <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-brand">

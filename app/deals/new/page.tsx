@@ -66,9 +66,22 @@ export default function NewDealPage() {
           requiredDocuments: documents,
         }),
       });
-      const payload = (await response.json()) as { proposal?: string; error?: string };
+      const raw = await response.text();
+      let payload: { proposal?: string; error?: string } = {};
+      if (raw) {
+        try {
+          payload = JSON.parse(raw) as typeof payload;
+        } catch {
+          throw new Error(`The proposal service returned an invalid response (HTTP ${response.status}). Please try again.`);
+        }
+      }
       if (!response.ok || !payload.proposal) {
-        throw new Error(payload.error || "Could not generate the proposal.");
+        const fallback = response.status === 504 || response.status === 408
+          ? "AI proposal generation timed out. Please try again."
+          : response.status === 401
+            ? "Your session has expired. Sign out and sign in again."
+            : `The proposal service did not return a proposal (HTTP ${response.status}). Please try again.`;
+        throw new Error(payload.error || fallback);
       }
       setProposal(payload.proposal);
     } catch (cause) {

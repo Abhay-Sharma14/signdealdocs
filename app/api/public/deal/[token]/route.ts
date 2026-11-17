@@ -42,15 +42,19 @@ export async function GET(_request: Request, context: { params: Promise<{ token:
     .order("created_at", { ascending: true });
   if (error) return NextResponse.json({ error: "Could not load deal documents." }, { status: 500 });
 
-  const docs = await Promise.all((rows ?? []).map(async (row) => ({
-    ...row,
-    file_url: await signedUrl(row.file_url),
-  })));
+  // Generate independent storage URLs concurrently to avoid serial network round trips.
+  const [docs, signatureUrl] = await Promise.all([
+    Promise.all((rows ?? []).map(async (row) => ({
+      ...row,
+      file_url: await signedUrl(row.file_url),
+    }))),
+    signedUrl(deal.signature_url),
+  ]);
   return NextResponse.json({
     deal: {
       id: deal.id, slug: deal.slug, client_name: deal.client_name, client_email: deal.client_email,
       project_title: deal.project_title, currency: deal.currency, amount: deal.amount,
-      status: deal.status, signature_url: await signedUrl(deal.signature_url),
+      status: deal.status, signature_url: signatureUrl,
       signed_at: deal.signed_at, created_at: deal.created_at, proposal: deal.proposal,
       required_documents: deal.required_documents,
     },

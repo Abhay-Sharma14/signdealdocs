@@ -6,7 +6,7 @@ import { ProposalView } from "@/components/proposal-view";
 import { SignaturePad, type SignaturePadHandle } from "@/components/signature-pad";
 import { formatMoney, formatWhen, normalizeDeal } from "@/lib/format";
 import type { Deal, DealDocument } from "@/lib/types";
-import { DOCUMENT_ACCEPT } from "@/lib/document-types";
+import { DOCUMENT_ACCEPT, MAX_DOCUMENT_BYTES } from "@/lib/document-types";
 
 export function Portal({ slug }: { slug: string }) {
   const padRef = useRef<SignaturePadHandle>(null);
@@ -64,6 +64,10 @@ export function Portal({ slug }: { slug: string }) {
 
   async function uploadDocument(label: string, file: File | undefined) {
     if (!deal || !file) return;
+    if (file.size < 1 || file.size > MAX_DOCUMENT_BYTES) {
+      setError("Choose a non-empty file up to 25 MB.");
+      return;
+    }
     setError("");
     setUploadingLabel(label);
     try {

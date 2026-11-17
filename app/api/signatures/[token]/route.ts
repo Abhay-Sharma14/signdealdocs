@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, createHmac, randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 export const runtime="nodejs";
@@ -42,5 +42,21 @@ export async function POST(request:Request,{params}:Context){
  const signedAt=new Date().toISOString();
  const {data,error}=await getSupabaseAdmin().from("signature_requests").update({signature_path:path,signed_at:signedAt,consent_text:"I reviewed the document and agree to sign electronically."}).eq("id",row.id).is("signed_at",null).is("revoked_at",null).gt("expires_at",signedAt).select("id").maybeSingle();
  if(error||!data){await storage.remove([path]);return NextResponse.json({error:"Request changed; reload and try again."},{status:409});}
- return NextResponse.json({signed_at:signedAt},{headers:{"Cache-Control":"no-store"}});
+ const {data:original,error:downloadError}=await storage.download(row.document_path);
+ const documentHash=!downloadError&&original?createHash("sha256").update(Buffer.from(await original.arrayBuffer())).digest("hex"):"";
+ const signatureHash=createHash("sha256").update(bytes).digest("hex");
+ const agent=request.headers.get("user-agent")?.slice(0,500)??null;
+ const ip=request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()??"";
+ const auditSecret=process.env.AUDIT_HASH_SECRET;
+ const ipHash=ip&&auditSecret?createHmac("sha256",auditSecret).update(ip).digest("hex"):null;
+ let evidenceSaved=false;
+ if(documentHash){
+  const {error:auditError}=await getSupabaseAdmin().from("signature_events").insert({
+   signature_request_id:row.id,event_type:"signed",signer_name:name,
+   consent_text:"I reviewed the document and agree to sign electronically.",
+   document_sha256:documentHash,signature_sha256:signatureHash,user_agent:agent,ip_sha256:ipHash
+  });
+  evidenceSaved=!auditError;
+ }
+ return NextResponse.json({signed_at:signedAt,evidence_saved:evidenceSaved},{headers:{"Cache-Control":"no-store"}});
 }

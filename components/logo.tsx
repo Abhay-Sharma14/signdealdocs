@@ -1,15 +1,13 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export function BrandMark({ className = "h-9 w-9" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 48 48" fill="none" role="img" aria-label="SignDealDocs signature document logo">
-      <defs>
-        <linearGradient id="sdd-logo-gradient" x1="8" y1="8" x2="39" y2="40" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#3538A8" />
-          <stop offset=".58" stopColor="#5645DD" />
-          <stop offset="1" stopColor="#873CF0" />
-        </linearGradient>
-      </defs>
+      <defs><linearGradient id="sdd-logo-gradient" x1="8" y1="8" x2="39" y2="40" gradientUnits="userSpaceOnUse"><stop stopColor="#3538A8" /><stop offset=".58" stopColor="#5645DD" /><stop offset="1" stopColor="#873CF0" /></linearGradient></defs>
       <rect x="1" y="1" width="46" height="46" rx="13" fill="#F0ECFF" />
       <path d="M12 8.5h16l8 8V38a2 2 0 0 1-2 2H14a2 2 0 0 1-2-2V10.5a2 2 0 0 1 2-2Z" fill="#fff" stroke="url(#sdd-logo-gradient)" strokeWidth="2.7" strokeLinejoin="round" />
       <path d="M28 8.5v8h8" fill="#DDD2FF" stroke="url(#sdd-logo-gradient)" strokeWidth="2.4" strokeLinejoin="round" />
@@ -22,9 +20,21 @@ export function BrandMark({ className = "h-9 w-9" }: { className?: string }) {
   );
 }
 
-export function Logo({ href = "/dashboard" }: { href?: string }) {
+export function Logo({ href }: { href?: string }) {
+  const [destination, setDestination] = useState(href ?? "/");
+  useEffect(() => {
+    if (href) { setDestination(href); return; }
+    let mounted = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (mounted) setDestination(data.session ? "/dashboard" : "/");
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (mounted) setDestination(session ? "/dashboard" : "/");
+    });
+    return () => { mounted = false; listener.subscription.unsubscribe(); };
+  }, [href]);
   return (
-    <Link href={href} className="flex shrink-0 items-center gap-2.5" aria-label="SignDealDocs home">
+    <Link href={destination} className="flex shrink-0 items-center gap-2.5" aria-label="SignDealDocs home">
       <BrandMark className="h-9 w-9 shrink-0" />
       <span className="font-display text-lg font-extrabold tracking-tight text-[#111C33] sm:text-xl">Sign<span className="text-[#5144D5]">Deal</span>Docs</span>
     </Link>

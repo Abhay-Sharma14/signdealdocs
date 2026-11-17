@@ -23,7 +23,7 @@ export function BrandMark({ className = "h-9 w-9" }: { className?: string }) {
 export function Logo({ href }: { href?: string }) {
   const [destination, setDestination] = useState(href ?? "/");
   useEffect(() => {
-    if (href) { setDestination(href); return; }
+    if (href) return;
     let mounted = true;
     supabase.auth.getSession().then(({ data }) => {
       if (mounted) setDestination(data.session ? "/dashboard" : "/");
@@ -34,7 +34,7 @@ export function Logo({ href }: { href?: string }) {
     return () => { mounted = false; listener.subscription.unsubscribe(); };
   }, [href]);
   return (
-    <Link href={destination} className="flex shrink-0 items-center gap-2.5" aria-label="SignDealDocs home">
+    <Link href={href ?? destination} className="flex shrink-0 items-center gap-2.5" aria-label="SignDealDocs home">
       <BrandMark className="h-9 w-9 shrink-0" />
       <span className="font-display text-lg font-extrabold tracking-tight text-[#111C33] sm:text-xl">Sign<span className="text-[#5144D5]">Deal</span>Docs</span>
     </Link>

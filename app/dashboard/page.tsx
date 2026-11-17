@@ -34,8 +34,8 @@ export default function DashboardPage() {
   const [signatureFailed, setSignatureFailed] = useState(false);
 
   useEffect(() => {
-    setCurrentTime(Date.now());
     supabase.auth.getSession().then(async ({ data }) => {
+      setCurrentTime(Date.now());
       const user = data.session?.user;
       if (!user) {
         router.replace("/login");

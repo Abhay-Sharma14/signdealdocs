@@ -78,7 +78,7 @@ begin
     raise exception 'Clients may only update signature and status';
   end if;
 
-  if old.status = 'sent' and new.status <> 'signed' then
+  if old.status = 'sent' and new.status not in ('signed', 'completed') then
     raise exception 'Invalid status transition';
   end if;
   if old.status = 'signed' and new.status not in ('signed', 'completed') then
@@ -101,23 +101,30 @@ create trigger deals_protect_client_update
   for each row
   execute function public.protect_deal_client_update();
 
-drop policy if exists "owners read deals" on public.deals;
-drop policy if exists "owners insert deals" on public.deals;
-drop policy if exists "owners update deals" on public.deals;
-drop policy if exists "public read deals" on public.deals;
-drop policy if exists "public update deals" on public.deals;
+do $$
+declare p record;
+begin
+  for p in select policyname from pg_policies where schemaname='public' and tablename='deals'
+  loop execute format('drop policy %I on public.deals', p.policyname); end loop;
+end $$;
 
-create policy "owners read deals"
-  on public.deals for select
-  to authenticated
+create policy "owners read deals" on public.deals for select to authenticated
   using (auth.uid() = user_id);
-
-create policy "owners insert deals"
-  on public.deals for insert
-  to authenticated
+create policy "owners insert deals" on public.deals for insert to authenticated
   with check (auth.uid() = user_id);
+create policy "owners update deals" on public.deals for update to authenticated
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
-create policy "owners update deals"
+do $$
+declare p record;
+begin
+  for p in select policyname from pg_policies where schemaname='public' and tablename='deal_documents'
+  loop execute format('drop policy %I on public.deal_documents', p.policyname); end loop;
+end $$;
+
+create policy "owners read documents" on public.deal_documents for select to authenticated
+  using (exists (select 1 from public.deals d where d.id = deal_id and d.user_id = auth.uid()));
+
   on public.deals for update
   to authenticated
   using (auth.uid() = user_id)
@@ -164,18 +171,8 @@ create policy "public insert documents"
   );
 
 insert into storage.buckets (id, name, public)
-values ('deal-vault', 'deal-vault', true)
-on conflict (id) do update set public = true;
+values ('deal-vault', 'deal-vault', false)
+on conflict (id) do update set public = false;
 
 drop policy if exists "deal vault upload" on storage.objects;
 drop policy if exists "deal vault read" on storage.objects;
-
-create policy "deal vault upload"
-  on storage.objects for insert
-  to anon, authenticated
-  with check (bucket_id = 'deal-vault');
-
-create policy "deal vault read"
-  on storage.objects for select
-  to anon, authenticated
-  using (bucket_id = 'deal-vault');

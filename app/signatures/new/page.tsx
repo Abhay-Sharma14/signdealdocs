@@ -44,10 +44,10 @@ export default function NewSignaturePage(){
  <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-3">
  <p className="text-sm font-bold text-slate-900">Need to prepare your PDF first?</p>
  <div className="mt-2 flex flex-wrap gap-4 text-xs font-bold text-indigo-700">
-  <a href="https://tools.pdf24.org/en/split-pdf" target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">Split PDF ↗</a>
-  <a href="https://tools.pdf24.org/en/edit-pdf" target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">Edit PDF ↗</a>
+  <a href="https://iduckpdf.com/" target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">Split PDF ↗</a>
+  <a href="https://iduckpdf.com/" target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">Edit PDF ↗</a>
  </div>
- <p className="mt-2 text-xs leading-5 text-slate-600">These open an independent third-party service. Avoid uploading confidential agreements there unless you trust its privacy and data handling. Return here to request a signature.</p>
+ <p className="mt-2 text-xs leading-5 text-slate-600">These open iDuckPDF, an independent PDF toolkit. Check its privacy terms before processing confidential documents, then return here to request a signature.</p>
  </div>
  <p className="text-xs text-slate-500">Signing link expires after 7 days. Share the link privately; anyone with the link can open the PDF. No automatic email is sent.</p>
  {error&&<p role="alert" className="text-sm text-rose-700">{error}</p>}

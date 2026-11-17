@@ -126,12 +126,43 @@ export default function HomePage() {
         </section>
 
         <section id="pricing" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-          <div className="mx-auto max-w-2xl text-center"><p className="text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">{t("pricingEyebrow")}</p><h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">{t("pricingTitle")}</h2><p className="mt-3 text-sm leading-7 text-slate-600">{t("pricingCopy")}</p></div>
-          <div className="mx-auto mt-10 grid max-w-4xl gap-4 md:grid-cols-2">
-            <article className="rounded-2xl border border-indigo-200 bg-white p-7 shadow-sm"><p className="text-sm font-bold text-indigo-700">{t("free")}</p><p className="mt-3 text-4xl font-extrabold tracking-tight text-slate-950">{t("freePrice")}<span className="ml-2 text-sm font-semibold text-slate-500">/ forever</span></p><p className="mt-3 text-sm text-slate-600">{t("freeDesc")}</p><Link href="/login" className="mt-6 inline-flex w-full justify-center rounded-xl bg-brand px-4 py-3 text-sm font-bold text-white hover:bg-[#4338ca]">{t("freeCta")}</Link></article>
-            <article className="rounded-2xl border border-slate-200 bg-slate-50 p-7"><p className="text-sm font-bold text-slate-700">{t("fair")}</p><p className="mt-3 text-4xl font-extrabold tracking-tight text-slate-950">{t("fairPrice")}</p><p className="mt-3 text-sm text-slate-600">{t("fairDesc")}</p><div className="mt-6 rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-600">{t("fairCta")}</div></article>
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">{t("pricingEyebrow")}</p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">{t("pricingTitle")}</h2>
+            <p className="mt-3 text-sm leading-7 text-slate-600">{t("pricingCopy")}</p>
+            <p className="mt-3 inline-flex rounded-full border border-violet-100 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800">Paid plans are a preview · Subscriptions are not available yet</p>
           </div>
-          <p className="mx-auto mt-5 max-w-3xl text-center text-xs leading-6 text-slate-500">{t("pricingNote")}</p>
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              { name: t("free"), price: "$0", india: "₹0", subtitle: "Explore the workflow", features: ["Create and review proposals", "Share a client deal link", "Collect signatures and documents"], featured: false, available: true },
+              { name: "Starter", price: "$4.99", india: "₹299", subtitle: "For independent professionals", features: ["Everything in Free", "More deals and AI proposals (planned)", "Reusable proposal templates (planned)"], featured: false, available: false },
+              { name: "Professional", price: "$12.99", india: "₹799", subtitle: "For busy freelancers and agencies", features: ["Everything in Starter", "Signature audit history (planned)", "Client-link controls (planned)"], featured: true, available: false },
+              { name: "Business", price: "$24.99", india: "₹1,499", subtitle: "For growing teams", features: ["Everything in Professional", "Team workspaces and roles (planned)", "Advanced reporting (planned)"], featured: false, available: false },
+            ].map((plan) => (
+              <article key={plan.name} className={`relative flex flex-col rounded-[1.5rem] border p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg ${plan.featured ? "border-indigo-400 bg-gradient-to-b from-violet-50 to-white ring-1 ring-indigo-200" : "border-slate-200 bg-white"}`}>
+                {plan.featured && <span className="absolute -top-3 left-5 rounded-full bg-indigo-600 px-3 py-1 text-[11px] font-bold text-white">Popular option</span>}
+                <h3 className="text-lg font-extrabold text-slate-950">{plan.name}</h3>
+                <p className="mt-1 min-h-10 text-sm leading-5 text-slate-500">{plan.subtitle}</p>
+                <div className="mt-4 flex items-baseline gap-1">
+                  <span className="text-4xl font-extrabold tracking-tight text-slate-950">{plan.price}</span>
+                  <span className="text-xs text-slate-500">/ month</span>
+                </div>
+                <p className="mt-1 text-xs text-slate-500">{plan.india} / month in India · indicative</p>
+                <div className="my-5 border-t border-slate-100" />
+                <ul className="flex-1 space-y-3">
+                  {plan.features.map((feature) => <li key={feature} className="flex gap-2 text-sm leading-6 text-slate-600"><span className="shrink-0 font-bold text-indigo-600">✓</span><span>{feature}</span></li>)}
+                </ul>
+                {plan.available ? (
+                  <Link href="/login" className="mt-7 inline-flex justify-center rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-indigo-700">{t("freeCta")}</Link>
+                ) : (
+                  <div className="mt-7 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-sm font-semibold text-slate-500">Coming soon</div>
+                )}
+              </article>
+            ))}
+          </div>
+          <p className="mx-auto mt-6 max-w-4xl text-center text-xs leading-6 text-slate-500">
+            Proposed monthly prices shown in USD, with indicative India pricing. Final pricing, quotas, feature availability, taxes, and billing terms will be confirmed before subscriptions launch. No paid checkout is active.
+          </p>
         </section>
 
         <section className="bg-slate-950">

@@ -129,8 +129,13 @@ export default function DashboardPage() {
   }
 
   async function signOut() {
-    await supabase.auth.signOut();
-    router.replace("/login");
+    setError("");
+    const { error: signOutError } = await supabase.auth.signOut();
+    if (signOutError) {
+      setError("Could not sign out. Please try again.");
+      return;
+    }
+    window.location.replace("/");
   }
 
   if (!ready) {

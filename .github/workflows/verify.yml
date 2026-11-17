@@ -2,11 +2,11 @@ name: Verify application
 
 on:
   pull_request:
-    branches: [main]
   push:
     branches:
       - main
       - security/harden-public-deal-access
+      - feature/global-document-intake
 
 permissions:
   contents: read

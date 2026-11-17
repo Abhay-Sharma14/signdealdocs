@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/logo";
+import { AppFooter } from "@/components/app-footer";
 import { formatMoney, formatWhen, magicLink, normalizeDeal } from "@/lib/format";
 import { supabase } from "@/lib/supabase";
 import type { Deal, DealDocument, DealStatus } from "@/lib/types";
@@ -213,6 +214,8 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
+
+      <AppFooter />
 
       {active ? (
         <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/40">

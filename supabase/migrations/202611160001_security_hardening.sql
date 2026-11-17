@@ -71,7 +71,7 @@ begin
       policy_row.policyname, policy_row.schemaname, policy_row.tablename);
   end loop;
 end;
-$func$;
+$block$;
 
 -- Remove all legacy anonymous policies (including broad public reads and writes).
 drop policy if exists "public read deals" on public.deals;

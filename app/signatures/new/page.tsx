@@ -8,6 +8,7 @@ type Item={id:string;token:string;title:string;signer_name:string;signer_email:s
 export default function NewSignaturePage(){
  const router=useRouter();
  const [ready,setReady]=useState(false);
+ const [now,setNow]=useState(0);
  const [title,setTitle]=useState("");
  const [name,setName]=useState("");
  const [email,setEmail]=useState("");
@@ -17,7 +18,7 @@ export default function NewSignaturePage(){
  const [items,setItems]=useState<Item[]>([]);
  const [created,setCreated]=useState("");
  useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session)router.replace("/login");else setReady(true);});},[router]);
- useEffect(()=>{if(!ready)return;supabase.auth.getSession().then(async({data})=>{const token=data.session?.access_token;if(!token)return;const res=await fetch("/api/signatures",{headers:{Authorization:`Bearer ${token}`},cache:"no-store"});if(res.ok){const payload=await res.json();setItems(payload.requests??[]);}});},[ready]);
+ useEffect(()=>{if(!ready)return;supabase.auth.getSession().then(async({data})=>{const token=data.session?.access_token;if(!token)return;const res=await fetch("/api/signatures",{headers:{Authorization:`Bearer ${token}`},cache:"no-store"});if(res.ok){const payload=await res.json();setNow(Date.now());setItems(payload.requests??[]);}});},[ready]);
  async function submit(e:FormEvent){
  e.preventDefault();setError("");setCreated("");
  if(!file||file.size>3_000_000){setError("Choose a PDF smaller than 3 MB.");return;}
@@ -44,6 +45,6 @@ export default function NewSignaturePage(){
  {error&&<p role="alert" className="text-sm text-rose-700">{error}</p>}
  <button disabled={busy} className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold text-white disabled:opacity-50">{busy?"Creating…":"Create signature request"}</button>
  {created&&<div className="rounded-xl bg-indigo-50 p-3 text-sm"><p className="font-bold">Link ready — send privately</p><p className="mt-2 break-all text-xs">{created}</p><button type="button" onClick={()=>navigator.clipboard.writeText(created)} className="mt-2 font-bold text-indigo-700">Copy link</button></div>}
- </form><section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><h2 className="text-lg font-extrabold">Recent signature requests</h2><div className="mt-4 space-y-3">{items.length===0?<p className="text-sm text-slate-500">No requests yet.</p>:items.map(item=><div key={item.id} className="rounded-xl border border-slate-100 p-3"><p className="font-bold text-slate-900">{item.title}</p><p className="text-xs text-slate-500">{item.signer_name} · {item.signer_email}</p><p className="mt-1 text-xs font-semibold text-indigo-600">{item.signed_at?"Signed":item.revoked_at?"Revoked":new Date(item.expires_at).getTime()<Date.now()?"Expired":"Awaiting signature"}</p><button type="button" onClick={()=>navigator.clipboard.writeText(`${window.location.origin}/sign/${item.token}`)} className="mt-2 text-xs font-bold text-indigo-700">Copy signing link</button></div>)}</div></section></div>}
+ </form><section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><h2 className="text-lg font-extrabold">Recent signature requests</h2><div className="mt-4 space-y-3">{items.length===0?<p className="text-sm text-slate-500">No requests yet.</p>:items.map(item=><div key={item.id} className="rounded-xl border border-slate-100 p-3"><p className="font-bold text-slate-900">{item.title}</p><p className="text-xs text-slate-500">{item.signer_name} · {item.signer_email}</p><p className="mt-1 text-xs font-semibold text-indigo-600">{item.signed_at?"Signed":item.revoked_at?"Revoked":now>0&&new Date(item.expires_at).getTime()<now?"Expired":"Awaiting signature"}</p><button type="button" onClick={()=>navigator.clipboard.writeText(`${window.location.origin}/sign/${item.token}`)} className="mt-2 text-xs font-bold text-indigo-700">Copy signing link</button></div>)}</div></section></div>}
  </main></div>;
 }

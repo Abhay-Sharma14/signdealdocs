@@ -11,7 +11,7 @@ alter table public.deal_documents enable row level security;
 create or replace function public.protect_deal_client_update()
 returns trigger
 language plpgsql
-as $func
+as $func$
 begin
   if auth.uid() is not null and auth.uid() = old.user_id then
     return new;
@@ -57,7 +57,7 @@ create trigger deals_protect_client_update
   execute function public.protect_deal_client_update();
 
 -- Remove every existing table policy first: permissive policies combine with OR.
-do $block
+do $block$
 declare
   policy_row record;
 begin

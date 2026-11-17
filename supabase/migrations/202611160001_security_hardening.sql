@@ -104,6 +104,46 @@ create policy "owners read documents"
     )
   );
 
+
+-- Protect paid/limited AI provider usage with an atomic per-user hourly quota.
+create table if not exists public.ai_proposal_usage (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  window_start timestamptz not null,
+  request_count integer not null default 0 check (request_count >= 0)
+);
+alter table public.ai_proposal_usage enable row level security;
+revoke all on public.ai_proposal_usage from anon, authenticated;
+
+create or replace function public.consume_ai_proposal_quota(p_user_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $quota$
+declare
+  v_count integer;
+  v_window timestamptz := date_trunc('hour', now());
+begin
+  insert into public.ai_proposal_usage(user_id, window_start, request_count)
+  values (p_user_id, v_window, 1)
+  on conflict (user_id) do update
+    set window_start = case
+          when public.ai_proposal_usage.window_start < v_window then v_window
+          else public.ai_proposal_usage.window_start
+        end,
+        request_count = case
+          when public.ai_proposal_usage.window_start < v_window then 1
+          else public.ai_proposal_usage.request_count + 1
+        end
+  returning request_count into v_count;
+
+  return v_count <= 10;
+end;
+$quota$;
+
+revoke all on function public.consume_ai_proposal_quota(uuid) from public, anon, authenticated;
+grant execute on function public.consume_ai_proposal_quota(uuid) to service_role;
+
 -- The server uses the service role for controlled portal operations. Do not expose
 -- direct storage access to anon/authenticated browser clients.
 update storage.buckets

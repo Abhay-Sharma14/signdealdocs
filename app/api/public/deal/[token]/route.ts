@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { getDocumentMime, hasValidDocumentSignature, MAX_DOCUMENT_BYTES } from "@/lib/document-upload";
 
 export const runtime = "nodejs";
 
 const BUCKET = "deal-vault";
-const MAX_FILE_BYTES = 10 * 1024 * 1024;
-const ALLOWED_TYPES = new Set(["application/pdf", "image/png", "image/jpeg", "image/webp"]);
 
 type DealRow = {
   id: string; slug: string; client_name: string; client_email: string;
@@ -66,7 +65,7 @@ export async function GET(_request: Request, context: { params: Promise<{ token:
 export async function POST(request: Request, context: { params: Promise<{ token: string }> }) {
   const { token } = await context.params;
   const contentLength = Number(request.headers.get("content-length") ?? 0);
-  if (contentLength > MAX_FILE_BYTES + 256_000) return NextResponse.json({ error: "Upload is too large." }, { status: 413 });
+  if (contentLength > MAX_DOCUMENT_BYTES + 256_000) return NextResponse.json({ error: "Upload is too large." }, { status: 413 });
   const deal = await getDeal(token);
   if (!deal) return NextResponse.json({ error: "Deal link is invalid or expired." }, { status: 404 });
 
@@ -83,7 +82,7 @@ export async function POST(request: Request, context: { params: Promise<{ token:
     if (file.type !== "image/png") return NextResponse.json({ error: "Signature must be a PNG image." }, { status: 400 });
     const path = `${deal.id}/signature-${randomUUID()}.png`;
     const bytes = Buffer.from(await file.arrayBuffer());
-    if (!hasValidFileSignature(bytes, file.type)) return NextResponse.json({ error: "File content does not match its declared type." }, { status: 400 });
+    if (!hasValidDocumentSignature(bytes, "image/png")) return NextResponse.json({ error: "File content does not match its declared type." }, { status: 400 });
     const { error: uploadError } = await getSupabaseAdmin().storage.from(BUCKET).upload(path, bytes, {
       contentType: "image/png", upsert: false,
     });
@@ -108,11 +107,17 @@ export async function POST(request: Request, context: { params: Promise<{ token:
     if (!label || !deal.required_documents.includes(label)) {
       return NextResponse.json({ error: "This document is not requested for the deal." }, { status: 400 });
     }
+    const mime = getDocumentMime(file.name, file.type);
+    if (!mime) {
+      return NextResponse.json({ error: "Unsupported file type. Upload PDF, Office, OpenDocument, RTF, TXT, CSV, JPG, PNG, WebP or HEIC." }, { status: 415 });
+    }
     const path = `${deal.id}/documents/${randomUUID()}`;
     const bytes = Buffer.from(await file.arrayBuffer());
-    if (!hasValidFileSignature(bytes, file.type)) return NextResponse.json({ error: "File content does not match its declared type." }, { status: 400 });
+    if (!hasValidDocumentSignature(bytes, mime)) {
+      return NextResponse.json({ error: "The file content does not match its extension. Please choose a valid document." }, { status: 400 });
+    }
     const { error: uploadError } = await getSupabaseAdmin().storage.from(BUCKET).upload(path, bytes, {
-      contentType: file.type, upsert: false,
+      contentType: mime, upsert: false,
     });
     if (uploadError) return NextResponse.json({ error: "Could not upload document." }, { status: 500 });
 

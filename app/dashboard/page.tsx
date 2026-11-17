@@ -172,12 +172,12 @@ export default function DashboardPage() {
               1 Magic Link = AI Proposal + E-Sign + Document Vault
             </p>
           </div>
-          <Link
+          <div className="flex flex-wrap gap-2"><Link href="/signatures/new" className="inline-flex items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-bold text-indigo-700 hover:bg-indigo-100">Request Signature Only</Link><Link
             href="/deals/new"
             className="inline-flex items-center justify-center rounded-xl bg-brand px-4 py-3 text-sm font-bold text-white hover:bg-[#4338ca]"
           >
             + Create New Deal Room
-          </Link>
+          </Link></div>
         </div>
 
         {error ? (

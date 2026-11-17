@@ -20,9 +20,9 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SignDealDocs.com — AI Proposals, E-Signature & Client Onboarding",
+  title: "SignDealDocs | Proposals, E-Signatures & Client Onboarding",
   description:
-    "1 Magic Link = AI Proposal + E-Sign + Document Vault. Configure a client proposal, collect a signature, and unlock the document vault.",
+    "Create client proposals, collect electronic signatures, and request onboarding documents through a single private link.",
 };
 
 export default function RootLayout({

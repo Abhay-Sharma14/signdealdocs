@@ -11,6 +11,13 @@ import { supabase } from "@/lib/supabase";
 import { CURRENCIES, type Currency } from "@/lib/types";
 
 const DEFAULT_DOCS = ["Signed NDA", "Brand Assets / Logo", "GST / Tax ID"];
+const PROPOSAL_TEMPLATES = [
+  { id: "custom", name: "Start from scratch", brief: "", documents: DEFAULT_DOCS },
+  { id: "website", name: "Website Development", brief: "Design and develop a responsive business website. Include discovery, UX/UI design, development, testing, deployment, milestones, deliverables, revision limits, client responsibilities, and exclusions.", documents: ["Brand Assets / Logo", "Website Content", "Domain / Hosting Details"] },
+  { id: "marketing", name: "Digital Marketing", brief: "Provide a digital marketing engagement covering discovery, channel strategy, campaign setup, reporting cadence, KPIs, deliverables, approvals, ad spend exclusions, and monthly responsibilities.", documents: ["Brand Guidelines", "Existing Marketing Assets", "Account Access Details"] },
+  { id: "consulting", name: "Business Consulting", brief: "Provide a consulting engagement covering objectives, discovery workshops, analysis, recommendations, deliverables, timeline, assumptions, stakeholder responsibilities, and exclusions.", documents: ["Project Requirements", "Existing Business Documents", "Signed NDA"] },
+  { id: "design", name: "Brand & Creative Design", brief: "Create a visual identity and brand design package covering research, concepts, logo deliverables, brand guidelines, revisions, file formats, handoff, usage rights, and exclusions.", documents: ["Creative Brief", "Brand References", "Existing Brand Assets"] },
+] as const;
 
 export default function NewDealPage() {
   const router = useRouter();
@@ -21,6 +28,8 @@ export default function NewDealPage() {
   const [currency, setCurrency] = useState<Currency>("USD");
   const [amount, setAmount] = useState("");
   const [brief, setBrief] = useState("");
+  const [templateId, setTemplateId] = useState("custom");
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [documents, setDocuments] = useState<string[]>(DEFAULT_DOCS);
   const [docDraft, setDocDraft] = useState("");
   const [proposal, setProposal] = useState("");
@@ -39,6 +48,23 @@ export default function NewDealPage() {
       setReady(true);
     });
   }, [router]);
+
+  function chooseTemplate(id: string) {
+    const template = PROPOSAL_TEMPLATES.find((item) => item.id === id);
+    if (!template) return;
+    setTemplateId(id);
+    setBrief(template.brief);
+    setDocuments([...template.documents]);
+    setProposal("");
+    setError("");
+  }
+
+  function exportProposalPdf() {
+    if (!proposal.trim()) return;
+    // The browser's native print dialog provides PDF export without a paid service.
+    setPreviewOpen(true);
+    window.setTimeout(() => window.print(), 120);
+  }
 
   function addDocument() {
     const next = docDraft.trim();
@@ -253,6 +279,12 @@ export default function NewDealPage() {
                 />
               </Field>
             </div>
+            <Field label="Proposal Template">
+              <select value={templateId} onChange={(event) => chooseTemplate(event.target.value)} className={inputClass}>
+                {PROPOSAL_TEMPLATES.map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}
+              </select>
+              <p className="mt-1 text-xs text-slate-500">Selecting a template updates the project brief and requested documents. Review them before generating.</p>
+            </Field>
             <Field label="Project Scope / Brief">
               <textarea
                 required
@@ -274,6 +306,13 @@ export default function NewDealPage() {
               </button>
             </div>
 
+            {proposal ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <button type="button" onClick={() => setPreviewOpen(true)} className="rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100">Full Preview</button>
+                <button type="button" onClick={exportProposalPdf} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-800 hover:bg-slate-50">Export PDF</button>
+                <span className="text-xs text-slate-500">Choose “Save as PDF” in the print dialog.</span>
+              </div>
+            ) : null}
             {proposal ? (
               <label className="block">
                 <span className="mb-1 block font-mono text-[10px] font-bold uppercase tracking-wider text-brand-deep">
@@ -416,6 +455,30 @@ export default function NewDealPage() {
           </div>
         </section>
       </main>
+      {previewOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/65 p-3 print:static print:overflow-visible print:bg-white print:p-0 sm:p-8" role="dialog" aria-modal="true" aria-label="Proposal preview">
+          <div className="mx-auto max-w-3xl rounded-2xl bg-white shadow-2xl print:max-w-none print:rounded-none print:shadow-none">
+            <div className="flex items-center justify-between gap-3 border-b border-slate-200 p-4 print:hidden">
+              <h2 className="text-sm font-bold text-slate-950">Proposal Preview</h2>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => window.print()} className="rounded-lg bg-brand px-3 py-2 text-xs font-bold text-white">Save as PDF / Print</button>
+                <button type="button" onClick={() => setPreviewOpen(false)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold">Close</button>
+              </div>
+            </div>
+            <div className="space-y-6 p-6 sm:p-10 print:p-0">
+              <div className="border-b border-slate-200 pb-6">
+                <p className="text-xs font-bold uppercase tracking-[.2em] text-indigo-600">SignDealDocs · Proposal</p>
+                <h1 className="mt-3 text-2xl font-extrabold text-slate-950">{projectTitle || "Project Proposal"}</h1>
+                <p className="mt-2 text-sm text-slate-600">Prepared for {clientName || "Client"} {clientEmail ? `· ${clientEmail}` : ""}</p>
+                <p className="mt-2 text-sm font-semibold text-slate-800">Proposed amount: {currency} {amount || "0"}</p>
+              </div>
+              <ProposalView text={proposal} />
+              <p className="border-t border-slate-200 pt-4 text-xs text-slate-500">Draft proposal — review and confirm all terms before sharing.</p>
+            </div>
+          </div>
+        </div>
+      )}
+      <style jsx global>{`@media print { body > * { visibility: hidden !important; } [role="dialog"], [role="dialog"] * { visibility: visible !important; } [role="dialog"] { position: absolute !important; inset: 0 !important; width: 100% !important; } @page { size: A4; margin: 16mm; } }`}</style>
       <AppFooter />
     </div>
   );

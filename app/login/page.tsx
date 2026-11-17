@@ -23,6 +23,23 @@ export default function LoginPage() {
     });
   }, [router]);
 
+  async function signInWithProvider(provider: "google" | "azure" | "linkedin_oidc") {
+    setError("");
+    setNotice("");
+    setPending(true);
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+        ...(provider === "azure" ? { scopes: "email" } : {}),
+      },
+    });
+    if (oauthError) {
+      setError(oauthError.message);
+      setPending(false);
+    }
+  }
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setError("");
@@ -77,7 +94,7 @@ export default function LoginPage() {
             {mode === "sign-in" ? "Sign in" : "Create your studio"}
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Email and password. Authenticated studios land on the deal dashboard.
+            Sign in securely to manage your proposals, agreements, and client documents.
           </p>
 
           <div className="mt-5 grid grid-cols-2 rounded-xl border border-slate-200 bg-slate-100/90 p-1">
@@ -112,6 +129,22 @@ export default function LoginPage() {
               Sign Up
             </button>
           </div>
+
+          <div className="mt-6 space-y-2.5">
+            <button type="button" disabled={pending} onClick={() => signInWithProvider("google")} className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-indigo-200 hover:bg-slate-50 disabled:opacity-60">
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5"><path fill="#4285F4" d="M21.35 12.25c0-.73-.07-1.42-.19-2.1H12v3.97h5.24a4.48 4.48 0 0 1-1.94 2.94v2.44h3.14c1.84-1.69 2.91-4.18 2.91-7.25Z"/><path fill="#34A853" d="M12 21.75c2.63 0 4.83-.87 6.44-2.35l-3.14-2.44c-.87.58-1.98.93-3.3.93-2.54 0-4.69-1.72-5.46-4.03H3.3v2.52a9.75 9.75 0 0 0 8.7 5.37Z"/><path fill="#FBBC05" d="M6.54 13.86a5.85 5.85 0 0 1 0-3.72V7.62H3.3a9.75 9.75 0 0 0 0 8.76l3.24-2.52Z"/><path fill="#EA4335" d="M12 6.11c1.43 0 2.71.49 3.72 1.46l2.79-2.79A9.3 9.3 0 0 0 12 2.25a9.75 9.75 0 0 0-8.7 5.37l3.24 2.52C7.31 7.83 9.46 6.11 12 6.11Z"/></svg>
+              Continue with Google
+            </button>
+            <button type="button" disabled={pending} onClick={() => signInWithProvider("azure")} className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-indigo-200 hover:bg-slate-50 disabled:opacity-60">
+              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5"><path fill="#F25022" d="M2 2h9v9H2z"/><path fill="#7FBA00" d="M13 2h9v9h-9z"/><path fill="#00A4EF" d="M2 13h9v9H2z"/><path fill="#FFB900" d="M13 13h9v9h-9z"/></svg>
+              Continue with Microsoft
+            </button>
+            <button type="button" disabled={pending} onClick={() => signInWithProvider("linkedin_oidc")} className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-indigo-200 hover:bg-slate-50 disabled:opacity-60">
+              <span aria-hidden="true" className="flex h-5 w-5 items-center justify-center rounded bg-[#0A66C2] text-xs font-extrabold text-white">in</span>
+              Continue with LinkedIn
+            </button>
+          </div>
+          <div className="mt-6 flex items-center gap-3 text-xs font-medium text-slate-400"><span className="h-px flex-1 bg-slate-200" />or continue with email<span className="h-px flex-1 bg-slate-200" /></div>
 
           <form onSubmit={onSubmit} className="mt-5 space-y-4">
             <label className="block">

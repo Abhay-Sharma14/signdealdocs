@@ -41,6 +41,14 @@ export default function NewSignaturePage(){
  <label className="block text-sm font-semibold">Signer name<input required value={name} onChange={e=>setName(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="Full legal name"/></label>
  <label className="block text-sm font-semibold">Signer email<input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="client@example.com"/></label>
  <label className="block text-sm font-semibold">PDF document (max 3 MB)<input required type="file" accept="application/pdf,.pdf" onChange={e=>setFile(e.target.files?.[0]??null)} className="mt-2 block w-full rounded-xl border border-slate-200 p-3 text-sm"/></label>
+ <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-3">
+ <p className="text-sm font-bold text-slate-900">Need to prepare your PDF first?</p>
+ <div className="mt-2 flex flex-wrap gap-4 text-xs font-bold text-indigo-700">
+  <a href="https://tools.pdf24.org/en/split-pdf" target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">Split PDF ↗</a>
+  <a href="https://tools.pdf24.org/en/edit-pdf" target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">Edit PDF ↗</a>
+ </div>
+ <p className="mt-2 text-xs leading-5 text-slate-600">These open an independent third-party service. Avoid uploading confidential agreements there unless you trust its privacy and data handling. Return here to request a signature.</p>
+ </div>
  <p className="text-xs text-slate-500">Signing link expires after 7 days. Share the link privately; anyone with the link can open the PDF. No automatic email is sent.</p>
  {error&&<p role="alert" className="text-sm text-rose-700">{error}</p>}
  <button disabled={busy} className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold text-white disabled:opacity-50">{busy?"Creating…":"Create signature request"}</button>

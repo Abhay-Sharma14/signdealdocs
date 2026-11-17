@@ -11,7 +11,7 @@ alter table public.deal_documents enable row level security;
 create or replace function public.protect_deal_client_update()
 returns trigger
 language plpgsql
-as $
+as $func
 begin
   if auth.uid() is not null and auth.uid() = old.user_id then
     return new;
@@ -47,7 +47,7 @@ begin
 
   return new;
 end;
-$;
+$func$;
 
 -- Ensure the client-update guard is installed even on databases created manually.
 drop trigger if exists deals_protect_client_update on public.deals;
@@ -57,7 +57,7 @@ create trigger deals_protect_client_update
   execute function public.protect_deal_client_update();
 
 -- Remove every existing table policy first: permissive policies combine with OR.
-do $
+do $block
 declare
   policy_row record;
 begin
@@ -71,7 +71,7 @@ begin
       policy_row.policyname, policy_row.schemaname, policy_row.tablename);
   end loop;
 end;
-$;
+$func$;
 
 -- Remove all legacy anonymous policies (including broad public reads and writes).
 drop policy if exists "public read deals" on public.deals;

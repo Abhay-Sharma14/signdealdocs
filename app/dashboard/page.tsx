@@ -25,6 +25,7 @@ export default function DashboardPage() {
   const [copiedSlug, setCopiedSlug] = useState("");
   const [linkSettings, setLinkSettings] = useState<Record<string, { revoked: boolean; expires: string | null }>>({});
   const [savingLink, setSavingLink] = useState("");
+  const [linkControlsReady, setLinkControlsReady] = useState(false);
   const [active, setActive] = useState<Deal | null>(null);
   const [files, setFiles] = useState<DealDocument[]>([]);
   const [filesError, setFilesError] = useState("");
@@ -38,7 +39,7 @@ export default function DashboardPage() {
         return;
       }
       setEmail(user.email ?? "");
-      const { data: rows, error: queryError } = await supabase
+      let { data: rows, error: queryError } = await supabase
         .from("deals")
         .select(
           "id, slug, client_name, client_email, project_title, currency, amount, status, signature_url, signed_at, created_at, proposal, required_documents, link_expires_at, link_revoked_at",
@@ -46,6 +47,13 @@ export default function DashboardPage() {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
+      if (queryError?.code === "42703") {
+        const fallback = await supabase.from("deals").select("id, slug, client_name, client_email, project_title, currency, amount, status, signature_url, signed_at, created_at, proposal, required_documents").eq("user_id", user.id).order("created_at", { ascending: false });
+        rows = fallback.data;
+        queryError = fallback.error;
+      } else if (!queryError) {
+        setLinkControlsReady(true);
+      }
       if (queryError) setError(queryError.message);
       else {
         setDeals((rows ?? []).map((row) => normalizeDeal(row)));
@@ -223,11 +231,11 @@ export default function DashboardPage() {
                           >
                             {copiedSlug === deal.slug ? "Copied" : "Copy Client Magic Link"}
                           </button>
-                          <button type="button" disabled={savingLink === deal.id} onClick={() => changeLinkAccess(deal.id, linkSettings[deal.id]?.revoked ? "restore" : "revoke")} className="rounded-lg border border-rose-200 px-2.5 py-1.5 text-[11px] font-bold text-rose-700 hover:bg-rose-50 disabled:opacity-50">
+                          {linkControlsReady && <button type="button" disabled={savingLink === deal.id} onClick={() => changeLinkAccess(deal.id, linkSettings[deal.id]?.revoked ? "restore" : "revoke")} className="rounded-lg border border-rose-200 px-2.5 py-1.5 text-[11px] font-bold text-rose-700 hover:bg-rose-50 disabled:opacity-50">
                             {linkSettings[deal.id]?.revoked ? "Restore link" : "Revoke link"}
-                          </button>
-                          {!linkSettings[deal.id]?.revoked && !linkSettings[deal.id]?.expires && <button type="button" disabled={savingLink === deal.id} onClick={() => changeLinkAccess(deal.id, "expire")} className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50">Set 7-day expiry</button>}
-                          {linkSettings[deal.id]?.expires && <span className="self-center text-[11px] text-slate-500">Expires {formatWhen(linkSettings[deal.id].expires)}</span>}
+                          </button>}
+                          {linkControlsReady && !linkSettings[deal.id]?.revoked && !linkSettings[deal.id]?.expires && <button type="button" disabled={savingLink === deal.id} onClick={() => changeLinkAccess(deal.id, "expire")} className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50">Set 7-day expiry</button>}
+                          {linkControlsReady && linkSettings[deal.id]?.expires && <span className="self-center text-[11px] text-slate-500">Expires {formatWhen(linkSettings[deal.id].expires)}</span>}
                           <button
                             type="button"
                             onClick={() => openDeal(deal)}

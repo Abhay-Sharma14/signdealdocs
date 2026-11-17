@@ -122,18 +122,12 @@ export default function HomePage() {
                         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M20 7 10 17l-5-5"/><path d="M12 3a9 9 0 1 0 9 9"/></svg>
                       )}
                     </div>
-                    <span className="rounded-full bg-slate-50 px-3 py-1 font-mono text-xs font-bold tracking-wider text-indigo-600">{step.number} / 03</span>
+
                   </div>
                   <h3 className="mt-7 text-xl font-extrabold tracking-tight text-slate-950">{step.title}</h3>
                   <p className="mt-2 max-w-sm text-sm leading-7 text-slate-600">{step.copy}</p>
-                  <div className="mt-auto pt-6">
-                    <div className="h-1 w-12 rounded-full bg-gradient-to-r from-indigo-600 to-violet-400 transition-all duration-300 group-hover:w-20" />
-                  </div>
-                  {index < 2 && (
-                    <span aria-hidden="true" className="absolute -right-[25px] top-[62px] z-10 hidden h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white text-indigo-600 shadow-sm md:flex">
-                      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
-                    </span>
-                  )}
+                  <div className="mt-auto pt-6"><div className="h-px w-full bg-gradient-to-r from-indigo-200 via-violet-100 to-transparent" /></div>
+
                 </article>
               ))}
             </div>

@@ -110,7 +110,7 @@ export default function HomePage() {
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[.17em] text-indigo-700">Standalone E-Signature</p>
               <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">Only need a signature? Skip the proposal.</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">Upload a PDF, enter your signer's details and share a private link. They can draw or upload their signature without creating an account. Currently in beta: signatures are recorded separately; embedded signed PDFs are coming next.</p>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">Upload a PDF, enter your signer&apos;s details and share a private link. They can draw or upload their signature without creating an account. Currently in beta: signatures are recorded separately; embedded signed PDFs are coming next.</p>
             </div>
             <Link href="/signatures/new" className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-md hover:bg-indigo-700">Request an E-Signature →</Link>
           </div>

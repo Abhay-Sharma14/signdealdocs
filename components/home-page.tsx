@@ -91,8 +91,36 @@ export default function HomePage() {
         <section id="how-it-works" className="border-y border-slate-200/70 bg-white/70">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
             <h2 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">{t("howTitle")}</h2>
-            <div className="mt-9 grid gap-4 md:grid-cols-3">
-              {steps.map((step)=><article key={step.number} className="rounded-2xl bg-slate-50 p-6"><p className="font-mono text-xs font-bold text-indigo-600">{step.number}</p><h3 className="mt-3 text-lg font-extrabold text-slate-950">{step.title}</h3><p className="mt-2 text-sm leading-7 text-slate-600">{step.copy}</p></article>)}
+            <div className="relative mt-10 grid gap-5 md:grid-cols-3 md:gap-6">
+              {steps.map((step, index) => (
+                <article
+                  key={step.number}
+                  className="group relative flex min-h-[240px] flex-col rounded-[1.5rem] border border-slate-200/90 bg-white p-6 shadow-[0_12px_35px_-25px_rgba(44,38,119,.35)] transition duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-[0_20px_45px_-24px_rgba(78,61,187,.35)] sm:p-7"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-violet-100 text-indigo-700">
+                      {index === 0 ? (
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10Z"/><path d="M13 3v7h7M8 15h8M8 18h5"/></svg>
+                      ) : index === 1 ? (
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                      ) : (
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-7 w-7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M20 7 10 17l-5-5"/><path d="M12 3a9 9 0 1 0 9 9"/></svg>
+                      )}
+                    </div>
+                    <span className="rounded-full bg-slate-50 px-3 py-1 font-mono text-xs font-bold tracking-wider text-indigo-600">{step.number} / 03</span>
+                  </div>
+                  <h3 className="mt-7 text-xl font-extrabold tracking-tight text-slate-950">{step.title}</h3>
+                  <p className="mt-2 max-w-sm text-sm leading-7 text-slate-600">{step.copy}</p>
+                  <div className="mt-auto pt-6">
+                    <div className="h-1 w-12 rounded-full bg-gradient-to-r from-indigo-600 to-violet-400 transition-all duration-300 group-hover:w-20" />
+                  </div>
+                  {index < 2 && (
+                    <span aria-hidden="true" className="absolute -right-[25px] top-[62px] z-10 hidden h-11 w-11 items-center justify-center rounded-full border border-indigo-100 bg-white text-indigo-600 shadow-sm md:flex">
+                      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                    </span>
+                  )}
+                </article>
+              ))}
             </div>
           </div>
         </section>

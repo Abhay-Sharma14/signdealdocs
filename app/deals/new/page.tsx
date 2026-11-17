@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/logo";
+import { AppFooter } from "@/components/app-footer";
 import { ProposalView } from "@/components/proposal-view";
 import { magicLink, makeSlug } from "@/lib/format";
 import { supabase } from "@/lib/supabase";
@@ -415,6 +416,7 @@ export default function NewDealPage() {
           </div>
         </section>
       </main>
+      <AppFooter />
     </div>
   );
 }

@@ -4,6 +4,28 @@ import { useEffect, useRef, useState } from "react";
 import { SUPPORTED_LOCALES, type LocaleCode } from "@/lib/i18n";
 import { useLocale } from "@/components/locale-provider";
 
+const flagCountry: Record<LocaleCode, string> = {
+  "en-US": "us",
+  "en-GB": "gb",
+  "nl-NL": "nl",
+  "fr-FR": "fr",
+  "zh-CN": "cn",
+  "da-DK": "dk",
+  "ja-JP": "jp",
+  "hi-IN": "in",
+};
+
+function CountryFlag({ code }: { code: LocaleCode }) {
+  const country = flagCountry[code];
+  return (
+    <span
+      aria-hidden="true"
+      className="inline-block h-[15px] w-[22px] shrink-0 rounded-[2px] border border-slate-200 bg-white bg-cover bg-center shadow-sm"
+      style={{ backgroundImage: `url(https://flagcdn.com/w40/${country}.png)` }}
+    />
+  );
+}
+
 export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
   const { locale, setLocale } = useLocale();
   const [open, setOpen] = useState(false);
@@ -38,7 +60,7 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
           ? "inline-flex h-9 w-9 items-center justify-center rounded-full border border-violet-100 bg-violet-50 text-lg transition hover:bg-violet-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:h-10 sm:w-10"
           : "inline-flex items-center gap-2 rounded-full border border-violet-100 bg-violet-50 px-3 py-2 text-sm font-semibold text-slate-800 transition hover:bg-violet-100 focus-visible:outline-2 focus-visible:outline-indigo-600"}
       >
-        <span aria-hidden="true">{selected.flag}</span>
+        <CountryFlag code={selected.code} />
         {!compact && <span>{selected.label}</span>}
         {!compact && <span aria-hidden="true" className="text-xs text-slate-500">⌄</span>}
       </button>
@@ -54,7 +76,7 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
                 onClick={() => { setLocale(item.code as LocaleCode); setOpen(false); }}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition focus-visible:outline-2 focus-visible:outline-indigo-600 ${locale === item.code ? "bg-violet-50 font-semibold text-indigo-900" : "text-slate-700 hover:bg-slate-50"}`}
               >
-                <span aria-hidden="true" className="text-lg">{item.flag}</span>
+                <CountryFlag code={item.code} />
                 <span className="flex-1">{item.label}</span>
                 {locale === item.code && <span aria-hidden="true" className="text-indigo-600">✓</span>}
               </button>

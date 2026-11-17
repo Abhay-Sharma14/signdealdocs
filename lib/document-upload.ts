@@ -1,4 +1,4 @@
-/**
+import { MAX_DOCUMENT_BYTES } from "@/lib/document-types";\n\n/**
  * Safe document intake allowlist.
  * Executables, scripts, HTML/SVG and archives are intentionally excluded.
  */

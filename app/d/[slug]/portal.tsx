@@ -294,6 +294,7 @@ export function Portal({ slug }: { slug: string }) {
                           </span>
                           <input
                             type="file"
+                            accept={DOCUMENT_ACCEPT}
                             disabled={uploadingLabel === label}
                             onChange={(event) => {
                               const file = event.target.files?.[0];

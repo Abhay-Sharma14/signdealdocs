@@ -43,3 +43,8 @@ test("mobile homepage shows a usable e-sign entry", async ({ page, isMobile }) =
  await page.goto(base);
  await expect(page.getByRole("link", { name: /E-Sign a PDF/i })).toBeVisible();
 });
+
+test("signature evidence cannot be read without owner authentication", async ({ request }) => {
+ const response = await request.get(`${base}/api/signatures/evidence/00000000-0000-0000-0000-000000000000`);
+ expect(response.status()).toBe(401);
+});

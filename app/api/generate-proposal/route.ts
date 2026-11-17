@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isCurrency } from "@/lib/types";
 import { createClient } from "@supabase/supabase-js";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 type GenerateBody = {
   clientName?: string;
@@ -25,6 +26,20 @@ export async function POST(request: Request) {
   });
   const { data: { user }, error: authError } = await authClient.auth.getUser(accessToken);
   if (authError || !user) return NextResponse.json({ error: "Your session is invalid. Sign in again." }, { status: 401 });
+
+  // Enforce a per-user hourly quota server-side so a leaked session cannot
+  // generate unbounded third-party AI charges.
+  const { data: withinQuota, error: quotaError } = await getSupabaseAdmin()
+    .rpc("consume_ai_proposal_quota", { p_user_id: user.id });
+  if (quotaError) {
+    return NextResponse.json({ error: "AI generation is temporarily unavailable." }, { status: 503 });
+  }
+  if (!withinQuota) {
+    return NextResponse.json(
+      { error: "You have reached the proposal generation limit. Try again later." },
+      { status: 429, headers: { "Retry-After": "3600" } },
+    );
+  }
   const contentLength = Number(request.headers.get("content-length") ?? 0);
   if (contentLength > 24_000) return NextResponse.json({ error: "Request is too large." }, { status: 413 });
 

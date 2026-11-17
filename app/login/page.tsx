@@ -19,7 +19,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) router.replace("/dashboard");
+      if (data.session) window.location.replace("/dashboard");
     });
   }, [router]);
 
@@ -57,7 +57,7 @@ export default function LoginPage() {
         return;
       }
       if (data.session) {
-        router.replace("/dashboard");
+        window.location.replace("/dashboard");
         return;
       }
       setNotice("Account created. Check your email to confirm, then sign in.");
@@ -74,7 +74,7 @@ export default function LoginPage() {
       setError(signInError.message);
       return;
     }
-    router.replace("/dashboard");
+    window.location.replace("/dashboard");
   }
 
   return (

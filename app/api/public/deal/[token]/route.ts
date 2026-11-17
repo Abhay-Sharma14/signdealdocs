@@ -14,14 +14,6 @@ type DealRow = {
   proposal: string | null; required_documents: string[];
 };
 
-function hasValidFileSignature(bytes: Buffer, mime: string) {
-  if (mime === "application/pdf") return bytes.subarray(0, 5).toString() === "%PDF-";
-  if (mime === "image/png") return bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
-  if (mime === "image/jpeg") return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
-  if (mime === "image/webp") return bytes.subarray(0, 4).toString() === "RIFF" && bytes.subarray(8, 12).toString() === "WEBP";
-  return false;
-}
-
 async function getDeal(token: string) {
   if (!/^[a-f0-9]{64}$/i.test(token)) return null;
   const { data } = await getSupabaseAdmin().from("deals").select("*").eq("slug", token).maybeSingle();
@@ -73,8 +65,8 @@ export async function POST(request: Request, context: { params: Promise<{ token:
   const action = String(form.get("action") ?? "");
   const file = form.get("file");
   if (!(file instanceof File)) return NextResponse.json({ error: "A file is required." }, { status: 400 });
-  if (file.size < 1 || file.size > MAX_FILE_BYTES || !ALLOWED_TYPES.has(file.type)) {
-    return NextResponse.json({ error: "Use a PDF, PNG, JPG, or WebP file up to 10 MB." }, { status: 400 });
+  if (file.size < 1 || file.size > MAX_DOCUMENT_BYTES) {
+    return NextResponse.json({ error: "Files must be between 1 byte and 25 MB." }, { status: 400 });
   }
 
   if (action === "sign") {

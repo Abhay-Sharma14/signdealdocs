@@ -2,7 +2,7 @@ import "server-only";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 export const BUCKET="deal-vault";
 export const admin=()=>getSupabaseAdmin();
-export const tokenValid=(token:string)=>/^[a-f0-9]{64}$/i.test(token);
+export const tokenValid=(token:string)=>(/^[a-zA-Z0-9]{6}$/.test(token)||/^[a-f0-9]{64}$/i.test(token));
 export async function publicDeal(token:string){
  if(!tokenValid(token))return null;
  const {data}=await admin().from("deals").select("*").eq("slug",token).maybeSingle();

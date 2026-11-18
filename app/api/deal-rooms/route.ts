@@ -1,4 +1,5 @@
-import { randomBytes,randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
+import {newDealSlug} from "@/lib/deal-slug";
 import {PDFDocument} from "pdf-lib";
 import {admin,BUCKET,owner,jsonError} from "@/lib/deal-room";
 export const runtime="nodejs";
@@ -26,9 +27,15 @@ export async function POST(request:Request){
   if(error){await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError("Could not store PDFs.",500);}
   uploads.push({type,file,path});
  }
- const slug=randomBytes(32).toString("hex");
- const {error}=await admin().from("deals").insert({id:dealId,user_id:user.id,slug,client_name,client_email,project_title,amount,currency:"USD",status:"sent",brand_name:brand_name||null,brand_color,required_documents:[],proposal:null});
- if(error){await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError("Could not create deal. Apply migration first.",500);}
+ let slug="";
+ let inserted=false;
+ for(let attempt=0;attempt<5;attempt++){
+  slug=newDealSlug();
+  const {error}=await admin().from("deals").insert({id:dealId,user_id:user.id,slug,client_name,client_email,project_title,amount,currency:"USD",status:"sent",brand_name:brand_name||null,brand_color,required_documents:[],proposal:null});
+  if(!error){inserted=true;break;}
+  if(error.code!=="23505"){await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError("Could not create deal. Check database migration.",500);}
+ }
+ if(!inserted){await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError("Could not generate unique deal link. Retry.",503);}
  const rows=[
   {deal_id:dealId,type:"proposal",title:"Project Proposal",pdf_url:uploads[0].path,sort_order:1},
   {deal_id:dealId,type:"contract",title:"Service Agreement",pdf_url:uploads[1].path,sort_order:2},

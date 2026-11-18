@@ -125,6 +125,14 @@ export async function POST(request: Request, context: { params: Promise<{ token:
     if (!mime) {
       return NextResponse.json({ error: "Unsupported file type. Upload PDF, Office, OpenDocument, RTF, TXT, CSV, JPG, PNG, WebP or HEIC." }, { status: 415 });
     }
+    // Until malware scanning and Office container inspection are deployed,
+    // accept only formats with a verifiable file signature.
+    const betaSafeTypes = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
+    if (!betaSafeTypes.has(mime)) {
+      return NextResponse.json({
+        error: "For security, document uploads currently support PDF, JPG, PNG and WebP only.",
+      }, { status: 415 });
+    }
     const path = `${deal.id}/documents/${randomUUID()}`;
     const bytes = Buffer.from(await file.arrayBuffer());
     if (!hasValidDocumentSignature(bytes, mime)) {

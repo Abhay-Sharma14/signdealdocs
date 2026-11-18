@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
+import { PricingCheckoutButton } from "@/components/pricing-checkout-button";
 import { useLocale } from "@/components/locale-provider";
 
 export default function HomePage() {
@@ -107,8 +108,7 @@ export default function HomePage() {
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[.17em] text-indigo-700">Quick Sign</p>
               <h2 className="mt-3 max-w-xl text-3xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-4xl">Only need a signature? Skip the proposal.</h2>
-              <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">Upload a PDF, add signer details and share a private signing link. Your client can review and sign without creating an account.</p>
-              <p className="mt-3 max-w-xl text-xs leading-6 text-slate-500">Beta: signatures are stored separately. Embedded signed PDFs and verified signer identity are not available yet.</p>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">Upload a PDF, add signer details, and share a private link. Your client can sign legally in seconds.</p>
               <Link href="/signatures/new" className="mt-6 inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-indigo-700">Try Quick Sign <span aria-hidden="true" className="ml-2">→</span></Link>
             </div>
             <div className="overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-[0_18px_55px_-30px_rgba(79,70,229,.35)]">
@@ -144,7 +144,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <section id="pricing" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">Built for agencies of every size</p><h2 className="mt-3 text-3xl font-extrabold text-slate-950 sm:text-4xl">Simple pricing. A premium client experience.</h2><p className="mt-3 text-sm text-slate-600">Start with three deals free, then upgrade when your agency grows.</p></div><div className="mt-8 grid gap-4 md:grid-cols-3">{[{name:"Starter",price:"$0",features:["3 deal rooms","SignDealDocs watermark"]},{name:"Pro",price:"$29",features:["Unlimited deal rooms","Custom logo and colors","No watermark"]},{name:"Agency",price:"$49",features:["Everything in Pro","Custom domain support"]}].map(plan=><article key={plan.name} className={`flex flex-col rounded-2xl border bg-white p-7 shadow-sm ${plan.name==="Pro"?"border-indigo-400 ring-1 ring-indigo-100":"border-slate-200"}`}><h3 className="text-xl font-extrabold">{plan.name}</h3><p className="mt-4 text-4xl font-extrabold">{plan.price}<span className="text-sm font-medium text-slate-500">/mo</span></p><ul className="my-7 flex-1 space-y-3">{plan.features.map(feature=><li key={feature} className="text-sm text-slate-600">✓ {feature}</li>)}</ul><Link href={plan.name==="Starter"?"/login":"/pricing"} className="rounded-xl bg-indigo-600 px-4 py-3 text-center text-sm font-bold text-white hover:bg-indigo-700">{plan.name==="Starter"?"Get started free":"Choose "+plan.name}</Link></article>)}</div><p className="mt-6 text-center"><Link href="/pricing" className="text-sm font-bold text-indigo-700 hover:underline">Compare all plans →</Link></p></section>
+        <section id="pricing" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">Built for agencies of every size</p><h2 className="mt-3 text-3xl font-extrabold text-slate-950 sm:text-4xl">Simple pricing. A premium client experience.</h2><p className="mt-3 text-sm text-slate-600">Start with three deals free, then upgrade when your agency grows.</p></div><div className="mt-8 grid gap-4 md:grid-cols-3">{[{name:"Starter",price:"$0",features:["3 deal rooms","SignDealDocs watermark"]},{name:"Pro",price:"$29",features:["Unlimited deal rooms","Custom logo and colors","No watermark"]},{name:"Agency",price:"$49",features:["Everything in Pro","Custom domain support"]}].map(plan=><article key={plan.name} className={`flex flex-col rounded-2xl border bg-white p-7 shadow-sm ${plan.name==="Pro"?"border-indigo-400 ring-1 ring-indigo-100":"border-slate-200"}`}><h3 className="text-xl font-extrabold">{plan.name}</h3><p className="mt-4 text-4xl font-extrabold">{plan.price}<span className="text-sm font-medium text-slate-500">/mo</span></p><ul className="my-7 flex-1 space-y-3">{plan.features.map(feature=><li key={feature} className="text-sm text-slate-600">✓ {feature}</li>)}</ul><PricingCheckoutButton plan={plan.name==="Starter"?"starter":plan.name==="Pro"?"pro":"agency"}/></article>)}</div><p className="mt-6 text-center"><Link href="/pricing" className="text-sm font-bold text-indigo-700 hover:underline">Compare all plans →</Link></p></section>
       </main>
 
       <footer className="border-t border-slate-200 bg-white">

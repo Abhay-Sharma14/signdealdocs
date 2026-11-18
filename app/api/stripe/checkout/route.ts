@@ -11,6 +11,7 @@ export async function POST(request:Request){
  try{
   const {data:billing}=await admin().from("billing_profiles").select("stripe_customer_id").eq("user_id",user.id).maybeSingle();
   const form=new URLSearchParams({mode:"subscription",success_url:`${origin}/settings?checkout=success`,cancel_url:`${origin}/pricing?checkout=cancelled`,"line_items[0][price]":price,"line_items[0][quantity]":"1",client_reference_id:user.id,"metadata[user_id]":user.id,"metadata[plan]":plan,"subscription_data[metadata][user_id]":user.id,"subscription_data[metadata][plan]":plan});
+  if(plan==="pro")form.set("subscription_data[trial_period_days]","14");
   if(billing?.stripe_customer_id)form.set("customer",billing.stripe_customer_id);
   else if(user.email)form.set("customer_email",user.email);
   const session=await stripePost("checkout/sessions",form);

@@ -51,3 +51,13 @@ test("signature evidence cannot be read without owner authentication", async ({ 
  const response = await request.get(`${base}/api/signatures/evidence/00000000-0000-0000-0000-000000000000`);
  expect(response.status()).toBe(401);
 });
+
+test("signed PDF owner download requires authentication", async ({ request }) => {
+ const response = await request.get(`${base}/api/signatures/download/00000000-0000-0000-0000-000000000000`);
+ expect(response.status()).toBe(401);
+});
+
+test("signed PDF public download rejects invalid tokens", async ({ request }) => {
+ const response = await request.get(`${base}/api/signatures/invalid-token/download`);
+ expect(response.status()).toBe(404);
+});

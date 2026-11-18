@@ -6,14 +6,14 @@ import { Logo } from "@/components/logo";
 import { useLocale } from "@/components/locale-provider";
 
 export default function HomePage() {
-  const { t, formatCurrency } = useLocale();
+  const { t } = useLocale();
   const year = new Date().getFullYear();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [billingCountry, setBillingCountry] = useState<"IN" | "US" | "GB" | "EU" | "OTHER">("US");
+
   const features = [
-    { number: "01", icon: "✦", title: t("feature1"), copy: t("feature1d") },
-    { number: "02", icon: "✍", title: t("feature2"), copy: t("feature2d") },
-    { number: "03", icon: "▤", title: t("feature3"), copy: t("feature3d") },
+    { number: "01", icon: "✦", title: "Branded Deal Rooms", copy: "Send one secure link for the proposal, contract signing and deposit step." },
+    { number: "02", icon: "✍", title: "White-labeling", copy: "Put your agency name, logo and brand colors front and center." },
+    { number: "03", icon: "▤", title: "Client Onboarding", copy: "Collect project files and assets directly inside each client portal." },
   ];
   const steps = [
     { icon: "✎", title: t("how1"), copy: t("how1d") },
@@ -28,7 +28,7 @@ export default function HomePage() {
           <Logo />
           <nav aria-label="Main navigation" className="hidden items-center gap-8 lg:flex">
             <a href="#product" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">Features</a>
-            <Link href="/signatures/new" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">E-Signatures</Link>
+            <Link href="/signatures/new" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">Quick Sign</Link>
             <a href="#how-it-works" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">{t("navHow")}</a>
             <a href="#pricing" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">{t("navPricing")}</a>
           </nav>
@@ -41,7 +41,7 @@ export default function HomePage() {
         {mobileMenuOpen && <nav id="mobile-navigation" aria-label="Mobile navigation" className="border-t border-slate-100 bg-white px-5 py-4 shadow-lg lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1">
             <a href="#product" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">Features</a>
-            <Link href="/signatures/new" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">E-Signatures</Link>
+            <Link href="/signatures/new" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">Quick Sign</Link>
             <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">{t("navHow")}</a>
             <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">{t("navPricing")}</a>
             <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">Log in</Link>
@@ -55,8 +55,8 @@ export default function HomePage() {
           <div className="mx-auto grid max-w-7xl items-start gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[.95fr_1.05fr] lg:gap-12 lg:px-8 lg:py-20">
             <div className="space-y-5 lg:pt-5">
               <p className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2 text-xs font-extrabold uppercase tracking-[.12em] text-indigo-700"><span aria-hidden="true">✦</span> Proposals · Signatures · Client Documents</p>
-              <h1 className="max-w-2xl text-[clamp(2.5rem,4.3vw,4rem)] font-extrabold leading-[1.07] tracking-[-.055em] text-[#101A33]">Create proposals.<br />Get signatures.<br /><span className="text-indigo-600">Close deals.</span></h1>
-              <p className="max-w-xl text-base leading-8 text-slate-600 sm:text-lg">Create professional proposals, request electronic signatures and manage client documents in one simple workspace.</p>
+              <h1 className="max-w-2xl text-[clamp(2.5rem,4.3vw,4rem)] font-extrabold leading-[1.07] tracking-[-.055em] text-[#101A33]">Send one link.<br /><span className="text-indigo-600">Get your proposal signed, deposit paid, and client onboarded.</span></h1>
+              <p className="max-w-xl text-base leading-8 text-slate-600 sm:text-lg">The white-labeled client portal for modern agencies.</p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/login" className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200/70 transition hover:bg-indigo-700">Get started free <span className="ml-2" aria-hidden="true">→</span></Link>
                 <a href="#how-it-works" className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 transition hover:border-indigo-200 hover:bg-indigo-50">See how it works</a>
@@ -105,11 +105,11 @@ export default function HomePage() {
         <section className="border-y border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50">
           <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[.95fr_1.05fr] lg:gap-12 lg:px-8 lg:py-12">
             <div>
-              <p className="text-xs font-extrabold uppercase tracking-[.17em] text-indigo-700">Standalone E-Signature</p>
+              <p className="text-xs font-extrabold uppercase tracking-[.17em] text-indigo-700">Quick Sign</p>
               <h2 className="mt-3 max-w-xl text-3xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-4xl">Only need a signature? Skip the proposal.</h2>
               <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">Upload a PDF, add signer details and share a private signing link. Your client can review and sign without creating an account.</p>
               <p className="mt-3 max-w-xl text-xs leading-6 text-slate-500">Beta: signatures are stored separately. Embedded signed PDFs and verified signer identity are not available yet.</p>
-              <Link href="/signatures/new" className="mt-6 inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-indigo-700">Request an E-Signature <span aria-hidden="true" className="ml-2">→</span></Link>
+              <Link href="/signatures/new" className="mt-6 inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-indigo-700">Try Quick Sign <span aria-hidden="true" className="ml-2">→</span></Link>
             </div>
             <div className="overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-[0_18px_55px_-30px_rgba(79,70,229,.35)]">
               <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4"><span className="text-sm font-bold text-slate-900">Signature request</span><span className="rounded-full bg-indigo-50 px-3 py-1 text-[10px] font-bold text-indigo-700">Illustrative preview</span></div>
@@ -144,63 +144,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <section id="pricing" className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">{t("pricingEyebrow")}</p>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">{t("pricingTitle")}</h2>
-            <p className="mt-3 text-sm leading-7 text-slate-600">{t("pricingCopy")}</p>
-            <p className="mt-3 inline-flex rounded-full border border-violet-100 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800">Preview pricing · Paid subscriptions are not yet available</p>
-          </div>
-          <div className="mx-auto mt-7 flex max-w-sm items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-            <label htmlFor="billing-country" className="text-sm font-semibold text-slate-700">Billing country</label>
-            <select id="billing-country" value={billingCountry} onChange={(event) => setBillingCountry(event.target.value as typeof billingCountry)} className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
-              <option value="IN">India (INR)</option>
-              <option value="US">United States (USD)</option>
-              <option value="GB">United Kingdom (GBP)</option>
-              <option value="EU">Europe (EUR)</option>
-              <option value="OTHER">Other countries</option>
-            </select>
-          </div>
-          <div className="mt-7 grid gap-4 md:grid-cols-3">
-            {[
-              { name: t("free"), price: "$0", india: "₹0", subtitle: "Explore the workflow", features: ["Create and review proposals", "Share a client deal link", "Collect signatures and documents"], featured: false, available: true },
-              { name: "Pro", price: "$9.99", india: "₹599", subtitle: "For professionals and growing businesses", features: ["Everything in Free", "More deals and AI proposals (planned)", "Reusable templates (planned)", "Signature audit history (planned)"], featured: true, available: false },
-              { name: "Business", price: "$24.99", india: "₹1,499", subtitle: "For growing teams", features: ["Everything in Pro", "Team workspaces and roles (planned)", "Advanced reporting (planned)"], featured: false, available: false },
-            ].map((plan) => (
-              <article key={plan.name} className={`relative flex flex-col rounded-[1.5rem] border p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg ${plan.featured ? "border-indigo-400 bg-gradient-to-b from-violet-50 to-white ring-1 ring-indigo-200" : "border-slate-200 bg-white"}`}>
-                {plan.featured && <span className="absolute -top-3 left-5 rounded-full bg-indigo-600 px-3 py-1 text-[11px] font-bold text-white">Popular option</span>}
-                <h3 className="text-lg font-extrabold text-slate-950">{plan.name}</h3>
-                <p className="mt-1 min-h-10 text-sm leading-5 text-slate-500">{plan.subtitle}</p>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold tracking-tight text-slate-950">{billingCountry === "IN" ? plan.india : billingCountry === "US" ? plan.price : plan.available ? "Free" : "Coming soon"}</span>
-                  {(billingCountry === "IN" || billingCountry === "US") && <span className="text-xs text-slate-500">/ month</span>}
-                </div>
-                
-                <div className="my-5 border-t border-slate-100" />
-                <ul className="flex-1 space-y-3">
-                  {plan.features.map((feature) => <li key={feature} className="flex gap-2 text-sm leading-6 text-slate-600"><span className="shrink-0 font-bold text-indigo-600">✓</span><span>{feature}</span></li>)}
-                </ul>
-                {plan.available ? (
-                  <Link href="/login" className="mt-7 inline-flex justify-center rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-indigo-700">{t("freeCta")}</Link>
-                ) : (
-                  <div className="mt-7 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-sm font-semibold text-slate-500">Coming soon</div>
-                )}
-              </article>
-            ))}
-          </div>
-          <p className="mx-auto mt-6 max-w-4xl text-center text-xs leading-6 text-slate-500">
-            Preview pricing only. Paid subscriptions are not yet available. Prices, features and taxes may change before launch.
-          </p>
-        </section>
-
-        <section id="reviews" className="border-t border-slate-200 bg-slate-50">
-          <div className="mx-auto max-w-7xl px-4 py-12 text-center sm:px-6 lg:px-8">
-            <p className="text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">Customer feedback</p>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950">Help shape SignDealDocs</h2>
-            <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-600">We’re improving the signing experience with feedback from early users. Have a suggestion or a story to share? We’d love to hear from you.</p>
-            <a href="mailto:hello@signdealdocs.com?subject=SignDealDocs%20feedback" className="mt-6 inline-flex rounded-xl border border-indigo-200 bg-white px-5 py-3 text-sm font-bold text-indigo-700 hover:bg-indigo-50">Share your feedback</a>
-          </div>
-        </section>
+        <section id="pricing" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">Built for agencies of every size</p><h2 className="mt-3 text-3xl font-extrabold text-slate-950 sm:text-4xl">Simple pricing. A premium client experience.</h2><p className="mt-3 text-sm text-slate-600">Start with three deals free, then upgrade when your agency grows.</p></div><div className="mt-8 grid gap-4 md:grid-cols-3">{[{name:"Starter",price:"$0",features:["3 deal rooms","SignDealDocs watermark"]},{name:"Pro",price:"$29",features:["Unlimited deal rooms","Custom logo and colors","No watermark"]},{name:"Agency",price:"$49",features:["Everything in Pro","Custom domain support"]}].map(plan=><article key={plan.name} className={`flex flex-col rounded-2xl border bg-white p-7 shadow-sm ${plan.name==="Pro"?"border-indigo-400 ring-1 ring-indigo-100":"border-slate-200"}`}><h3 className="text-xl font-extrabold">{plan.name}</h3><p className="mt-4 text-4xl font-extrabold">{plan.price}<span className="text-sm font-medium text-slate-500">/mo</span></p><ul className="my-7 flex-1 space-y-3">{plan.features.map(feature=><li key={feature} className="text-sm text-slate-600">✓ {feature}</li>)}</ul><Link href={plan.name==="Starter"?"/login":"/pricing"} className="rounded-xl bg-indigo-600 px-4 py-3 text-center text-sm font-bold text-white hover:bg-indigo-700">{plan.name==="Starter"?"Get started free":"Choose "+plan.name}</Link></article>)}</div><p className="mt-6 text-center"><Link href="/pricing" className="text-sm font-bold text-indigo-700 hover:underline">Compare all plans →</Link></p></section>
       </main>
 
       <footer className="border-t border-slate-200 bg-white">

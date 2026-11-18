@@ -1,4 +1,3 @@
-import {Checkout} from "@dodopayments/nextjs";
 import {owner,jsonError} from "@/lib/deal-room";
 
 export const runtime="nodejs";
@@ -15,44 +14,61 @@ export async function POST(request:Request){
 
   const productId=plan==="pro"?process.env.DODO_PRO_PRODUCT_ID:process.env.DODO_AGENCY_PRODUCT_ID;
   const apiKey=process.env.DODO_PAYMENTS_API_KEY;
-  if(!productId||!apiKey)return jsonError("Payment checkout is temporarily unavailable. Please try again later.",503);
+  if(!productId||!apiKey){
+   console.error("Checkout configuration missing",{
+    hasApiKey:Boolean(apiKey),hasProductId:Boolean(productId),plan
+   });
+   return jsonError("Payment checkout is not configured. Please contact support.",503);
+  }
+  const environment=process.env.DODO_PAYMENTS_ENVIRONMENT||"test_mode";
+  if(environment!=="test_mode"&&environment!=="live_mode"){
+   console.error("Invalid DODO_PAYMENTS_ENVIRONMENT");
+   return jsonError("Payment checkout configuration is invalid.",503);
+  }
 
-  // Initialize only after configuration validation, so missing secrets cannot
-  // throw during module import and cause a non-JSON Next.js error response.
-  const handler=Checkout({
-   bearerToken:apiKey,
-   returnUrl:process.env.DODO_PAYMENTS_RETURN_URL,
-   environment:(process.env.DODO_PAYMENTS_ENVIRONMENT||"test_mode") as "test_mode"|"live_mode",
-   type:"session"
-  });
+  // Call the official Checkout Sessions REST API directly. The adapter can
+  // return a non-JSON response, hiding the actual payment-provider failure.
+  const endpoint=environment==="live_mode"
+   ?"https://live.dodopayments.com/checkouts"
+   :"https://test.dodopayments.com/checkouts";
   const payload={
    product_cart:[{product_id:productId,quantity:1}],
    metadata:{user_id:user.id,plan},
-   customer:user.email?{email:user.email}:undefined
+   ...(user.email?{customer:{email:user.email}}:{}),
+   ...(process.env.DODO_PAYMENTS_RETURN_URL?{return_url:process.env.DODO_PAYMENTS_RETURN_URL}:{})
   };
-  const delegated=new Request(request.url,{
+  const response=await fetch(endpoint,{
    method:"POST",
-   headers:{"content-type":"application/json"},
-   body:JSON.stringify(payload)
+   headers:{"Authorization":`Bearer ${apiKey}`,"Content-Type":"application/json"},
+   body:JSON.stringify(payload),
+   cache:"no-store",
+   signal:AbortSignal.timeout(15000)
   });
-  const response=await handler(delegated as never);
   const raw=await response.text();
-  let result:unknown;
-  try{result=JSON.parse(raw);}catch{
-   console.error("Dodo checkout returned non-JSON response",response.status,raw.slice(0,500));
-   return jsonError("Payment provider returned an unexpected response. Please try again later.",502);
-  }
+  let result:Record<string,unknown>|null=null;
+  try{
+   const parsed:unknown=JSON.parse(raw);
+   if(parsed&&typeof parsed==="object"&&!Array.isArray(parsed))result=parsed as Record<string,unknown>;
+  }catch{ /* Preserve provider HTTP status when response is not JSON. */ }
+
   if(!response.ok){
-   console.error("Dodo checkout failed",response.status,JSON.stringify(result).slice(0,500));
-   return jsonError("Unable to start checkout. Please try again later.",response.status>=400&&response.status<600?response.status:502);
+   console.error("Dodo checkout API error",{
+    status:response.status,environment,plan,
+    providerCode:result?.code??result?.type??null,
+    providerMessage:result?.message??result?.error??raw.slice(0,300)
+   });
+   if(response.status===401||response.status===403)
+    return jsonError("Payment provider authentication failed. Please contact support.",502);
+   if(response.status===404||response.status===422||response.status===400)
+    return jsonError("Payment plan configuration was rejected. Please contact support.",502);
+   return jsonError("Payment provider is temporarily unavailable. Please try again later.",502);
   }
-  const data=result as {checkout_url?:unknown;url?:unknown};
-  const url=data.checkout_url||data.url;
+  const url=result?.checkout_url;
   if(typeof url!=="string"||!url.startsWith("https://")){
-   console.error("Dodo checkout returned no valid checkout URL",JSON.stringify(result).slice(0,500));
+   console.error("Dodo checkout API returned no checkout_url",response.status,raw.slice(0,300));
    return jsonError("Payment provider did not return a checkout link.",502);
   }
-  return Response.json({checkout_url:url});
+  return Response.json({checkout_url:url},{headers:{"Cache-Control":"no-store"}});
  }catch(error){
   console.error("Checkout session creation failed",error);
   return jsonError("Could not create checkout session. Please try again later.",502);

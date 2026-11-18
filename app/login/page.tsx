@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Logo } from "@/components/logo";
 import { AppFooter } from "@/components/app-footer";
 import { supabase } from "@/lib/supabase";
@@ -10,6 +10,8 @@ type Mode = "sign-in" | "sign-up";
 
 export default function LoginPage() {
   const router = useRouter();
+  const params = useSearchParams();
+  const nextPath = params.get("next") === "/signatures/new" ? "/signatures/new" : "/dashboard";
   const [mode, setMode] = useState<Mode>("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +21,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) window.location.replace("/dashboard");
+      if (data.session) window.location.replace(nextPath);
     });
   }, [router]);
 
@@ -30,7 +32,7 @@ export default function LoginPage() {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: `${window.location.origin}${nextPath}`,
         ...(provider === "azure" ? { scopes: "email" } : {}),
       },
     });
@@ -50,6 +52,7 @@ export default function LoginPage() {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
+        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
       });
       setPending(false);
       if (signUpError) {
@@ -60,7 +63,7 @@ export default function LoginPage() {
         window.location.replace("/dashboard");
         return;
       }
-      setNotice("Account created. Check your email to confirm, then sign in.");
+      setNotice("Account created. Check your email to confirm your account. You should then be redirected to your dashboard.");
       setMode("sign-in");
       return;
     }

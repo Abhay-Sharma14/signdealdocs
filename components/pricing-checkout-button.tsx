@@ -2,7 +2,16 @@
 import {useState} from "react";
 import {useRouter} from "next/navigation";
 import {supabase} from "@/lib/supabase";
-import {initializePaddle} from "@paddle/paddle-js";
+type PaddleInstance={Environment:{set:(env:string)=>void};Initialize:(options:{token:string})=>void;Checkout:{open:(options:{items:Array<{priceId:string;quantity:number}>;customData:Record<string,unknown>;settings:{displayMode:string;variant:string}})=>void}};
+declare global {interface Window {Paddle?:PaddleInstance;__paddleInitialized?:boolean;}}
+let scriptPromise:Promise<void>|null=null;
+function loadPaddle(){
+ if(window.Paddle)return Promise.resolve();
+ if(!scriptPromise)scriptPromise=new Promise<void>((resolve,reject)=>{
+  const script=document.createElement("script");script.src="https://cdn.paddle.com/paddle/v2/paddle.js";script.async=true;script.onload=()=>resolve();script.onerror=()=>reject(Error("Could not load Paddle.js"));document.head.appendChild(script);
+ });
+ return scriptPromise;
+}
 type Plan="starter"|"pro"|"agency";
 export function PricingCheckoutButton({plan,region="global",className=""}:{plan:Plan;region?:"india"|"global";className?:string}){
  const [loading,setLoading]=useState(false),[error,setError]=useState("");
@@ -24,8 +33,9 @@ export function PricingCheckoutButton({plan,region="global",className=""}:{plan:
    if(!token)throw Error("Paddle client token is not configured.");
    const response=await fetch("/api/paddle/checkout",{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${data.session.access_token}`},body:JSON.stringify({plan})});
    const result=await response.json();if(!response.ok)throw Error(result.error||"Paddle unavailable.");
-   const paddle=await initializePaddle({token,environment:process.env.NEXT_PUBLIC_PADDLE_ENV==="production"?"production":"sandbox"});
-   if(!paddle)throw Error("Could not initialize Paddle.");
+   await loadPaddle();
+   const paddle=window.Paddle;if(!paddle)throw Error("Paddle.js unavailable.");
+   if(!window.__paddleInitialized){if(process.env.NEXT_PUBLIC_PADDLE_ENV!=="production")paddle.Environment.set("sandbox");paddle.Initialize({token});window.__paddleInitialized=true;}
    paddle.Checkout.open({items:[{priceId:result.priceId,quantity:1}],customData:result.customData,settings:{displayMode:"overlay",variant:"one-page"}});
   }catch(e){setError(e instanceof Error?e.message:"Checkout failed.");}finally{setLoading(false);}
  }

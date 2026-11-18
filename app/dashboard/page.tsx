@@ -204,14 +204,27 @@ export default function DashboardPage() {
         ) : null}
 
         {deals.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
-            <h2 className="font-display text-lg font-extrabold text-slate-950">
-              No deal rooms yet
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Publish a proposal and send the client their magic link.
-            </p>
-          </div>
+          <section className="overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-sm">
+            <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+              <div>
+                <span className="inline-flex rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700">Get started</span>
+                <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-slate-950">Your next client agreement starts here.</h2>
+                <p className="mt-3 max-w-lg text-sm leading-7 text-slate-600">Create a proposal workspace for your next project, or send an existing PDF to a client for e-signature. Everything stays organized here as you work.</p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Link href="/deals/new" className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700">Create a Deal Room</Link>
+                  <Link href="/signatures/new" className="inline-flex items-center justify-center rounded-xl border border-indigo-200 bg-white px-5 py-3 text-sm font-bold text-indigo-700 hover:bg-indigo-50">Send a PDF for E-Sign</Link>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-indigo-50/60 p-5">
+                <p className="text-xs font-extrabold uppercase tracking-widest text-slate-500">Your workflow</p>
+                <div className="mt-5 space-y-4">
+                  <div className="flex gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-lg text-indigo-600 shadow-sm" aria-hidden="true">✎</span><div><p className="text-sm font-bold text-slate-900">Prepare</p><p className="text-xs leading-5 text-slate-600">Create a proposal or upload a PDF.</p></div></div>
+                  <div className="flex gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-lg text-indigo-600 shadow-sm" aria-hidden="true">↗</span><div><p className="text-sm font-bold text-slate-900">Share</p><p className="text-xs leading-5 text-slate-600">Send a private link to your client.</p></div></div>
+                  <div className="flex gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-lg text-indigo-600 shadow-sm" aria-hidden="true">✓</span><div><p className="text-sm font-bold text-slate-900">Track</p><p className="text-xs leading-5 text-slate-600">See signature activity in your workspace.</p></div></div>
+                </div>
+              </div>
+            </div>
+          </section>
         ) : (
           <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white">
             <div className="overflow-x-auto">
@@ -284,7 +297,7 @@ export default function DashboardPage() {
         <section id="e-signatures" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-widest text-indigo-600">E-Sign Activity</p><h2 className="mt-1 text-xl font-extrabold text-slate-950">Your signature requests</h2><p className="mt-1 text-sm text-slate-500">Track standalone signing requests separately from deal rooms.</p></div><Link href="/signatures/new" className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white">New E-Sign Request</Link></div>
           {signatureError&&<p role="alert" className="mt-4 text-sm text-rose-700">{signatureError}</p>}
-          {signatureLoading?<p className="mt-5 text-sm text-slate-500">Loading signature requests…</p>:signatureRequests.length===0?<p className="mt-5 rounded-xl bg-slate-50 p-5 text-sm text-slate-600">No signature requests yet. Send your first document for e-signature.</p>:<div className="mt-5 overflow-x-auto"><table className="w-full text-left text-sm"><thead className="border-b bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-3">Document</th><th className="p-3">Signer</th><th className="p-3">Status</th><th className="p-3">Action</th></tr></thead><tbody>{signatureRequests.map(item=>{const status=item.signed_at?"Signed":item.revoked_at?"Revoked":currentTime!==null&&new Date(item.expires_at).getTime()<=currentTime?"Expired":"Pending";return <tr key={item.id} className="border-b last:border-0"><td className="p-3"><div className="font-bold text-slate-900">{item.title}</div><div className="text-xs text-slate-500">Created {formatWhen(item.created_at)}</div></td><td className="p-3">{item.signer_name}<div className="text-xs text-slate-500">{item.signer_email}</div></td><td className="p-3"><span className={`rounded-full px-2.5 py-1 text-xs font-bold ${status==="Signed"?"bg-emerald-100 text-emerald-800":status==="Pending"?"bg-amber-100 text-amber-800":"bg-slate-100 text-slate-600"}`}>{status}</span>{item.signed_at&&<div className="mt-1 text-xs text-slate-500">{formatWhen(item.signed_at)}</div>}</td><td className="p-3"><div className="flex flex-wrap gap-2"><a href={`/sign/${item.token}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border px-3 py-2 text-xs font-semibold text-indigo-700">View request</a>{item.signed_at&&<span className="self-center text-xs text-slate-500">Signature recorded · PDF pending</span>}</div></td></tr>})}</tbody></table></div>}
+          {signatureLoading?<p className="mt-5 text-sm text-slate-500">Loading signature requests…</p>:signatureRequests.length===0?<div className="mt-5 flex flex-col items-start gap-3 rounded-xl border border-dashed border-indigo-200 bg-indigo-50/40 p-6"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-xl text-indigo-600" aria-hidden="true">✍</span><h3 className="text-base font-extrabold text-slate-950">No signature requests yet</h3><p className="max-w-lg text-sm leading-6 text-slate-600">Upload an agreement, add your signer’s details, and share a secure signing link. You’ll be able to track the request here.</p><Link href="/signatures/new" className="text-sm font-bold text-indigo-700 hover:underline">Create your first E-Sign request →</Link></div>:<div className="mt-5 overflow-x-auto"><table className="w-full text-left text-sm"><thead className="border-b bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-3">Document</th><th className="p-3">Signer</th><th className="p-3">Status</th><th className="p-3">Action</th></tr></thead><tbody>{signatureRequests.map(item=>{const status=item.signed_at?"Signed":item.revoked_at?"Revoked":currentTime!==null&&new Date(item.expires_at).getTime()<=currentTime?"Expired":"Pending";return <tr key={item.id} className="border-b last:border-0"><td className="p-3"><div className="font-bold text-slate-900">{item.title}</div><div className="text-xs text-slate-500">Created {formatWhen(item.created_at)}</div></td><td className="p-3">{item.signer_name}<div className="text-xs text-slate-500">{item.signer_email}</div></td><td className="p-3"><span className={`rounded-full px-2.5 py-1 text-xs font-bold ${status==="Signed"?"bg-emerald-100 text-emerald-800":status==="Pending"?"bg-amber-100 text-amber-800":"bg-slate-100 text-slate-600"}`}>{status}</span>{item.signed_at&&<div className="mt-1 text-xs text-slate-500">{formatWhen(item.signed_at)}</div>}</td><td className="p-3"><div className="flex flex-wrap gap-2"><a href={`/sign/${item.token}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border px-3 py-2 text-xs font-semibold text-indigo-700">View request</a>{item.signed_at&&<span className="self-center text-xs text-slate-500">Signature recorded · PDF pending</span>}</div></td></tr>})}</tbody></table></div>}
         </section>
       </main>
 

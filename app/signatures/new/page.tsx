@@ -36,7 +36,7 @@ export default function NewSignaturePage(){
  const form=new FormData();form.set("title",title);form.set("signer_name",name);form.set("signer_email",email);form.set("file",file);
  const res=await fetch("/api/signatures",{method:"POST",headers:{Authorization:`Bearer ${data.session.access_token}`},body:form});
  const payload=await res.json();if(!res.ok)throw Error(payload.error??"Could not create request.");
- const url=`${window.location.origin}/sign/${payload.request.token}`;setCreated(url);setShareTitle(title);setShareEmail(email);setEmailStatus(payload.email_sent?"Invitation emailed to signer.":"Email could not be sent. Please share the link manually.");
+ const url=`${window.location.origin}/sign/${payload.request.token}`;setCreated(url);setShareTitle(title);setShareEmail(email);setEmailStatus(payload.email_sent?"Invitation emailed to signer.":"Email delivery could not be confirmed. Please share the link manually.");
  setTitle("");setName("");setEmail("");setFile(null);
  }catch(cause){setError(cause instanceof Error?cause.message:"Request failed.");}finally{setBusy(false);}
  }
@@ -49,7 +49,7 @@ export default function NewSignaturePage(){
  <label className="block text-sm font-semibold">PDF document (max 3 MB)<input required type="file" accept="application/pdf,.pdf" onChange={e=>setFile(e.target.files?.[0]??null)} className="mt-2 block w-full rounded-xl border border-slate-200 p-3 text-sm"/></label>
  {error&&<p role="alert" className="text-sm text-rose-700">{error}</p>}
  <button disabled={busy} className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold text-white disabled:opacity-50">{busy?"Creating…":"Create Secure Signing Link"}</button>
- <p className="text-xs text-slate-500">Signing links expire after 7 days for security. An email will be sent to the signer immediately.</p>
+ <p className="text-xs text-slate-500">Signing links expire after 7 days for security. We will automatically email the link to your signer.</p>
  {created&&<div className="rounded-xl bg-indigo-50 p-3 text-sm"><p className="font-bold">Secure signing link created</p><p className="mt-2 break-all text-xs">{created}</p><p role="status" className="mt-2 text-xs text-slate-700">{emailStatus}</p><button type="button" onClick={copyLink} aria-live="polite" className={`mt-3 rounded-lg px-4 py-2 text-sm font-bold transition ${copied?"bg-emerald-100 text-emerald-800":"bg-indigo-600 text-white hover:bg-indigo-700"}`}>{copied?"✓ Copied!":"Copy link"}</button>{copyError&&<p role="alert" className="mt-2 text-xs text-rose-700">{copyError}</p>}<div className="mt-3 flex flex-wrap gap-2"><a href={`mailto:${shareEmail}?subject=${encodeURIComponent(`Signature requested: ${shareTitle}`)}&body=${encodeURIComponent(`Please review and sign ${shareTitle} using this secure link:\n${created}\n\nThis link expires after 7 days.`)}`} className="rounded-lg border border-indigo-200 bg-white px-3 py-2 text-xs font-bold text-indigo-700">Share via Email</a><a href={`https://wa.me/?text=${encodeURIComponent(`Please review and sign ${shareTitle}: ${created}\nThis link expires after 7 days.`)}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-emerald-200 bg-white px-3 py-2 text-xs font-bold text-emerald-700">Share via WhatsApp</a></div><p className="mt-2 text-xs text-slate-500">You can also share the link manually if needed.</p></div>}
  </form><aside className="space-y-5">
  <section className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 shadow-sm">
@@ -61,7 +61,7 @@ export default function NewSignaturePage(){
  <div className="flex gap-3"><span className="text-lg text-indigo-600" aria-hidden="true">↗</span><div><h3 className="text-sm font-bold text-slate-900">Share a private link</h3><p className="text-xs leading-5 text-slate-600">Copy the link and send it directly to your signer.</p></div></div>
  <div className="flex gap-3"><span className="text-lg text-indigo-600" aria-hidden="true">✓</span><div><h3 className="text-sm font-bold text-slate-900">Client signs online</h3><p className="text-xs leading-5 text-slate-600">No SignDealDocs account needed for the signer.</p></div></div>
  </div></section>
- <section className="rounded-2xl border border-slate-200 bg-white p-5"><h2 className="text-sm font-bold text-slate-900">Why SignDealDocs?</h2><ul className="mt-3 space-y-2 text-sm text-slate-700"><li>✓ Electronic signatures with consent records (ESIGN/UETA applicability depends on jurisdiction and workflow)</li><li>✓ Timestamped signing audit trail</li><li>✓ Signed PDF generated immediately after signature</li></ul></section>
+ <section className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">Why use SignDealDocs?</p><h2 className="mt-3 text-xl font-extrabold text-slate-950">Legally binding &amp; secure</h2><ul className="mt-5 space-y-3 text-sm font-medium text-slate-700"><li>✓ ESIGN &amp; UETA compliant signatures</li><li>✓ Tamper-proof audit trail</li><li>✓ Instant PDF flattening</li></ul></section>
  </aside></div>}
  </main></div>;
 }

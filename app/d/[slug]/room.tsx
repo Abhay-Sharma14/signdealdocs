@@ -1,6 +1,6 @@
 "use client";
 import {useEffect,useState} from "react";
-import Link from "next/link";
+import {Portal as LegacyPortal} from "./legacy-portal";
 import {SignatureCapture} from "@/components/signature-capture";
 type Item={id:string;type:"proposal"|"contract"|"invoice"|"file_request";title:string;pdf_url:string|null;signed_pdf_url:string|null;status:string};
 type Deal={client_name:string;project_title:string;amount:number;currency:string;status:string;brand_name:string;brand_color:string;logo_url:string|null};
@@ -26,6 +26,7 @@ export function AgencyDealRoom({token}:{token:string}){
  }
  if(loading)return <main className="mx-auto max-w-xl p-12 text-center text-slate-600">Opening your secure client portal…</main>;
  if(!deal)return <main className="mx-auto max-w-xl p-12 text-center"><h1 className="text-2xl font-bold">Deal room unavailable</h1><p className="mt-3 text-slate-600">{error||"Ask the agency for a new link."}</p></main>;
+ if(items.length===0)return <LegacyPortal slug={token}/>;
  const signed=items.some(i=>i.type==="contract"&&i.status==="signed");
  const color=deal.brand_color;
  return <div className="min-h-screen bg-[#f6f8fc] text-slate-900">

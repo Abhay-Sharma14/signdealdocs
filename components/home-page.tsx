@@ -3,14 +3,12 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
-import { LanguageSwitcher } from "@/components/language-switcher";
 import { useLocale } from "@/components/locale-provider";
 
 export default function HomePage() {
   const { t, formatCurrency } = useLocale();
   const year = new Date().getFullYear();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [platformOpen, setPlatformOpen] = useState(false);
   const [billingCountry, setBillingCountry] = useState<"IN" | "US" | "GB" | "EU" | "OTHER">("US");
   const features = [
     { number: "01", icon: "✦", title: t("feature1"), copy: t("feature1d") },
@@ -29,20 +27,12 @@ export default function HomePage() {
         <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
           <Logo />
           <nav aria-label="Main navigation" className="hidden items-center gap-8 lg:flex">
-            <div className="relative">
-              <button type="button" aria-expanded={platformOpen} aria-controls="platform-menu" onClick={() => setPlatformOpen(!platformOpen)} className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-indigo-700">Platform <span aria-hidden="true" className={platformOpen ? "rotate-180 transition-transform" : "transition-transform"}>⌄</span></button>
-              {platformOpen && <div id="platform-menu" className="absolute left-0 top-full mt-4 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
-                <a href="#product" onClick={() => setPlatformOpen(false)} className="block rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-indigo-50">AI proposals <span className="block text-xs font-normal text-slate-500">Create and share proposals</span></a>
-                <Link href="/signatures/new" onClick={() => setPlatformOpen(false)} className="block rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-indigo-50">E-Signatures <span className="block text-xs font-normal text-slate-500">Request a PDF signature</span></Link>
-                <a href="#how-it-works" onClick={() => setPlatformOpen(false)} className="block rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-indigo-50">Client workspace <span className="block text-xs font-normal text-slate-500">Documents and deal workflow</span></a>
-              </div>}
-            </div>
+            <a href="#product" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">Features</a>
             <Link href="/signatures/new" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">E-Signatures</Link>
             <a href="#how-it-works" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">{t("navHow")}</a>
             <a href="#pricing" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">{t("navPricing")}</a>
           </nav>
           <div className="flex items-center gap-2">
-            <div className="hidden sm:block"><LanguageSwitcher compact /></div>
             <Link href="/login" className="hidden rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 md:inline-flex">{t("login")}</Link>
             <Link href="/login" className="hidden rounded-xl bg-[#4338CA] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#3730A3] sm:inline-flex">Get started free</Link>
             <button type="button" aria-label={mobileMenuOpen ? "Close menu" : "Open menu"} aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-xl text-slate-800 lg:hidden">{mobileMenuOpen ? "×" : "☰"}</button>
@@ -50,11 +40,10 @@ export default function HomePage() {
         </div>
         {mobileMenuOpen && <nav id="mobile-navigation" aria-label="Mobile navigation" className="border-t border-slate-100 bg-white px-5 py-4 shadow-lg lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1">
-            <a href="#product" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">Platform</a>
+            <a href="#product" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">Features</a>
             <Link href="/signatures/new" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">E-Signatures</Link>
             <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">{t("navHow")}</a>
             <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">{t("navPricing")}</a>
-            <div className="px-3 py-2"><LanguageSwitcher compact /></div>
             <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">Log in</Link>
             <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-xl bg-indigo-600 px-4 py-3 text-center text-sm font-bold text-white">Get started free</Link>
           </div>
@@ -204,10 +193,12 @@ export default function HomePage() {
           </p>
         </section>
 
-        <section className="bg-slate-950">
-          <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-12 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-            <div className="max-w-2xl"><h2 className="text-2xl font-extrabold text-white sm:text-3xl">{t("globalTitle")}</h2><p className="mt-2 text-sm leading-7 text-slate-300">{t("globalCopy")}</p></div>
-            <div className="rounded-xl bg-white p-2"><LanguageSwitcher /></div>
+        <section id="reviews" className="border-t border-slate-200 bg-slate-50">
+          <div className="mx-auto max-w-7xl px-4 py-12 text-center sm:px-6 lg:px-8">
+            <p className="text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">Customer feedback</p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950">Help shape SignDealDocs</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-600">We’re improving the signing experience with feedback from early users. Have a suggestion or a story to share? We’d love to hear from you.</p>
+            <a href="mailto:hello@signdealdocs.com?subject=SignDealDocs%20feedback" className="mt-6 inline-flex rounded-xl border border-indigo-200 bg-white px-5 py-3 text-sm font-bold text-indigo-700 hover:bg-indigo-50">Share your feedback</a>
           </div>
         </section>
       </main>

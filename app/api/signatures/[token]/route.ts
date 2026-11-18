@@ -7,7 +7,7 @@ export const runtime="nodejs";
 const bucket="deal-vault";
 type Context={params:Promise<{token:string}>};
 async function find(token:string){
- if(!/^(?:[a-f0-9]{16}|[a-f0-9]{64})$/.test(token))return null;
+ if(!/^(?:[A-Za-z0-9]{16}|[a-f0-9]{64})$/.test(token))return null;
  const {data}=await getSupabaseAdmin().from("signature_requests").select("*").eq("token",token).maybeSingle();
  if(!data||data.revoked_at||new Date(data.expires_at).getTime()<=Date.now())return null;
  return data;

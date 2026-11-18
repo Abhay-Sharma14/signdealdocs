@@ -24,7 +24,6 @@ export default function DashboardPage() {
   const [signatureRequests, setSignatureRequests] = useState<SignatureRequest[]>([]);
   const [signatureError, setSignatureError] = useState("");
   const [signatureLoading, setSignatureLoading] = useState(true);
-  const [signatureDownload, setSignatureDownload] = useState("");
   const [ready, setReady] = useState(false);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [error, setError] = useState("");
@@ -139,17 +138,6 @@ export default function DashboardPage() {
     } finally {
       setLoadingFiles(false);
     }
-  }
-
-  async function downloadSignedPdf(id:string){
-    setSignatureDownload(id);setSignatureError("");
-    try {
-      const {data}=await supabase.auth.getSession();
-      if(!data.session)throw Error("Sign in again to download the document.");
-      const response=await fetch(`/api/signatures/download/${encodeURIComponent(id)}`,{headers:{Authorization:`Bearer ${data.session.access_token}`},cache:"no-store"});
-      if(!response.ok){const result=await response.json();throw Error(result.error||"Download unavailable.");}
-      const blob=await response.blob();const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`signed-${id}.pdf`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-    }catch(cause){setSignatureError(cause instanceof Error?cause.message:"Download failed.");}finally{setSignatureDownload("");}
   }
 
   async function signOut() {
@@ -296,7 +284,7 @@ export default function DashboardPage() {
         <section id="e-signatures" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-widest text-indigo-600">E-Sign Activity</p><h2 className="mt-1 text-xl font-extrabold text-slate-950">Your signature requests</h2><p className="mt-1 text-sm text-slate-500">Track standalone signing requests separately from deal rooms.</p></div><Link href="/signatures/new" className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white">Send for E-Signature</Link></div>
           {signatureError&&<p role="alert" className="mt-4 text-sm text-rose-700">{signatureError}</p>}
-          {signatureLoading?<p className="mt-5 text-sm text-slate-500">Loading signature requests…</p>:signatureRequests.length===0?<p className="mt-5 rounded-xl bg-slate-50 p-5 text-sm text-slate-600">No signature requests yet. Send your first document for e-signature.</p>:<div className="mt-5 overflow-x-auto"><table className="w-full text-left text-sm"><thead className="border-b bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-3">Document</th><th className="p-3">Signer</th><th className="p-3">Status</th><th className="p-3">Action</th></tr></thead><tbody>{signatureRequests.map(item=>{const status=item.signed_at?"Signed":item.revoked_at?"Revoked":new Date(item.expires_at).getTime()<=Date.now()?"Expired":"Pending";return <tr key={item.id} className="border-b last:border-0"><td className="p-3"><div className="font-bold text-slate-900">{item.title}</div><div className="text-xs text-slate-500">Created {formatWhen(item.created_at)}</div></td><td className="p-3">{item.signer_name}<div className="text-xs text-slate-500">{item.signer_email}</div></td><td className="p-3"><span className={`rounded-full px-2.5 py-1 text-xs font-bold ${status==="Signed"?"bg-emerald-100 text-emerald-800":status==="Pending"?"bg-amber-100 text-amber-800":"bg-slate-100 text-slate-600"}`}>{status}</span>{item.signed_at&&<div className="mt-1 text-xs text-slate-500">{formatWhen(item.signed_at)}</div>}</td><td className="p-3"><div className="flex flex-wrap gap-2"><a href={`/sign/${item.token}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border px-3 py-2 text-xs font-semibold text-indigo-700">View request</a>{item.signed_at&&<button type="button" onClick={()=>downloadSignedPdf(item.id)} disabled={signatureDownload===item.id} className="rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">{signatureDownload===item.id?"Preparing…":"Download signed PDF"}</button>}</div></td></tr>})}</tbody></table></div>}
+          {signatureLoading?<p className="mt-5 text-sm text-slate-500">Loading signature requests…</p>:signatureRequests.length===0?<p className="mt-5 rounded-xl bg-slate-50 p-5 text-sm text-slate-600">No signature requests yet. Send your first document for e-signature.</p>:<div className="mt-5 overflow-x-auto"><table className="w-full text-left text-sm"><thead className="border-b bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-3">Document</th><th className="p-3">Signer</th><th className="p-3">Status</th><th className="p-3">Action</th></tr></thead><tbody>{signatureRequests.map(item=>{const status=item.signed_at?"Signed":item.revoked_at?"Revoked":new Date(item.expires_at).getTime()<=Date.now()?"Expired":"Pending";return <tr key={item.id} className="border-b last:border-0"><td className="p-3"><div className="font-bold text-slate-900">{item.title}</div><div className="text-xs text-slate-500">Created {formatWhen(item.created_at)}</div></td><td className="p-3">{item.signer_name}<div className="text-xs text-slate-500">{item.signer_email}</div></td><td className="p-3"><span className={`rounded-full px-2.5 py-1 text-xs font-bold ${status==="Signed"?"bg-emerald-100 text-emerald-800":status==="Pending"?"bg-amber-100 text-amber-800":"bg-slate-100 text-slate-600"}`}>{status}</span>{item.signed_at&&<div className="mt-1 text-xs text-slate-500">{formatWhen(item.signed_at)}</div>}</td><td className="p-3"><div className="flex flex-wrap gap-2"><a href={`/sign/${item.token}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border px-3 py-2 text-xs font-semibold text-indigo-700">View request</a>{item.signed_at&&<span className="self-center text-xs text-slate-500">Signed PDF not yet available</span>}</div></td></tr>})}</tbody></table></div>}
         </section>
       </main>
 

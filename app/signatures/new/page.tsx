@@ -68,7 +68,7 @@ export default function NewSignaturePage(){
  <div className="flex gap-3"><span className="text-lg text-indigo-600" aria-hidden="true">↗</span><div><h3 className="text-sm font-bold text-slate-900">Share a private link</h3><p className="text-xs leading-5 text-slate-600">Copy the link and send it directly to your signer.</p></div></div>
  <div className="flex gap-3"><span className="text-lg text-indigo-600" aria-hidden="true">✓</span><div><h3 className="text-sm font-bold text-slate-900">Client signs online</h3><p className="text-xs leading-5 text-slate-600">No SignDealDocs account needed for the signer.</p></div></div>
  </div></section>
- <section className="rounded-2xl border border-slate-200 bg-white p-5"><h2 className="text-sm font-bold text-slate-900">Before you send</h2><p className="mt-2 text-xs leading-6 text-slate-600">Links expire after 7 days. Anyone with the link can view the document, so share it privately. Signed PDF downloads and verified signer identity are not available yet.</p></section>
+ <section className="rounded-2xl border border-slate-200 bg-white p-5"><h2 className="text-sm font-bold text-slate-900">Before you send</h2><p className="mt-2 text-xs leading-6 text-slate-600">Links expire after 7 days. Anyone with the link can view the document, so share it privately. After signing, both parties can download the completed PDF with an appended signature record. Signer identity is not independently verified.</p></section>
  </aside></div>}
  </main></div>;
 }

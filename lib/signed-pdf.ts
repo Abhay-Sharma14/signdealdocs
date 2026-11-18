@@ -6,6 +6,7 @@ const bucket = "deal-vault";
 export type SignatureRecord = {
  id: string; owner_id: string; document_path: string; signature_path: string | null;
  signer_name: string; title: string; signed_at: string | null; original_name: string;
+ signature_page?: number | null; signature_x?: number | null; signature_y?: number | null; signature_width?: number | null; signature_height?: number | null;
 };
 export function signedPdfPath(row: SignatureRecord) {
  return `signatures/${row.owner_id}/${row.id}-completed.pdf`;
@@ -18,7 +19,15 @@ function printable(value: string) {
 export async function createSignedPdf(original: Uint8Array, signature: Uint8Array, row: SignatureRecord, signedAt: string) {
  const pdf = await PDFDocument.load(original, { updateMetadata: false });
  const image = await pdf.embedPng(signature);
- const page = pdf.addPage([595.28, 841.89]);
+ const positioned = Number.isInteger(row.signature_page) && (row.signature_page ?? 0)>0;
+ const page = positioned ? pdf.getPage((row.signature_page as number)-1) : pdf.addPage([595.28, 841.89]);
+ if(positioned){
+  const x=row.signature_x??0,y=row.signature_y??0,w=row.signature_width??150,h=row.signature_height??50;
+  if(![x,y,w,h].every(Number.isFinite)||w<=0||h<=0||x<0||y<0||x+w>page.getWidth()||y+h>page.getHeight())throw Error("Invalid signature placement.");
+  page.drawImage(image,{x,y,width:w,height:h});
+  pdf.setSubject("Electronic signature embedded in PDF by SignDealDocs");
+  return Buffer.from(await pdf.save());
+ }
  const font = await pdf.embedFont(StandardFonts.Helvetica);
  const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
  const ink = rgb(0.11, 0.16, 0.28);

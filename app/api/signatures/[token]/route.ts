@@ -18,8 +18,10 @@ export async function GET(_request:Request,{params}:Context){
  if(!row)return NextResponse.json({error:"This signature link is unavailable or expired."},{status:404});
  const storage=getSupabaseAdmin().storage.from(bucket);
  const {data:pdf}=await storage.createSignedUrl(row.document_path,300);
+ let pages:{width:number;height:number}[]=[];
+ if(!row.signed_at){const source=await storage.download(row.document_path);if(!source.error&&source.data){try{const doc=await PDFDocument.load(await source.data.arrayBuffer());pages=doc.getPages().map(p=>({width:p.getWidth(),height:p.getHeight()}));}catch{}}}
  const {data:signature}=row.signature_path?await storage.createSignedUrl(row.signature_path,300):{data:null};
- return NextResponse.json({title:row.title,signer_name:row.signer_name,original_name:row.original_name,pdf_url:pdf?.signedUrl??null,signature_url:signature?.signedUrl??null,signed_at:row.signed_at},{headers:{"Cache-Control":"no-store, private","Referrer-Policy":"no-referrer"}});
+ return NextResponse.json({title:row.title,signer_name:row.signer_name,original_name:row.original_name,pdf_url:pdf?.signedUrl??null,signature_url:signature?.signedUrl??null,signed_at:row.signed_at,pages},{headers:{"Cache-Control":"no-store, private","Referrer-Policy":"no-referrer"}});
 }
 export async function POST(request:Request,{params}:Context){
  const {token}=await params;
@@ -27,7 +29,7 @@ export async function POST(request:Request,{params}:Context){
  if(!row)return NextResponse.json({error:"Link unavailable."},{status:404});
  if(row.signed_at)return NextResponse.json({error:"Already signed."},{status:409});
  const length=Number(request.headers.get("content-length")??"0");
- if(length>400_000)return NextResponse.json({error:"Signature too large."},{status:413});
+ if(length>600_000)return NextResponse.json({error:"Signature too large."},{status:413});
  let form:FormData;
  try{form=await request.formData();}catch{return NextResponse.json({error:"Invalid signature."},{status:400});}
  const name=String(form.get("name")??"").trim();
@@ -38,12 +40,25 @@ export async function POST(request:Request,{params}:Context){
  const bytes=Buffer.from(await file.arrayBuffer());
  if(!bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])))return NextResponse.json({error:"Invalid PNG signature."},{status:415});
  try{const probe=await PDFDocument.create();await probe.embedPng(bytes);}catch{return NextResponse.json({error:"Signature PNG could not be decoded."},{status:415});}
+ const placementRaw=String(form.get("placement")??"");
+ let placement:Record<string,number|null>={signature_page:null,signature_x:null,signature_y:null,signature_width:null,signature_height:null};
+ if(placementRaw){
+  try{
+   const p=JSON.parse(placementRaw);
+   const source=await getSupabaseAdmin().storage.from(bucket).download(row.document_path);
+   if(source.error||!source.data)throw Error("Missing document");
+   const pdf=await PDFDocument.load(await source.data.arrayBuffer());
+   const page=Number(p.pageNumber),x=Number(p.x),y=Number(p.y),width=Number(p.width),height=Number(p.height);
+   if(!Number.isInteger(page)||page<1||page>pdf.getPageCount()||![x,y,width,height].every(Number.isFinite)||x<0||y<0||width<20||height<15||x+width>pdf.getPage(page-1).getWidth()||y+height>pdf.getPage(page-1).getHeight())throw Error("Invalid position");
+   placement={signature_page:page,signature_x:x,signature_y:y,signature_width:width,signature_height:height};
+  }catch{return NextResponse.json({error:"Invalid signature placement."},{status:400});}
+ }
  const path=`signatures/${row.owner_id}/${randomUUID()}-signed.png`;
  const storage=getSupabaseAdmin().storage.from(bucket);
  const {error:uploadError}=await storage.upload(path,bytes,{contentType:"image/png",upsert:false});
  if(uploadError)return NextResponse.json({error:"Could not store signature."},{status:500});
  const signedAt=new Date().toISOString();
- const {data,error}=await getSupabaseAdmin().from("signature_requests").update({signature_path:path,signed_at:signedAt,consent_text:"I reviewed the document and agree to sign electronically."}).eq("id",row.id).is("signed_at",null).is("revoked_at",null).gt("expires_at",signedAt).select("id").maybeSingle();
+ const {data,error}=await getSupabaseAdmin().from("signature_requests").update({signature_path:path,signed_at:signedAt,consent_text:"I reviewed the document and agree to sign electronically.",...placement}).eq("id",row.id).is("signed_at",null).is("revoked_at",null).gt("expires_at",signedAt).select("id").maybeSingle();
  if(error||!data){await storage.remove([path]);return NextResponse.json({error:"Request changed; reload and try again."},{status:409});}
  const {data:original,error:downloadError}=await storage.download(row.document_path);
  const documentHash=!downloadError&&original?createHash("sha256").update(Buffer.from(await original.arrayBuffer())).digest("hex"):"";
@@ -62,6 +77,6 @@ export async function POST(request:Request,{params}:Context){
   evidenceSaved=!auditError;
  }
  let pdfReady=false;
- try {await ensureSignedPdf({...row,signature_path:path,signed_at:signedAt});pdfReady=true;}catch(error){console.error("Completed PDF generation failed",error);}
+ try {await ensureSignedPdf({...row,...placement,signature_path:path,signed_at:signedAt});pdfReady=true;}catch(error){console.error("Completed PDF generation failed",error);}
  return NextResponse.json({signed_at:signedAt,evidence_saved:evidenceSaved,pdf_ready:pdfReady},{headers:{"Cache-Control":"no-store"}});
 }

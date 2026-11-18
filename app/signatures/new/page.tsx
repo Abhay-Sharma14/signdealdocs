@@ -15,6 +15,8 @@ export default function NewSignaturePage(){
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
  const [created,setCreated]=useState("");
+ const [shareTitle,setShareTitle]=useState("");
+ const [shareEmail,setShareEmail]=useState("");
  const [copied,setCopied]=useState(false);
  const [copyError,setCopyError]=useState("");
  useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session)router.replace("/login?next=%2Fsignatures%2Fnew");else setReady(true);});},[router]);
@@ -33,7 +35,7 @@ export default function NewSignaturePage(){
  const form=new FormData();form.set("title",title);form.set("signer_name",name);form.set("signer_email",email);form.set("file",file);
  const res=await fetch("/api/signatures",{method:"POST",headers:{Authorization:`Bearer ${data.session.access_token}`},body:form});
  const payload=await res.json();if(!res.ok)throw Error(payload.error??"Could not create request.");
- const url=`${window.location.origin}/sign/${payload.request.token}`;setCreated(url);
+ const url=`${window.location.origin}/sign/${payload.request.token}`;setCreated(url);setShareTitle(title);setShareEmail(email);
  setTitle("");setName("");setEmail("");setFile(null);
  }catch(cause){setError(cause instanceof Error?cause.message:"Request failed.");}finally{setBusy(false);}
  }
@@ -55,7 +57,7 @@ export default function NewSignaturePage(){
  <p className="text-xs text-slate-500">Signing link expires after 7 days. Share the link privately; anyone with the link can open the PDF. No automatic email is sent.</p>
  {error&&<p role="alert" className="text-sm text-rose-700">{error}</p>}
  <button disabled={busy} className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold text-white disabled:opacity-50">{busy?"Creating…":"Create Secure Signing Link"}</button>
- {created&&<div className="rounded-xl bg-indigo-50 p-3 text-sm"><p className="font-bold">Link ready — send privately</p><p className="mt-2 break-all text-xs">{created}</p><button type="button" onClick={copyLink} aria-live="polite" className={`mt-3 rounded-lg px-4 py-2 text-sm font-bold transition ${copied?"bg-emerald-100 text-emerald-800":"bg-indigo-600 text-white hover:bg-indigo-700"}`}>{copied?"✓ Copied!":"Copy link"}</button>{copyError&&<p role="alert" className="mt-2 text-xs text-rose-700">{copyError}</p>}</div>}
+ {created&&<div className="rounded-xl bg-indigo-50 p-3 text-sm"><p className="font-bold">Link ready — send privately</p><p className="mt-2 break-all text-xs">{created}</p><button type="button" onClick={copyLink} aria-live="polite" className={`mt-3 rounded-lg px-4 py-2 text-sm font-bold transition ${copied?"bg-emerald-100 text-emerald-800":"bg-indigo-600 text-white hover:bg-indigo-700"}`}>{copied?"✓ Copied!":"Copy link"}</button>{copyError&&<p role="alert" className="mt-2 text-xs text-rose-700">{copyError}</p>}<div className="mt-3 flex flex-wrap gap-2"><a href={`mailto:${shareEmail}?subject=${encodeURIComponent(`Signature requested: ${shareTitle}`)}&body=${encodeURIComponent(`Please review and sign ${shareTitle} using this secure link:\n${created}\n\nThis link expires after 7 days.`)}`} className="rounded-lg border border-indigo-200 bg-white px-3 py-2 text-xs font-bold text-indigo-700">Share via Email</a><a href={`https://wa.me/?text=${encodeURIComponent(`Please review and sign ${shareTitle}: ${created}\nThis link expires after 7 days.`)}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-emerald-200 bg-white px-3 py-2 text-xs font-bold text-emerald-700">Share via WhatsApp</a></div><p className="mt-2 text-xs text-slate-500">Email and WhatsApp open your app with a prepared message; SignDealDocs does not send it automatically.</p></div>}
  </form><aside className="space-y-5">
  <section className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 shadow-sm">
  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 text-2xl text-white" aria-hidden="true">✍</div>

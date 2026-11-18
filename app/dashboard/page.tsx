@@ -16,7 +16,7 @@ export default function Dashboard(){
  const signed=deals.filter(d=>["signed","completed","paid"].includes(d.status)).length;
  const pending=deals.filter(d=>["sent","draft","pending"].includes(d.status)).length;
  const money=(n:number)=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(n);
- const recent=(d:string|null)=>{if(!d)return "No activity yet";const hours=Math.max(0,Math.floor((Date.now()-new Date(d).getTime())/3600000));return hours<1?"Just now":hours<24?`${hours}h ago`:`${Math.floor(hours/24)}d ago`;};
+ const recent=(d:string|null)=>d?new Date(d).toLocaleString():"No activity yet";
  return <div className="min-h-screen bg-slate-50 text-slate-900 lg:flex">
  <aside className="w-full bg-[#101b31] text-white lg:min-h-screen lg:w-64 lg:shrink-0"><div className="border-b border-white/10 px-6 py-6 text-xl font-extrabold">✦ SignDealDocs</div><nav aria-label="Main navigation" className="flex gap-2 px-4 py-5 lg:flex-col"><Link href="/dashboard" className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-white/10">▦ Dashboard</Link><Link href="/dashboard" className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white">▣ Deal Rooms</Link><Link href="/settings" className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-white/10">⚙ Settings</Link></nav><p className="hidden px-8 pt-8 text-xs text-slate-400 lg:block">Your client workspace, beautifully organized.</p></aside>
  <main className="min-w-0 flex-1 px-4 py-8 sm:px-8 lg:px-10"><div className="mx-auto max-w-7xl space-y-7">

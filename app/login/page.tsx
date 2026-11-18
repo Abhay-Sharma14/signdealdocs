@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { AppFooter } from "@/components/app-footer";
 import { supabase } from "@/lib/supabase";
@@ -9,7 +9,6 @@ import { supabase } from "@/lib/supabase";
 type Mode = "sign-in" | "sign-up";
 
 export default function LoginPage() {
-  const router = useRouter();
   const nextPath = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("next") === "/signatures/new" ? "/signatures/new" : "/dashboard";
   const [mode, setMode] = useState<Mode>("sign-in");
   const [email, setEmail] = useState("");
@@ -22,7 +21,7 @@ export default function LoginPage() {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) window.location.replace(nextPath);
     });
-  }, [router]);
+  }, [nextPath]);
 
   async function signInWithProvider(provider: "google" | "azure" | "linkedin_oidc") {
     setError("");
@@ -76,7 +75,7 @@ export default function LoginPage() {
       setError(signInError.message);
       return;
     }
-    window.location.replace("/dashboard");
+    window.location.replace(nextPath);
   }
 
   return (
@@ -84,6 +83,7 @@ export default function LoginPage() {
       <header className="border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
           <Logo />
+          <Link href="/" className="ml-auto inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700">← Back to home</Link>
         </div>
       </header>
 

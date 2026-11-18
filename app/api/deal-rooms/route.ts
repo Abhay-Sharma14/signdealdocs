@@ -69,6 +69,25 @@ export async function POST(request:Request){
  await admin().from("audit_log").insert({deal_id:dealId,action:"created",actor_email:user.email});
  return Response.json({id:dealId,shareToken:slug,url:`/d/${slug}`},{status:201});
 }
+
+export async function PATCH(request:Request){
+ const user=await owner(request);if(!user)return jsonError("Sign in required.",401);
+ let body:{id?:string};try{body=await request.json();}catch{return jsonError("Invalid request.",400);}
+ if(!body.id||!/^[a-f0-9-]{36}$/i.test(body.id))return jsonError("Invalid deal.",400);
+ const {data:deal,error:readError}=await admin().from("deals").select("id,status,payment_method,paid_at").eq("id",body.id).eq("user_id",user.id).maybeSingle();
+ if(readError)return jsonError("Could not load deal.",500);
+ if(!deal)return jsonError("Deal not found.",404);
+ if(deal.payment_method!=="manual_upi")return jsonError("Only manual UPI deals can be marked paid.",400);
+ if(deal.paid_at||deal.status==="paid")return Response.json({ok:true,already_paid:true});
+ const {data:contract}=await admin().from("deal_items").select("status").eq("deal_id",deal.id).eq("type","contract").maybeSingle();
+ if(contract?.status!=="signed")return jsonError("Contract must be signed before confirming payment.",409);
+ const {data:updated,error}=await admin().from("deals").update({status:"paid",paid_at:new Date().toISOString()}).eq("id",deal.id).eq("user_id",user.id).is("paid_at",null).select("id").maybeSingle();
+ if(error)return jsonError("Could not confirm payment.",500);
+ if(!updated)return jsonError("Payment already updated. Refresh.",409);
+ const {error:auditError}=await admin().from("audit_log").insert({deal_id:deal.id,action:"paid",actor_email:user.email});
+ if(auditError)console.error("UPI payment audit insert failed",auditError);
+ return Response.json({ok:true});
+}
 export async function DELETE(request:Request){
  const user=await owner(request);if(!user)return jsonError("Sign in required.",401);
  const id=new URL(request.url).searchParams.get("id");

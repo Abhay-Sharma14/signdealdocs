@@ -14,9 +14,14 @@ export function PricingCheckoutButton({plan,className=""}:{plan:Plan;region?:"in
    if(authError)throw Error("Could not verify session.");
    if(!data.session){router.push("/login?next="+encodeURIComponent("/pricing"));return;}
    const response=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${data.session.access_token}`},body:JSON.stringify({productId:plan})});
-   const result=await response.json();
-   if(!response.ok)throw Error(result.error||"Checkout unavailable.");
-   const url=result.checkout_url;
+   const raw=await response.text();
+   let result:Record<string,unknown>={};
+   try{result=JSON.parse(raw) as Record<string,unknown>;}catch{
+    if(!response.ok)throw Error(`Checkout failed (HTTP ${response.status}). ${raw.slice(0,180)||"Please check payment configuration."}`);
+    throw Error("Payment provider returned an unexpected response.");
+   }
+   if(!response.ok)throw Error(String(result.error||result.message||`Checkout failed (HTTP ${response.status}).`));
+   const url=result.checkout_url||result.url;
    if(typeof url!=="string"||!url.startsWith("https://"))throw Error("Invalid checkout URL.");
    window.location.assign(url);
   }catch(e){setError(e instanceof Error?e.message:"Could not open checkout.");setLoading(false);}

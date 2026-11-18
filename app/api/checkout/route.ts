@@ -11,6 +11,14 @@ export async function POST(request:Request){
  if(!productId||!process.env.DODO_PAYMENTS_API_KEY)return jsonError("Dodo checkout not configured.",503);
  const payload={product_cart:[{product_id:productId,quantity:1}],metadata:{user_id:user.id,plan},customer:user.email?{email:user.email}:undefined};
  const delegated=new Request(request.url,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
- const response=await handler(delegated as never);
- return response;
+ try{
+  const response=await handler(delegated as never);
+  if(response.ok)return response;
+  const raw=await response.text();
+  console.error("Dodo checkout request failed",response.status,raw.slice(0,500));
+  return Response.json({error:`Dodo checkout failed (HTTP ${response.status}). Check Dodo test-mode API key and product IDs.`},{status:response.status>=400&&response.status<600?response.status:502});
+ }catch(error){
+  console.error("Dodo checkout handler error",error);
+  return Response.json({error:"Could not create Dodo checkout session. Check Vercel logs and Dodo configuration."},{status:502});
+ }
 }

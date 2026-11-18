@@ -59,7 +59,15 @@ export async function POST(request:Request,{params}:Context){
  if(uploadError)return NextResponse.json({error:"Could not store signature."},{status:500});
  const signedAt=new Date().toISOString();
  const {data,error}=await getSupabaseAdmin().from("signature_requests").update({signature_path:path,signed_at:signedAt,consent_text:"I reviewed the document and agree to sign electronically.",...placement}).eq("id",row.id).is("signed_at",null).is("revoked_at",null).gt("expires_at",signedAt).select("id").maybeSingle();
- if(error||!data){await storage.remove([path]);return NextResponse.json({error:"Request changed; reload and try again."},{status:409});}
+ if(error||!data){
+  await storage.remove([path]);
+  if(error){
+   console.error("Signature finalization database update failed",{code:error.code,message:error.message,details:error.details,hint:error.hint,requestId:row.id});
+   return NextResponse.json({error:"Unable to save the signature due to a server configuration error. Please contact support.",code:"SIGNATURE_SAVE_FAILED"},{status:500});
+  }
+  console.warn("Signature finalization rejected by conditional update",{requestId:row.id});
+  return NextResponse.json({error:"This signing request was already completed, revoked, or expired. Refresh to see its latest status.",code:"SIGNATURE_REQUEST_CHANGED"},{status:409});
+ }
  const {data:original,error:downloadError}=await storage.download(row.document_path);
  const documentHash=!downloadError&&original?createHash("sha256").update(Buffer.from(await original.arrayBuffer())).digest("hex"):"";
  const signatureHash=createHash("sha256").update(bytes).digest("hex");

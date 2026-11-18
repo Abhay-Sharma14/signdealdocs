@@ -1,6 +1,7 @@
 import { createHash, createHmac, randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { ensureSignedPdf } from "@/lib/signed-pdf";
 export const runtime="nodejs";
 const bucket="deal-vault";
 type Context={params:Promise<{token:string}>};
@@ -58,5 +59,7 @@ export async function POST(request:Request,{params}:Context){
   });
   evidenceSaved=!auditError;
  }
- return NextResponse.json({signed_at:signedAt,evidence_saved:evidenceSaved},{headers:{"Cache-Control":"no-store"}});
+ let pdfReady=false;
+ try {await ensureSignedPdf({...row,signature_path:path,signed_at:signedAt});pdfReady=true;}catch(error){console.error("Completed PDF generation failed",error);}
+ return NextResponse.json({signed_at:signedAt,evidence_saved:evidenceSaved,pdf_ready:pdfReady},{headers:{"Cache-Control":"no-store"}});
 }

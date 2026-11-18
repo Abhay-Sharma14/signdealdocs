@@ -2,7 +2,7 @@ import {Webhooks} from "@dodopayments/nextjs";
 import {admin} from "@/lib/deal-room";
 export const runtime="nodejs";
 const supported=["subscription.active","subscription.cancelled","subscription.on_hold"];
-export const POST=Webhooks({
+const makeHandler=()=>Webhooks({
  webhookKey:process.env.DODO_PAYMENTS_WEBHOOK_KEY!,
  onPayload:async(payload)=>{
   const event=payload as unknown as {type?:string;data?:Record<string,unknown>};
@@ -26,3 +26,7 @@ export const POST=Webhooks({
   if(error)throw error;
  }
 });
+export async function POST(request:Request){
+ if(!process.env.DODO_PAYMENTS_WEBHOOK_KEY)return Response.json({error:"Webhook not configured"},{status:503});
+ return makeHandler()(request as never);
+}

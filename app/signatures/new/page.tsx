@@ -15,9 +15,16 @@ export default function NewSignaturePage(){
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
  const [created,setCreated]=useState("");
+ const [copied,setCopied]=useState(false);
+ const [copyError,setCopyError]=useState("");
  useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session)router.replace("/login?next=%2Fsignatures%2Fnew");else setReady(true);});},[router]);
+ async function copyLink(){
+  setCopyError("");
+  try { await navigator.clipboard.writeText(created); setCopied(true); }
+  catch { setCopied(false); setCopyError("Could not copy the link. Please select and copy it manually."); }
+ }
  async function submit(e:FormEvent){
- e.preventDefault();setError("");setCreated("");
+ e.preventDefault();setError("");setCreated("");setCopied(false);setCopyError("");
  if(!file||file.size>3_000_000){setError("Choose a PDF smaller than 3 MB.");return;}
  setBusy(true);
  try{
@@ -48,7 +55,7 @@ export default function NewSignaturePage(){
  <p className="text-xs text-slate-500">Signing link expires after 7 days. Share the link privately; anyone with the link can open the PDF. No automatic email is sent.</p>
  {error&&<p role="alert" className="text-sm text-rose-700">{error}</p>}
  <button disabled={busy} className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold text-white disabled:opacity-50">{busy?"Creating…":"Create Secure Signing Link"}</button>
- {created&&<div className="rounded-xl bg-indigo-50 p-3 text-sm"><p className="font-bold">Link ready — send privately</p><p className="mt-2 break-all text-xs">{created}</p><button type="button" onClick={()=>navigator.clipboard.writeText(created)} className="mt-2 font-bold text-indigo-700">Copy link</button></div>}
+ {created&&<div className="rounded-xl bg-indigo-50 p-3 text-sm"><p className="font-bold">Link ready — send privately</p><p className="mt-2 break-all text-xs">{created}</p><button type="button" onClick={copyLink} aria-live="polite" className={`mt-3 rounded-lg px-4 py-2 text-sm font-bold transition ${copied?"bg-emerald-100 text-emerald-800":"bg-indigo-600 text-white hover:bg-indigo-700"}`}>{copied?"✓ Copied!":"Copy link"}</button>{copyError&&<p role="alert" className="mt-2 text-xs text-rose-700">{copyError}</p>}</div>}
  </form><aside className="space-y-5">
  <section className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 shadow-sm">
  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 text-2xl text-white" aria-hidden="true">✍</div>

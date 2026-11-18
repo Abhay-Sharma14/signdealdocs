@@ -1,4 +1,4 @@
-import { randomBytes, randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { PDFDocument } from "pdf-lib";
@@ -32,9 +32,10 @@ export async function POST(request: Request) {
  const bytes=Buffer.from(await file.arrayBuffer());
  if(bytes.subarray(0,5).toString()!=="%PDF-")return NextResponse.json({error:"Only valid PDF files are supported."},{status:415});
  try {const pdf=await PDFDocument.load(bytes);if(pdf.getPageCount()<1)throw Error("No pages");}catch{return NextResponse.json({error:"Upload a valid, unencrypted PDF."},{status:415});}
- // 16 hexadecimal characters = 64 bits of cryptographic randomness. 
+ // 16 base62 characters provide approximately 95 bits of randomness. 
  // Existing 64-character links remain valid for previously sent invitations. 
- const token=randomBytes(8).toString("hex");
+ const alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+ const token=Array.from({length:16},()=>alphabet[randomInt(alphabet.length)]).join("");
  const path=`signatures/${user.id}/${randomUUID()}.pdf`;
  const storage=getSupabaseAdmin().storage.from(bucket);
  const {error:uploadError}=await storage.upload(path,bytes,{contentType:"application/pdf",upsert:false});

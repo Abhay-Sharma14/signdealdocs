@@ -61,3 +61,22 @@ test("signed PDF public download rejects invalid tokens", async ({ request }) =>
  const response = await request.get(`${base}/api/signatures/invalid-token/download`);
  expect(response.status()).toBe(404);
 });
+
+test("signing page exposes three signature methods when a valid request is available", async ({ page }) => {
+ await page.route("**/api/signatures/" + "b".repeat(64), async route => {
+  await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({
+   title:"Sample agreement",signer_name:"Jane Doe",original_name:"sample.pdf",
+   pdf_url:"https://example.com/sample.pdf",signature_url:null,signed_at:null,
+   pages:[{width:612,height:792}]
+  })});
+ });
+ await page.goto(`${base}/sign/${"b".repeat(64)}`);
+ await expect(page.getByRole("tab", {name:"Draw"})).toBeVisible();
+ await expect(page.getByRole("tab", {name:"Type"})).toBeVisible();
+ await expect(page.getByRole("tab", {name:"Upload"})).toBeVisible();
+ await expect(page.getByRole("button", {name:"Agree & Sign"})).toBeDisabled();
+ await page.getByRole("tab", {name:"Type"}).click();
+ await expect(page.getByLabel("Type your signature")).toBeVisible();
+ await page.getByRole("tab", {name:"Upload"}).click();
+ await expect(page.getByLabel("Upload signature PNG or JPG")).toBeVisible();
+});

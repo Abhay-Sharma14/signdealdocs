@@ -19,6 +19,7 @@ export default function NewSignaturePage(){
  const [shareEmail,setShareEmail]=useState("");
  const [copied,setCopied]=useState(false);
  const [copyError,setCopyError]=useState("");
+ const [emailStatus,setEmailStatus]=useState("");
  useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session)router.replace("/login?next=%2Fsignatures%2Fnew");else setReady(true);});},[router]);
  async function copyLink(){
   setCopyError("");
@@ -35,7 +36,7 @@ export default function NewSignaturePage(){
  const form=new FormData();form.set("title",title);form.set("signer_name",name);form.set("signer_email",email);form.set("file",file);
  const res=await fetch("/api/signatures",{method:"POST",headers:{Authorization:`Bearer ${data.session.access_token}`},body:form});
  const payload=await res.json();if(!res.ok)throw Error(payload.error??"Could not create request.");
- const url=`${window.location.origin}/sign/${payload.request.token}`;setCreated(url);setShareTitle(title);setShareEmail(email);
+ const url=`${window.location.origin}/sign/${payload.request.token}`;setCreated(url);setShareTitle(title);setShareEmail(email);setEmailStatus(payload.email_sent?"Invitation emailed to signer.":"Email could not be sent. Please share the link manually.");
  setTitle("");setName("");setEmail("");setFile(null);
  }catch(cause){setError(cause instanceof Error?cause.message:"Request failed.");}finally{setBusy(false);}
  }
@@ -46,18 +47,10 @@ export default function NewSignaturePage(){
  <label className="block text-sm font-semibold">Signer name<input required value={name} onChange={e=>setName(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="Full legal name"/></label>
  <label className="block text-sm font-semibold">Signer email<input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="client@example.com"/></label>
  <label className="block text-sm font-semibold">PDF document (max 3 MB)<input required type="file" accept="application/pdf,.pdf" onChange={e=>setFile(e.target.files?.[0]??null)} className="mt-2 block w-full rounded-xl border border-slate-200 p-3 text-sm"/></label>
- <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-3">
- <p className="text-sm font-bold text-slate-900">Need to prepare your PDF first?</p>
- <div className="mt-2 flex flex-wrap gap-4 text-xs font-bold text-indigo-700">
-  <a href="https://iduckpdf.com/" target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">Split PDF ↗</a>
-  <a href="https://iduckpdf.com/" target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">Edit PDF ↗</a>
- </div>
- <p className="mt-2 text-xs leading-5 text-slate-600">These open iDuckPDF, an independent PDF toolkit. Check its privacy terms before processing confidential documents, then return here to request a signature.</p>
- </div>
- <p className="text-xs text-slate-500">Signing link expires after 7 days. Share the link privately; anyone with the link can open the PDF. No automatic email is sent.</p>
  {error&&<p role="alert" className="text-sm text-rose-700">{error}</p>}
  <button disabled={busy} className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold text-white disabled:opacity-50">{busy?"Creating…":"Create Secure Signing Link"}</button>
- {created&&<div className="rounded-xl bg-indigo-50 p-3 text-sm"><p className="font-bold">Link ready — send privately</p><p className="mt-2 break-all text-xs">{created}</p><button type="button" onClick={copyLink} aria-live="polite" className={`mt-3 rounded-lg px-4 py-2 text-sm font-bold transition ${copied?"bg-emerald-100 text-emerald-800":"bg-indigo-600 text-white hover:bg-indigo-700"}`}>{copied?"✓ Copied!":"Copy link"}</button>{copyError&&<p role="alert" className="mt-2 text-xs text-rose-700">{copyError}</p>}<div className="mt-3 flex flex-wrap gap-2"><a href={`mailto:${shareEmail}?subject=${encodeURIComponent(`Signature requested: ${shareTitle}`)}&body=${encodeURIComponent(`Please review and sign ${shareTitle} using this secure link:\n${created}\n\nThis link expires after 7 days.`)}`} className="rounded-lg border border-indigo-200 bg-white px-3 py-2 text-xs font-bold text-indigo-700">Share via Email</a><a href={`https://wa.me/?text=${encodeURIComponent(`Please review and sign ${shareTitle}: ${created}\nThis link expires after 7 days.`)}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-emerald-200 bg-white px-3 py-2 text-xs font-bold text-emerald-700">Share via WhatsApp</a></div><p className="mt-2 text-xs text-slate-500">Email and WhatsApp open your app with a prepared message; SignDealDocs does not send it automatically.</p></div>}
+ <p className="text-xs text-slate-500">Signing links expire after 7 days for security. An email will be sent to the signer immediately.</p>
+ {created&&<div className="rounded-xl bg-indigo-50 p-3 text-sm"><p className="font-bold">Secure signing link created</p><p className="mt-2 break-all text-xs">{created}</p><p role="status" className="mt-2 text-xs text-slate-700">{emailStatus}</p><button type="button" onClick={copyLink} aria-live="polite" className={`mt-3 rounded-lg px-4 py-2 text-sm font-bold transition ${copied?"bg-emerald-100 text-emerald-800":"bg-indigo-600 text-white hover:bg-indigo-700"}`}>{copied?"✓ Copied!":"Copy link"}</button>{copyError&&<p role="alert" className="mt-2 text-xs text-rose-700">{copyError}</p>}<div className="mt-3 flex flex-wrap gap-2"><a href={`mailto:${shareEmail}?subject=${encodeURIComponent(`Signature requested: ${shareTitle}`)}&body=${encodeURIComponent(`Please review and sign ${shareTitle} using this secure link:\n${created}\n\nThis link expires after 7 days.`)}`} className="rounded-lg border border-indigo-200 bg-white px-3 py-2 text-xs font-bold text-indigo-700">Share via Email</a><a href={`https://wa.me/?text=${encodeURIComponent(`Please review and sign ${shareTitle}: ${created}\nThis link expires after 7 days.`)}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-emerald-200 bg-white px-3 py-2 text-xs font-bold text-emerald-700">Share via WhatsApp</a></div><p className="mt-2 text-xs text-slate-500">You can also share the link manually if needed.</p></div>}
  </form><aside className="space-y-5">
  <section className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 shadow-sm">
  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 text-2xl text-white" aria-hidden="true">✍</div>
@@ -68,7 +61,7 @@ export default function NewSignaturePage(){
  <div className="flex gap-3"><span className="text-lg text-indigo-600" aria-hidden="true">↗</span><div><h3 className="text-sm font-bold text-slate-900">Share a private link</h3><p className="text-xs leading-5 text-slate-600">Copy the link and send it directly to your signer.</p></div></div>
  <div className="flex gap-3"><span className="text-lg text-indigo-600" aria-hidden="true">✓</span><div><h3 className="text-sm font-bold text-slate-900">Client signs online</h3><p className="text-xs leading-5 text-slate-600">No SignDealDocs account needed for the signer.</p></div></div>
  </div></section>
- <section className="rounded-2xl border border-slate-200 bg-white p-5"><h2 className="text-sm font-bold text-slate-900">Before you send</h2><p className="mt-2 text-xs leading-6 text-slate-600">Links expire after 7 days. Anyone with the link can view the document, so share it privately. After signing, both parties can download the completed PDF with an appended signature record. Signer identity is not independently verified.</p></section>
+ <section className="rounded-2xl border border-slate-200 bg-white p-5"><h2 className="text-sm font-bold text-slate-900">Why SignDealDocs?</h2><ul className="mt-3 space-y-2 text-sm text-slate-700"><li>✓ Electronic signatures with consent records (ESIGN/UETA applicability depends on jurisdiction and workflow)</li><li>✓ Timestamped signing audit trail</li><li>✓ Signed PDF generated immediately after signature</li></ul></section>
  </aside></div>}
  </main></div>;
 }

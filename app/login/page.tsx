@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Logo } from "@/components/logo";
 import { AppFooter } from "@/components/app-footer";
 import { supabase } from "@/lib/supabase";
@@ -10,8 +10,7 @@ type Mode = "sign-in" | "sign-up";
 
 export default function LoginPage() {
   const router = useRouter();
-  const params = useSearchParams();
-  const nextPath = params.get("next") === "/signatures/new" ? "/signatures/new" : "/dashboard";
+  const nextPath = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("next") === "/signatures/new" ? "/signatures/new" : "/dashboard";
   const [mode, setMode] = useState<Mode>("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

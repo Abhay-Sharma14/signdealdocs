@@ -2,6 +2,7 @@ import { createHash, createHmac, randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { ensureSignedPdf } from "@/lib/signed-pdf";
+import { PDFDocument } from "pdf-lib";
 export const runtime="nodejs";
 const bucket="deal-vault";
 type Context={params:Promise<{token:string}>};
@@ -36,6 +37,7 @@ export async function POST(request:Request,{params}:Context){
  return NextResponse.json({error:"Confirm signer name, consent and drawn signature."},{status:400});
  const bytes=Buffer.from(await file.arrayBuffer());
  if(!bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])))return NextResponse.json({error:"Invalid PNG signature."},{status:415});
+ try{const probe=await PDFDocument.create();await probe.embedPng(bytes);}catch{return NextResponse.json({error:"Signature PNG could not be decoded."},{status:415});}
  const path=`signatures/${row.owner_id}/${randomUUID()}-signed.png`;
  const storage=getSupabaseAdmin().storage.from(bucket);
  const {error:uploadError}=await storage.upload(path,bytes,{contentType:"image/png",upsert:false});

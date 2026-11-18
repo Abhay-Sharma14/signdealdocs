@@ -17,7 +17,7 @@ export default function NewSignaturePage(){
  const [error,setError]=useState("");
  const [items,setItems]=useState<Item[]>([]);
  const [created,setCreated]=useState("");
- useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session)router.replace("/login");else setReady(true);});},[router]);
+ useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session)router.replace("/login?next=%2Fsignatures%2Fnew");else setReady(true);});},[router]);
  useEffect(()=>{if(!ready)return;supabase.auth.getSession().then(async({data})=>{const token=data.session?.access_token;if(!token)return;const res=await fetch("/api/signatures",{headers:{Authorization:`Bearer ${token}`},cache:"no-store"});if(res.ok){const payload=await res.json();setNow(Date.now());setItems(payload.requests??[]);}});},[ready]);
  async function submit(e:FormEvent){
  e.preventDefault();setError("");setCreated("");

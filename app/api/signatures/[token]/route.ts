@@ -40,25 +40,12 @@ export async function POST(request:Request,{params}:Context){
  const bytes=Buffer.from(await file.arrayBuffer());
  if(!bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])))return NextResponse.json({error:"Invalid PNG signature."},{status:415});
  try{const probe=await PDFDocument.create();await probe.embedPng(bytes);}catch{return NextResponse.json({error:"Signature PNG could not be decoded."},{status:415});}
- const placementRaw=String(form.get("placement")??"");
- let placement:Record<string,number|null>={signature_page:null,signature_x:null,signature_y:null,signature_width:null,signature_height:null};
- if(placementRaw){
-  try{
-   const p=JSON.parse(placementRaw);
-   const source=await getSupabaseAdmin().storage.from(bucket).download(row.document_path);
-   if(source.error||!source.data)throw Error("Missing document");
-   const pdf=await PDFDocument.load(await source.data.arrayBuffer());
-   const page=Number(p.pageNumber),x=Number(p.x),y=Number(p.y),width=Number(p.width),height=Number(p.height);
-   if(!Number.isInteger(page)||page<1||page>pdf.getPageCount()||![x,y,width,height].every(Number.isFinite)||x<0||y<0||width<20||height<15||x+width>pdf.getPage(page-1).getWidth()||y+height>pdf.getPage(page-1).getHeight())throw Error("Invalid position");
-   placement={signature_page:page,signature_x:x,signature_y:y,signature_width:width,signature_height:height};
-  }catch{return NextResponse.json({error:"Invalid signature placement."},{status:400});}
- }
  const path=`signatures/${row.owner_id}/${randomUUID()}-signed.png`;
  const storage=getSupabaseAdmin().storage.from(bucket);
  const {error:uploadError}=await storage.upload(path,bytes,{contentType:"image/png",upsert:false});
  if(uploadError)return NextResponse.json({error:"Could not store signature."},{status:500});
  const signedAt=new Date().toISOString();
- const {data,error}=await getSupabaseAdmin().from("signature_requests").update({signature_path:path,signed_at:signedAt,consent_text:"I reviewed the document and agree to sign electronically.",...placement}).eq("id",row.id).is("signed_at",null).is("revoked_at",null).gt("expires_at",signedAt).select("id").maybeSingle();
+ const {data,error}=await getSupabaseAdmin().from("signature_requests").update({signature_path:path,signed_at:signedAt,consent_text:"I reviewed the document and agree to sign electronically."}).eq("id",row.id).is("signed_at",null).is("revoked_at",null).gt("expires_at",signedAt).select("id").maybeSingle();
  if(error||!data){
   await storage.remove([path]);
   if(error){
@@ -85,6 +72,6 @@ export async function POST(request:Request,{params}:Context){
   evidenceSaved=!auditError;
  }
  let pdfReady=false;
- try {await ensureSignedPdf({...row,...placement,signature_path:path,signed_at:signedAt});pdfReady=true;}catch(error){console.error("Completed PDF generation failed",error);}
+ try {await ensureSignedPdf({...row,signature_page:null,signature_x:null,signature_y:null,signature_width:null,signature_height:null,signature_path:path,signed_at:signedAt});pdfReady=true;}catch(error){console.error("Completed PDF generation failed",error);}
  return NextResponse.json({signed_at:signedAt,evidence_saved:evidenceSaved,pdf_ready:pdfReady},{headers:{"Cache-Control":"no-store"}});
 }

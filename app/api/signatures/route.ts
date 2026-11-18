@@ -1,6 +1,7 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { PDFDocument } from "pdf-lib";
 export const runtime = "nodejs";
 const bucket = "deal-vault";
 async function owner(request: Request) {
@@ -30,6 +31,7 @@ export async function POST(request: Request) {
   return NextResponse.json({error:"Provide title, signer details and a PDF under 3 MB."},{status:400});
  const bytes=Buffer.from(await file.arrayBuffer());
  if(bytes.subarray(0,5).toString()!=="%PDF-")return NextResponse.json({error:"Only valid PDF files are supported."},{status:415});
+ try {const pdf=await PDFDocument.load(bytes);if(pdf.getPageCount()<1)throw Error("No pages");}catch{return NextResponse.json({error:"Upload a valid, unencrypted PDF."},{status:415});}
  const token=randomBytes(32).toString("hex");
  const path=`signatures/${user.id}/${randomUUID()}.pdf`;
  const storage=getSupabaseAdmin().storage.from(bucket);

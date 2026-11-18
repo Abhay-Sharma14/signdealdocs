@@ -32,7 +32,7 @@ export async function POST(request: Request) {
  const bytes=Buffer.from(await file.arrayBuffer());
  if(bytes.subarray(0,5).toString()!=="%PDF-")return NextResponse.json({error:"Only valid PDF files are supported."},{status:415});
  try {const pdf=await PDFDocument.load(bytes);if(pdf.getPageCount()<1)throw Error("No pages");}catch{return NextResponse.json({error:"Upload a valid, unencrypted PDF."},{status:415});}
- const token=randomBytes(32).toString("hex");
+ // 16 hexadecimal characters = 64 bits of cryptographic randomness.\n // Existing 64-character links remain valid for previously sent invitations.\n const token=randomBytes(8).toString("hex");
  const path=`signatures/${user.id}/${randomUUID()}.pdf`;
  const storage=getSupabaseAdmin().storage.from(bucket);
  const {error:uploadError}=await storage.upload(path,bytes,{contentType:"application/pdf",upsert:false});

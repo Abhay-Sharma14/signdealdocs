@@ -1,7 +1,7 @@
 "use client";
 import {useEffect,useState} from "react";
 import {Portal as LegacyPortal} from "./legacy-portal";
-import {SignatureCapture} from "@/components/signature-capture";
+import {SignContractModal} from "@/components/sign-contract-modal";
 
 type Item={id:string;type:"proposal"|"contract"|"invoice"|"file_request";title:string;pdf_url:string|null;signed_pdf_url:string|null;status:string};
 type Deal={client_name:string;project_title:string;amount:number;currency:string;status:string;brand_name:string;brand_color:string;logo_url:string|null;valid_until:string|null};
@@ -82,6 +82,6 @@ export function AgencyDealRoom({token}:{token:string}){
    {events.length>0&&<section className="rounded-xl border border-slate-200 bg-white px-6 py-5"><h2 className="text-sm font-bold text-slate-700">Recent activity</h2><div className="mt-3 space-y-2">{events.slice(0,4).map(e=><p key={e.id} className="text-xs text-slate-500">{new Date(e.created_at).toLocaleString()} · {e.action}</p>)}</div></section>}
   </main>
   <footer className="border-t border-slate-200 bg-white px-4 py-6 text-center text-xs text-slate-400">Powered securely by <a href="https://www.signdealdocs.com" target="_blank" rel="noopener noreferrer" className="font-semibold text-slate-500 underline-offset-2 hover:underline">SignDealDocs</a></footer>
-  {active&&<div role="dialog" aria-modal="true" aria-label="Sign contract" className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 p-3 backdrop-blur-sm sm:p-6"><div className="mx-auto my-3 max-w-5xl space-y-6 rounded-2xl bg-white p-5 shadow-2xl sm:p-8"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-wider" style={{color}}>Secure e-signature</p><h2 className="mt-1 text-2xl font-extrabold">Review & Sign Contract</h2></div><button type="button" onClick={()=>setActive(null)} className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Close ✕</button></div><p className="text-sm text-slate-600">Please read the complete agreement before signing. Your electronic signature will be embedded in the PDF; it is not a certificate-based digital signature.</p>{active.pdf_url&&<iframe title="Contract PDF" src={active.pdf_url} className="h-[42vh] min-h-64 w-full rounded-xl border bg-slate-50"/>}<SignatureCapture onSign={sign}/></div></div>}
+  {active&&<SignContractModal pdfUrl={active.pdf_url} brandColor={color} onClose={()=>setActive(null)} onSign={sign}/>}
  </div>;
 }

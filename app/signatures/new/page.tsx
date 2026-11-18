@@ -16,7 +16,6 @@ export default function NewSignaturePage(){
  const [error,setError]=useState("");
  const [created,setCreated]=useState("");
  const [shareTitle,setShareTitle]=useState("");
- const [shareEmail,setShareEmail]=useState("");
  const [copied,setCopied]=useState(false);
  const [copyError,setCopyError]=useState("");
  const [emailStatus,setEmailStatus]=useState(""); 
@@ -37,7 +36,7 @@ export default function NewSignaturePage(){
  const form=new FormData();form.set("title",title);form.set("signer_name",name);form.set("signer_email",email);form.set("file",file);
  const res=await fetch("/api/signatures",{method:"POST",headers:{Authorization:`Bearer ${data.session.access_token}`},body:form});
  const payload=await res.json();if(!res.ok)throw Error(payload.error??"Could not create request.");
- const url=`${window.location.origin}/sign/${payload.request.token}`;setCreated(url);setShareTitle(title);setShareEmail(email);setEmailSent(payload.email_sent===true);setEmailStatus(payload.email_sent?"Invitation emailed to signer.":"Email delivery could not be confirmed. Please share the link manually.");
+ const url=`${window.location.origin}/sign/${payload.request.token}`;setCreated(url);setShareTitle(title);setEmailSent(payload.email_sent===true);setEmailStatus(payload.email_sent?"Invitation emailed to signer.":"Email delivery could not be confirmed. Please share the link manually.");
  setTitle("");setName("");setEmail("");setFile(null);
  }catch(cause){setError(cause instanceof Error?cause.message:"Request failed.");}finally{setBusy(false);}
  }
@@ -51,11 +50,17 @@ export default function NewSignaturePage(){
  {error&&<p role="alert" className="text-sm text-rose-700">{error}</p>}
  <button disabled={busy} className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold text-white disabled:opacity-50">{busy?"Creating…":"Create Secure Signing Link"}</button>
  <p className="text-xs text-slate-500">Signing links expire after 7 days for security. We will automatically email the link to your signer.</p>
- {created&&<div className="rounded-xl bg-indigo-50 p-3 text-sm"><p className="font-bold">Secure signing link created</p><p className="mt-2 break-all text-xs">{created}</p><div role="status" className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-700">{emailSent&&<span className="rounded-full bg-emerald-100 px-2.5 py-1 font-bold text-emerald-800">✓ Email Sent</span>}<span>{emailStatus}</span></div><button type="button" onClick={copyLink} aria-live="polite" className="mt-4 w-full rounded-xl bg-violet-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-violet-700">{copied?"✓ Copied!":"Copy link"}</button>{copyError&&<p role="alert" className="mt-2 text-xs text-rose-700">{copyError}</p>}<div className="mt-3 flex flex-wrap gap-2"><a href={`mailto:${shareEmail}?subject=${encodeURIComponent(`Signature requested: ${shareTitle}`)}&body=${encodeURIComponent(`Please review and sign ${shareTitle} using this secure link: 
-${created} 
- 
-This link expires after 7 days.`)}`} className="rounded-lg border border-slate-200 bg-transparent px-3 py-2 text-xs font-medium text-slate-600 hover:border-violet-200 hover:text-violet-700">Share via Email</a><a href={`https://wa.me/?text=${encodeURIComponent(`Please review and sign ${shareTitle}: ${created} 
-This link expires after 7 days.`)}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-slate-200 bg-transparent px-3 py-2 text-xs font-medium text-slate-600 hover:border-violet-200 hover:text-violet-700">Share via WhatsApp</a></div><p className="mt-2 text-xs text-slate-500">You can also share the link manually if needed.</p></div>}
+ {created&&<div className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
+ <div className="flex items-center gap-2"><span aria-hidden="true" className="text-xl">✅</span><h2 className="text-base font-extrabold text-slate-900">Secure signing link created</h2></div>
+ <label htmlFor="created-signing-link" className="mt-4 block text-xs font-semibold text-slate-500">Your secure signing link</label>
+ <input id="created-signing-link" readOnly value={created} onFocus={e=>e.currentTarget.select()} className="mt-2 w-full rounded-lg border border-gray-200 bg-gray-100 px-3 py-3 font-mono text-xs text-gray-700 outline-none focus:ring-2 focus:ring-violet-300"/>
+ <div role="status" className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-700">{emailSent&&<span className="rounded-full bg-emerald-100 px-2.5 py-1 font-bold text-emerald-800">✓ Email Sent</span>}<span>{emailStatus}</span></div>
+ <button type="button" onClick={copyLink} aria-live="polite" className="mt-4 w-full rounded-xl bg-violet-600 px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-violet-700">{copied?"✓ Copied!":"Copy Link"}</button>
+ {copyError&&<p role="alert" className="mt-2 text-xs text-rose-700">{copyError}</p>}
+ <a href={`https://wa.me/?text=${encodeURIComponent(`Please review and sign ${shareTitle}: ${created}. This link expires after 7 days.`)}`} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-2 rounded-lg border border-green-600 bg-white px-4 py-2 text-xs font-semibold text-green-700 transition hover:bg-green-50">
+ <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-current text-green-600"><path d="M12.04 2a9.9 9.9 0 0 0-8.57 14.86L2 22l5.3-1.39A9.97 9.97 0 1 0 12.04 2Zm0 18.18a8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.14.82.84-3.06-.2-.32a8.2 8.2 0 1 1 6.98 3.88Zm4.5-6.15c-.25-.13-1.48-.73-1.7-.81-.23-.08-.39-.12-.55.13-.17.25-.64.81-.78.98-.14.16-.28.18-.53.06-.25-.13-1.04-.38-1.98-1.22-.73-.65-1.22-1.45-1.36-1.7-.14-.25-.02-.39.11-.51.11-.11.25-.29.37-.43.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.44-.06-.12-.55-1.32-.75-1.8-.2-.48-.4-.41-.55-.42h-.47c-.16 0-.42.06-.64.31-.22.25-.84.82-.84 2s.86 2.32.98 2.49c.12.16 1.69 2.58 4.09 3.62.57.25 1.02.4 1.37.51.58.18 1.11.15 1.53.09.47-.07 1.48-.6 1.69-1.18.21-.58.21-1.08.15-1.18-.06-.1-.22-.16-.47-.29Z"/></svg>
+ Share via WhatsApp</a>
+ </div>}
  </form><aside className="space-y-5">
 
  <section className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">Why use SignDealDocs?</p><h2 className="mt-3 text-xl font-extrabold text-slate-950">Legally binding &amp; secure</h2><ul className="mt-5 space-y-3 text-sm font-medium text-slate-700"><li>✓ ESIGN &amp; UETA compliant signatures</li><li>✓ Tamper-proof audit trail</li><li>✓ Instant PDF flattening</li></ul></section>

@@ -80,3 +80,16 @@ test("signing page exposes three signature methods when a valid request is avail
  await page.getByRole("tab", {name:"Upload"}).click();
  await expect(page.getByLabel("Upload signature PNG or JPG")).toBeVisible();
 });
+
+test("agency deal creation requires owner authentication", async ({ request }) => {
+ const response=await request.post(`${base}/api/deal-rooms`,{multipart:{client_name:"Test",client_email:"test@example.com"}});
+ expect(response.status()).toBe(401);
+});
+test("unknown agency room token is rejected", async ({ request }) => {
+ const response=await request.get(`${base}/api/deal-rooms/${"f".repeat(64)}`);
+ expect(response.status()).toBe(404);
+});
+test("public agency deal room handles invalid link", async ({ page }) => {
+ await page.goto(`${base}/d/${"f".repeat(64)}`);
+ await expect(page.getByRole("heading",{name:"Deal room unavailable"})).toBeVisible();
+});

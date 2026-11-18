@@ -4,7 +4,7 @@ import { ensureSignedPdf, pdfResponse, type SignatureRecord } from "@/lib/signed
 export const runtime = "nodejs";
 type Context={params:Promise<{id:string}>};
 export async function GET(request:Request,{params}:Context){
- const bearer=request.headers.get("authorization")?.match(/^Bearer\\s+(.+)$/i)?.[1];
+ const bearer=request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
  if(!bearer)return NextResponse.json({error:"Sign in required."},{status:401});
  const admin=getSupabaseAdmin();
  const {data:auth,error:authError}=await admin.auth.getUser(bearer);

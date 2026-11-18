@@ -41,7 +41,7 @@ export async function POST(request: Request) {
  if(error){await storage.remove([path]);return NextResponse.json({error:"Could not create signature request. Apply the database migration first."},{status:500});}
  const {data:settings}=await getSupabaseAdmin().from("agency_settings").select("agency_name").eq("owner_id",user.id).maybeSingle();
  const agencyName=(settings?.agency_name||"SignDealDocs").slice(0,100);
- const site=(process.env.NEXT_PUBLIC_SITE_URL||new URL(request.url).origin).replace(/\\/$/,"");
+  const baseSite=process.env.NEXT_PUBLIC_SITE_URL||new URL(request.url).origin; const site=baseSite.endsWith("/")?baseSite.slice(0,-1):baseSite;
  const signingUrl=`${site}/sign/${token}`;
  let emailSent=false;
  const apiKey=process.env.RESEND_API_KEY,from=process.env.RESEND_FROM_EMAIL;

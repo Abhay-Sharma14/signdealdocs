@@ -51,8 +51,10 @@ export async function POST(request: Request) {
    const message=`${agencyName} has requested your signature on ${title}.`;
    const response=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"Authorization":`Bearer ${apiKey}`,"Content-Type":"application/json"},body:JSON.stringify({from,to:[signerEmail],subject:`Signature requested: ${title}`,text:`${message}\n\nReview and sign: ${signingUrl}\n\nThis link expires after 7 days.`,html:`<p>${escape(message)}</p><p><a href="${escape(signingUrl)}" style="display:inline-block;background:#4f46e5;color:white;padding:12px 18px;border-radius:8px;text-decoration:none">Review and sign document</a></p><p>This link expires after 7 days.</p>`})});
    emailSent=response.ok;
-   if(!response.ok)console.error("Resend signature email failed",response.status);
+   if(!response.ok){const detail=await response.text();console.error("Resend signature email failed",response.status,detail.slice(0,500));}
   }catch(error){console.error("Resend signature email delivery error",error);}
+ }else{
+  console.error("Resend signature email skipped: RESEND_API_KEY or RESEND_FROM_EMAIL is missing.");
  }
  return NextResponse.json({request:data,email_sent:emailSent},{status:201,headers:{"Cache-Control":"no-store"}});
 }

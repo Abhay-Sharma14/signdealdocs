@@ -1,3 +1,4 @@
+import {randomUUID} from "node:crypto";
 import {admin,BUCKET,owner,jsonError} from "@/lib/deal-room";
 export const runtime="nodejs";
 export async function PUT(request:Request){
@@ -27,7 +28,7 @@ export async function PUT(request:Request){
   const bytes=Buffer.from(await file.arrayBuffer());
   const valid=file.type==="image/png"?bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])):bytes[0]===255&&bytes[1]===216&&bytes[2]===255;
   if(!valid)return jsonError("Invalid QR image.",415);
-  newPath=`rooms/${user.id}/${id}/upi-qr-${crypto.randomUUID()}`;
+  newPath=`rooms/${user.id}/${id}/upi-qr-${randomUUID()}`;
   const {error:uploadError}=await admin().storage.from(BUCKET).upload(newPath,bytes,{contentType:file.type,upsert:false});
   if(uploadError)return jsonError("Could not upload QR image.",500);
  }

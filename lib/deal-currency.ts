@@ -1,4 +1,3 @@
-"use client";
 import {useEffect,useState} from "react";
 import {isIndiaVisitor} from "@/lib/visitor-region";
 

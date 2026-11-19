@@ -64,7 +64,7 @@ export default function NewSignaturePage(){
  <input ref={fileInput} id="signature-pdf" type="file" accept="application/pdf,.pdf" onChange={onFileChange} className="sr-only" aria-describedby="signature-pdf-help"/>
  {!file?<label htmlFor="signature-pdf" className="block cursor-pointer rounded-md focus-within:ring-2 focus-within:ring-indigo-500">
  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3 h-9 w-9 text-indigo-500"><path d="M7 18a5 5 0 0 1-.5-10A6.5 6.5 0 0 1 19 10a4 4 0 0 1-1 8"/><path d="M12 21V11m-4 4 4-4 4 4"/></svg>
- <span id="signature-pdf-help" className="text-sm font-semibold text-slate-700">Click to upload or drag and drop</span><span className="mt-1 block text-xs text-slate-500">PDF max 3MB</span>
+ <span id="signature-pdf-help" className="text-sm font-semibold text-slate-700">Click to upload or drag and drop</span><span className="mt-1 block text-xs text-slate-500">PDF up to 3 MB</span>
  </label>:<div className="flex items-center justify-between gap-3 rounded-lg border border-indigo-100 bg-white px-3 py-3 text-left"><div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-800">📄 {file.name}</p><p className="text-xs text-slate-500">{(file.size/1024/1024).toFixed(2)} MB · PDF selected</p></div><button type="button" onClick={removeFile} aria-label="Remove selected PDF" className="shrink-0 rounded-lg p-2 font-bold text-slate-500 hover:bg-rose-50 hover:text-rose-600">✕</button></div>}
  </div></div>
  {error&&<p role="alert" className="text-sm text-rose-700">{error}</p>}

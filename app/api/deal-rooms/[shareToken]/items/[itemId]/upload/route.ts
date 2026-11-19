@@ -22,5 +22,15 @@ export async function POST(request:Request,{params}:C){
  if(error){await admin().storage.from(BUCKET).remove([path]);return jsonError("Could not save upload.",500);}
  await admin().from("deal_items").update({status:"uploaded"}).eq("id",item.id);
  await admin().from("audit_log").insert({deal_id:deal.id,action:"uploaded",actor_email:deal.client_email});
- return Response.json({ok:true,fileName:file.name,url:await urlFor(path)});
+ let emailSent=false;
+ const {data:agency,error:agencyError}=await admin().auth.admin.getUserById(deal.user_id);
+ const to=agency?.user?.email;
+ const key=process.env.RESEND_API_KEY,from=process.env.RESEND_FROM_EMAIL;
+ if(!agencyError&&to&&key&&from){
+  try{
+   const response=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"Authorization":`Bearer ${key}`,"Content-Type":"application/json"},body:JSON.stringify({from,to:[to],subject:"New client file uploaded to your Deal Room",text:`Client ${deal.client_name} uploaded a file for ${deal.project_title}. Open your SignDealDocs dashboard and choose View Uploads to review it. Deal ID: ${deal.id}`})});
+   if(response.ok)emailSent=true;else console.error("Deal upload email failed",response.status,(await response.text()).slice(0,250));
+  }catch(e){console.error("Deal upload email error",e);}
+ }else console.error("Deal upload email not configured or agency email unavailable");
+ return Response.json({ok:true,fileName:file.name,emailSent,url:await urlFor(path)});
 }

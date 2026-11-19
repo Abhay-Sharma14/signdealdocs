@@ -19,11 +19,13 @@ export async function POST(_request:Request,{params}:C){
  const {data:agency,error:agencyError}=await admin().auth.admin.getUserById(deal.user_id);
  const to=agency?.user?.email;
  const key=process.env.RESEND_API_KEY,from=process.env.RESEND_FROM_EMAIL;
+ let emailSent=false;
+ const amount=new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(Number(deal.amount||0)*0.5);
  if(!agencyError&&to&&key&&from){
   try{
-   const response=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"Authorization":`Bearer ${key}`,"Content-Type":"application/json"},body:JSON.stringify({from,to:[to],subject:"UPI payment reported for a Deal Room",text:`Client ${deal.client_name} reports paying the UPI deposit for ${deal.project_title}. Please verify the payment in your bank/UPI app before selecting Mark as Paid in your SignDealDocs dashboard. Deal ID: ${deal.id}`})});
-   if(!response.ok)console.error("UPI agency notification email failed",response.status,(await response.text()).slice(0,250));
+   const response=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"Authorization":`Bearer ${key}`,"Content-Type":"application/json"},body:JSON.stringify({from,to:[to],subject:"UPI payment reported for a Deal Room",text:`Client ${deal.client_name} claims to have paid ${amount} via UPI. Please verify and mark as paid.\nProject: ${deal.project_title}\nDeal ID: ${deal.id}\nDo not mark as paid until the funds appear in your bank/UPI account.`})});
+   if(!response.ok)console.error("UPI agency notification email failed",response.status,(await response.text()).slice(0,250));else emailSent=true;
   }catch(e){console.error("UPI agency notification email error",e);}
  }else console.error("UPI agency notification email not configured or agency email unavailable");
- return Response.json({ok:true,recorded:true});
+ return Response.json({ok:true,recorded:true,emailSent});
 }

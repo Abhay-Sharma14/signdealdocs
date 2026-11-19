@@ -128,12 +128,23 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <section aria-label="Customer testimonial example" className="mx-auto max-w-5xl px-4 py-9 sm:px-6 lg:px-8">
-          <div className="rounded-2xl border border-indigo-100 bg-indigo-50/40 px-6 py-7 text-center sm:px-10">
-            <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">Illustrative testimonial · Pending customer verification</p>
-            <blockquote className="mx-auto mt-3 max-w-3xl text-sm italic leading-7 text-slate-700">“SignDealDocs saved our agency hours of back-and-forth. Sending one link for the proposal, contract, and payment is a game-changer.”</blockquote>
-            <div className="mt-4 flex items-center justify-center gap-3"><span aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">RM</span><span className="text-xs font-semibold text-slate-700">Rahul Mehta, Founder @ PixelCraft Agency</span></div>
-            <p className="mt-3 text-xs text-slate-500">Trusted by early agencies in India and the US.</p>
+        <section aria-label="Illustrative agency experience" className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+          <div className="relative overflow-hidden rounded-3xl border border-indigo-100 bg-gradient-to-br from-white via-indigo-50/70 to-violet-50 px-6 py-9 shadow-[0_18px_50px_-35px_rgba(67,56,202,.35)] sm:px-12 sm:py-11">
+            <span aria-hidden="true" className="pointer-events-none absolute -right-3 -top-10 select-none text-[11rem] font-serif leading-none text-indigo-100/80">“</span>
+            <div className="relative mx-auto max-w-3xl text-center">
+              <p className="inline-flex items-center rounded-full border border-indigo-100 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.13em] text-indigo-700">Illustrative agency story · Not a verified customer review</p>
+              <div aria-hidden="true" className="mt-5 text-3xl font-serif leading-none text-indigo-500">“</div>
+              <blockquote className="mt-2 text-lg font-semibold italic leading-8 tracking-tight text-slate-800 sm:text-2xl sm:leading-10">SignDealDocs saved our agency hours of back-and-forth. Sending one link for the proposal, contract, and payment is a game-changer.</blockquote>
+              <div className="mx-auto mt-7 h-px w-16 bg-indigo-200" />
+              <div className="mt-6 flex items-center justify-center gap-3">
+                <span aria-hidden="true" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-violet-500 text-sm font-extrabold text-white shadow-md shadow-indigo-200">PC</span>
+                <div className="text-left">
+                  <p className="text-sm font-bold text-slate-900">PixelCraft Studio <span className="font-normal text-slate-500">· Example agency</span></p>
+                  <p className="mt-0.5 text-xs text-slate-500">Illustrative founder experience</p>
+                </div>
+              </div>
+              <p className="mt-5 text-xs text-slate-500">A preview of how a streamlined client workflow could feel.</p>
+            </div>
           </div>
         </section>
         <section id="pricing" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">{t("pricingTag")}</p><h2 className="mt-3 text-3xl font-extrabold text-slate-950 sm:text-4xl">{t("pricingHeading")}</h2><p className="mt-3 text-sm text-slate-600">{t("pricingDesc")}</p></div><div className="mt-8 grid gap-4 md:grid-cols-3">{[{name:t("starter"),id:"starter",price:"$0",features:[t("threeDeals"),t("watermark")]},{name:t("pro"),id:"pro",price:"$29",features:[t("unlimited"),t("customBrand"),t("noWatermark")]},{name:t("agency"),id:"agency",price:"$49",features:[t("everythingPro"),"Priority Support","Up to 3 Team Members"]}].map(plan=><article key={plan.name} className={`flex flex-col rounded-2xl border bg-white p-7 shadow-sm ${plan.id==="pro"?"border-indigo-400 ring-1 ring-indigo-100":"border-slate-200"}`}><h3 className="text-xl font-extrabold">{plan.name}</h3><IndiaPricing plan={plan.id as "starter"|"pro"|"agency"} monthlyLabel={t("monthly")}/><ul className="my-7 flex-1 space-y-3">{plan.features.map(feature=><li key={feature} className="text-sm text-slate-600">✓ {feature}</li>)}</ul><PricingCheckoutButton plan={plan.id as "starter"|"pro"|"agency"}/></article>)}</div></section>

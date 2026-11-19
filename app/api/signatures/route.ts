@@ -13,7 +13,10 @@ async function owner(request: Request) {
 export async function GET(request: Request) {
  const user = await owner(request);
  if (!user) return NextResponse.json({error:"Sign in required."},{status:401});
- const {data,error}=await getSupabaseAdmin().from("signature_requests").select("id,token,title,signer_name,signer_email,original_name,signed_at,created_at,expires_at,revoked_at,type,completed_pdf_path").eq("owner_id",user.id).eq("type","quick_sign").is("revoked_at",null).order("created_at",{ascending:false}).limit(100);
+ const completedOnly=new URL(request.url).searchParams.get("status")==="signed";
+ let query=getSupabaseAdmin().from("signature_requests").select("id,token,title,signer_name,signer_email,original_name,signed_at,created_at,expires_at,revoked_at,type,completed_pdf_path").eq("owner_id",user.id).eq("type","quick_sign").is("revoked_at",null).order("created_at",{ascending:false}).limit(100);
+ if(completedOnly)query=query.not("signed_at","is",null);
+ const {data,error}=await query;
  return error?NextResponse.json({error:"Could not load requests."},{status:500}):NextResponse.json({requests:data},{headers:{"Cache-Control":"no-store"}});
 }
 export async function POST(request: Request) {

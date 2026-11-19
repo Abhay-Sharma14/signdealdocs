@@ -27,15 +27,16 @@ export default function NewSignaturePage(){
  const [error,setError]=useState("");
  const [created,setCreated]=useState("");
  const [shareTitle,setShareTitle]=useState("");
- const [shareEmail,setShareEmail]=useState("");
  const [copied,setCopied]=useState(false);
+ const copyResetTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
+ useEffect(()=>()=>{if(copyResetTimer.current)clearTimeout(copyResetTimer.current);},[]);
  const [copyError,setCopyError]=useState("");
  const [emailStatus,setEmailStatus]=useState(""); 
  const [emailSent,setEmailSent]=useState(false);
  useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session)router.replace("/login?next=%2Fsignatures%2Fnew");else setReady(true);});},[router]);
  async function copyLink(){
   setCopyError("");
-  try { await navigator.clipboard.writeText(created); setCopied(true); }
+  try { await navigator.clipboard.writeText(created); setCopied(true); if(copyResetTimer.current)clearTimeout(copyResetTimer.current);copyResetTimer.current=setTimeout(()=>setCopied(false),2000); }
   catch { setCopied(false); setCopyError("Could not copy the link. Please select and copy it manually."); }
  }
  async function submit(e:FormEvent){
@@ -48,7 +49,7 @@ export default function NewSignaturePage(){
  const form=new FormData();form.set("title",title);form.set("signer_name",name);form.set("signer_email",email);form.set("file",file);
  const res=await fetch("/api/signatures",{method:"POST",headers:{Authorization:`Bearer ${data.session.access_token}`},body:form});
  const payload=await res.json();if(!res.ok)throw Error(payload.error??"Could not create request.");
- const url=`${window.location.origin}/sign/${payload.request.token}`;setCreated(url);setShareTitle(title);setShareEmail(email);setEmailSent(payload.email_sent===true);setEmailStatus(payload.email_sent?"Invitation emailed to signer.":"Email delivery could not be confirmed. Please share the link manually.");
+ const base=(process.env.NEXT_PUBLIC_APP_URL||window.location.origin).replace(/\/$/,"");const url=`${base}/sign/${payload.request.token}`;setCreated(url);setShareTitle(title);setEmailSent(payload.email_sent===true);setEmailStatus(payload.email_sent?"An email invitation has been sent to the signer. You can also share the link manually below.":"Signing link created. You can share the link manually below.");
  setTitle("");setName("");setEmail("");removeFile();
  }catch(cause){setError(cause instanceof Error?cause.message:"Request failed.");}finally{setBusy(false);}
  }
@@ -80,7 +81,7 @@ export default function NewSignaturePage(){
  <a href={`https://wa.me/?text=${encodeURIComponent(`Please review and sign ${shareTitle}: ${created}. This link expires after 7 days.`)}`} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-2 rounded-lg border border-green-600 bg-white px-4 py-2 text-xs font-semibold text-green-700 transition hover:bg-green-50">
  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 fill-current text-green-600"><path d="M12.04 2a9.9 9.9 0 0 0-8.57 14.86L2 22l5.3-1.39A9.97 9.97 0 1 0 12.04 2Zm0 18.18a8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.14.82.84-3.06-.2-.32a8.2 8.2 0 1 1 6.98 3.88Zm4.5-6.15c-.25-.13-1.48-.73-1.7-.81-.23-.08-.39-.12-.55.13-.17.25-.64.81-.78.98-.14.16-.28.18-.53.06-.25-.13-1.04-.38-1.98-1.22-.73-.65-1.22-1.45-1.36-1.7-.14-.25-.02-.39.11-.51.11-.11.25-.29.37-.43.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.44-.06-.12-.55-1.32-.75-1.8-.2-.48-.4-.41-.55-.42h-.47c-.16 0-.42.06-.64.31-.22.25-.84.82-.84 2s.86 2.32.98 2.49c.12.16 1.69 2.58 4.09 3.62.57.25 1.02.4 1.37.51.58.18 1.11.15 1.53.09.47-.07 1.48-.6 1.69-1.18.21-.58.21-1.08.15-1.18-.06-.1-.22-.16-.47-.29Z"/></svg>
  Share via WhatsApp</a>
- <a href={`mailto:${encodeURIComponent(shareEmail)}?subject=${encodeURIComponent(`Signature requested: ${shareTitle}`)}&body=${encodeURIComponent(`Please review and sign ${shareTitle}: ${created}\n\nThis link expires after 7 days.`)}`} className="mt-3 ml-2 inline-flex items-center gap-2 rounded-lg border border-indigo-200 bg-white px-4 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-50">Send via Email</a>
+
  </div>}
  </form><aside className="space-y-5">
 

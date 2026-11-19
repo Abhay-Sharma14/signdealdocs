@@ -77,12 +77,12 @@ export async function POST(request:Request,{params}:Context){
  let clientEmailSent=false,agencyEmailSent=false;
  const apiKey=process.env.RESEND_API_KEY,from=process.env.RESEND_FROM_EMAIL;
  if(apiKey&&from&&completedPdf){
-  const base=(process.env.NEXT_PUBLIC_APP_URL||process.env.NEXT_PUBLIC_SITE_URL||new URL(request.url).origin).replace(/\\/$/,"");
+  const base=(process.env.NEXT_PUBLIC_APP_URL||process.env.NEXT_PUBLIC_SITE_URL||new URL(request.url).origin).replace(/\/$/,"");
   const downloadUrl=`${base}/api/signatures/${encodeURIComponent(token)}/download`;
   const escape=(value:string)=>value.replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]||ch));
   const send=async(to:string,subject:string,message:string)=>{
    try{
-    const response=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"Authorization":`Bearer ${apiKey}`,"Content-Type":"application/json"},body:JSON.stringify({from,to:[to],subject,text:message,html:`<p>${escape(message).replace(/\\n/g,"<br/>")}</p><p><a href="${escape(downloadUrl)}">Download signed PDF</a></p>`,attachments:[{filename:"signed-document.pdf",content:completedPdf!.toString("base64")}]})});
+    const response=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"Authorization":`Bearer ${apiKey}`,"Content-Type":"application/json"},body:JSON.stringify({from,to:[to],subject,text:message,html:`<p>${escape(message).replace(/\n/g,"<br/>")}</p><p><a href="${escape(downloadUrl)}">Download signed PDF</a></p>`,attachments:[{filename:"signed-document.pdf",content:completedPdf!.toString("base64")}]})});
     if(!response.ok)console.error("Signed PDF notification failed",{status:response.status,detail:(await response.text()).slice(0,400)});
     return response.ok;
    }catch(err){console.error("Signed PDF notification error",err);return false;}

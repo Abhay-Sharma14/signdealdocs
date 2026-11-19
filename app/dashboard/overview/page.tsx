@@ -4,6 +4,7 @@ import {useCurrency} from "@/lib/use-currency";
 import {dealStatusBadge} from "@/lib/deal-status";
 import {useEffect,useState} from "react";
 import Link from "next/link";
+import {WorkspaceSidebarProfile} from "@/components/workspace-profile-header";
 import {useRouter} from "next/navigation";
 import {supabase} from "@/lib/supabase";
 type Deal={id:string;slug:string;client_name:string;client_email:string|null;amount:number;status:string;created_at:string;currency?:string|null};
@@ -18,7 +19,7 @@ export default function Overview(){
  const pending=deals.filter(d=>["sent","draft","pending"].includes(d.status)).length;
  const money=formatDealAmount;
  return <div className="flex flex-1 flex-col bg-slate-50 text-slate-900 lg:flex-row">
-  <aside className="bg-[#101b31] px-5 py-7 text-white lg:w-64 lg:shrink-0"><div className="mb-8 text-xl font-extrabold">✦ SignDealDocs</div><nav aria-label="Main navigation" className="flex gap-2 lg:flex-col"><Link href="/dashboard/overview" aria-current="page" className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold">▦ Dashboard</Link><Link href="/dashboard" className="rounded-xl px-4 py-3 text-sm text-slate-300 hover:bg-white/10">▣ Deal Rooms</Link><Link href="/settings" className="rounded-xl px-4 py-3 text-sm text-slate-300 hover:bg-white/10">⚙ Settings</Link></nav><p className="mt-12 hidden text-xs text-slate-400 lg:block">Your agency at a glance.</p></aside>
+  <aside className="flex min-h-0 flex-col bg-[#101b31] px-5 py-7 text-white lg:w-64 lg:shrink-0"><div className="mb-8 text-xl font-extrabold">✦ SignDealDocs</div><nav aria-label="Main navigation" className="flex gap-2 lg:flex-col"><Link href="/dashboard/overview" aria-current="page" className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold">▦ Dashboard</Link><Link href="/dashboard" className="rounded-xl px-4 py-3 text-sm text-slate-300 hover:bg-white/10">▣ Deal Rooms</Link><Link href="/settings" className="rounded-xl px-4 py-3 text-sm text-slate-300 hover:bg-white/10">⚙ Settings</Link></nav><div className="mt-auto border-t border-white/10 px-3 py-3"><WorkspaceSidebarProfile/></div></aside>
   <main className="min-w-0 flex-1 px-4 py-9 sm:px-10"><div className="mx-auto max-w-6xl space-y-8">
    <div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-widest text-indigo-600">Workspace overview</p><h1 className="mt-2 text-3xl font-extrabold">Dashboard</h1><p className="mt-2 text-sm text-slate-500">Your agency pipeline and client activity at a glance.</p></div><Link href="/dashboard" className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-indigo-700">Manage Deal Rooms →</Link></div>
    {error&&<p role="alert" className="rounded-xl bg-rose-50 p-4 text-sm text-rose-700">{error}</p>}

@@ -1,2 +1,4 @@
-import {redirect} from "next/navigation";
-export default function Page(){redirect("/en");}
+import {NextIntlClientProvider} from "next-intl";
+import HomePage from "@/components/home-page";
+import en from "@/messages/en.json";
+export default function Page(){return <NextIntlClientProvider locale="en" messages={en}><HomePage/></NextIntlClientProvider>;}

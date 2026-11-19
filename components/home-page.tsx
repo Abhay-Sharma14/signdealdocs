@@ -139,18 +139,7 @@ export default function HomePage() {
         <section id="pricing" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">{t("pricingTag")}</p><h2 className="mt-3 text-3xl font-extrabold text-slate-950 sm:text-4xl">{t("pricingHeading")}</h2><p className="mt-3 text-sm text-slate-600">{t("pricingDesc")}</p></div><div className="mt-8 grid gap-4 md:grid-cols-3">{[{name:t("starter"),id:"starter",price:"$0",features:[t("threeDeals"),t("watermark")]},{name:t("pro"),id:"pro",price:"$29",features:[t("unlimited"),t("customBrand"),t("noWatermark")]},{name:t("agency"),id:"agency",price:"$49",features:[t("everythingPro"),"Priority Support","Up to 3 Team Members"]}].map(plan=><article key={plan.name} className={`flex flex-col rounded-2xl border bg-white p-7 shadow-sm ${plan.id==="pro"?"border-indigo-400 ring-1 ring-indigo-100":"border-slate-200"}`}><h3 className="text-xl font-extrabold">{plan.name}</h3><IndiaPricing plan={plan.id as "starter"|"pro"|"agency"} monthlyLabel={t("monthly")}/><ul className="my-7 flex-1 space-y-3">{plan.features.map(feature=><li key={feature} className="text-sm text-slate-600">✓ {feature}</li>)}</ul><PricingCheckoutButton plan={plan.id as "starter"|"pro"|"agency"}/></article>)}</div></section>
       </main>
 
-      <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 pt-7 pb-20 sm:px-6 sm:pb-16 lg:px-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div><Logo /><p className="mt-1 text-xs text-slate-500">{t("heroSub")}</p></div>
-            <a href="mailto:hello@signdealdocs.com" className="text-xs font-semibold text-slate-600 hover:text-indigo-700">{t("footerContact")}</a>
-          </div>
-          <div className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-            <span>{t("footerCopy",{year})}</span>
-            <div className="flex flex-wrap gap-4 sm:pr-32"><Link href="/privacy" className="hover:text-indigo-700">Privacy Policy</Link><Link href="/terms" className="hover:text-indigo-700">Terms of Service</Link></div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter tagline={t("heroSub")} contactLabel={t("footerContact")} copyright={t("footerCopy",{year})} />
     </div>
   );
 }

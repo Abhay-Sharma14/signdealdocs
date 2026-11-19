@@ -11,21 +11,26 @@ export async function POST(request:Request){
  const client_email=String(form.get("client_email")||"").trim().toLowerCase();
  const project_title=String(form.get("project_title")||"Project Proposal").trim().slice(0,160);
  const amount=Number(form.get("amount")||0);
- const brand_name=String(form.get("brand_name")||"").trim().slice(0,100);
- const brand_color=String(form.get("brand_color")||"#4f46e5");
+
  const payment_method=String(form.get("payment_method")||"auto");
  if(!["auto","manual_upi"].includes(payment_method))return jsonError("Invalid payment method.",400);
  const qr=form.get("upi_qr");
- if(payment_method==="manual_upi"&&(!(qr instanceof File)||qr.size<100||qr.size>1_000_000||!["image/png","image/jpeg","image/webp"].includes(qr.type)))return jsonError("Upload a PNG, JPG or WebP UPI QR image under 1 MB.",400);
- if(!client_name||!/^\S+@\S+\.\S+$/.test(client_email)||!Number.isFinite(amount)||amount<0||amount>1e9||!/^#[0-9a-fA-F]{6}$/.test(brand_color))return jsonError("Check client, amount and brand color.",400);
+ if(payment_method==="manual_upi"&&(!(qr instanceof File)||qr.size<100||qr.size>1_000_000||!["image/png","image/jpeg"].includes(qr.type)))return jsonError("Upload a PNG or JPG UPI QR image under 1 MB.",400);
+ if(!client_name||!/^\S+@\S+\.\S+$/.test(client_email)||!Number.isFinite(amount)||amount<0||amount>1e9)return jsonError("Check client, amount and brand color.",400);
  const {data:billing,error:billingError}=await admin().from("billing_profiles").select("plan").eq("user_id",user.id).maybeSingle();
  if(billingError)return jsonError("Billing setup required. Apply billing migration.",503);
  const paid=billing?.plan==="pro"||billing?.plan==="agency";
+ const {data:settings,error:settingsError}=await admin().from("agency_settings").select("agency_name,brand_color").eq("owner_id",user.id).maybeSingle();
+ if(settingsError)return jsonError("Agency settings unavailable. Apply the agency settings migration.",503);
+ const brand_name=String(settings?.agency_name||"").trim().slice(0,100);
+ const brand_color=String(settings?.brand_color||"#4f46e5");
+ if(!brand_name)return jsonError("Set your Agency Name in Settings before creating a deal.",400);
+ if(!/^#[0-9a-fA-F]{6}$/.test(brand_color))return jsonError("Invalid brand color in agency settings.",400);
  if(!paid){
   const {count,error:countError}=await admin().from("deals").select("id",{count:"exact",head:true}).eq("user_id",user.id);
   if(countError)return jsonError("Could not check Starter plan limit.",503);
   if((count||0)>=3)return jsonError("Starter includes 3 deal rooms. Upgrade to Pro for unlimited deals.",403);
-  if(brand_color.toLowerCase()!=="#4f46e5")return jsonError("Custom colors require Pro or Agency.",403);
+
  }
  const proposal=form.get("proposal"),contract=form.get("contract");
  if(!(proposal instanceof File)||!(contract instanceof File))return jsonError("Proposal and contract PDFs are required.",400);
@@ -53,9 +58,9 @@ export async function POST(request:Request){
  let inserted=false;
  for(let attempt=0;attempt<5;attempt++){
   slug=newDealSlug();
-  const {error}=await admin().from("deals").insert({id:dealId,user_id:user.id,slug,client_name,client_email,project_title,amount,currency:payment_method==="manual_upi"?"INR":"USD",payment_method,upi_qr_path:payment_method==="manual_upi"?uploads.find(u=>u.type==="upi_qr")?.path:null,status:"sent",brand_name:brand_name||null,brand_color:paid?brand_color:"#4f46e5",required_documents:[],proposal:null});
+  const {error}=await admin().from("deals").insert({id:dealId,user_id:user.id,slug,client_name,client_email,project_title,amount,currency:payment_method==="manual_upi"?"INR":"USD",payment_method,upi_qr_path:payment_method==="manual_upi"?uploads.find(u=>u.type==="upi_qr")?.path:null,status:"sent",brand_name,brand_color:paid?brand_color:"#4f46e5",required_documents:[],proposal:null});
   if(!error){inserted=true;break;}
-  if(error.code!=="23505"){await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError("Could not create deal. Check database migration.",500);}
+  if(error.code!=="23505"){console.error("Deal insert failed",{code:error.code,message:error.message,details:error.details});await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError(error.code==="PGRST204"||error.code==="42703"?"Deal database columns are missing. Apply migration 202611180008_manual_upi_payments.sql.":"Could not create deal. Check database migration and server logs.",500);}
  }
  if(!inserted){await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError("Could not generate unique deal link. Retry.",503);}
  const rows=[

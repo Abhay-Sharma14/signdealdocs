@@ -1,3 +1,4 @@
+import {validCurrency} from "@/lib/deal-currency";
 import {validatePaymentLink} from "@/lib/payment-link";
 import {randomUUID} from "node:crypto";
 import {admin,BUCKET,owner,jsonError} from "@/lib/deal-room";
@@ -14,7 +15,8 @@ export async function PUT(request:Request){
  if(!deal)return jsonError("Deal not found.",404);
  if(deal.paid_at||deal.status==="paid")return jsonError("Paid deals cannot be edited.",409);
  if(deal.payment_notified_at)return jsonError("Payment has been reported. Verify or resolve it before editing payment settings.",409);
- const currency=method==="manual_upi"?"INR":"USD";
+ const currency=method==="manual_upi"?"INR":String(form.get("currency")||deal.currency);
+ if(!validCurrency(currency))return jsonError("Invalid deal currency.",400);
  const changingCurrency=deal.currency!==currency;
  const amountValue=form.get("amount");
  const amount=changingCurrency?Number(amountValue):Number(deal.amount);

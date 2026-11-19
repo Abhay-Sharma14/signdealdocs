@@ -87,8 +87,8 @@ export async function POST(request:Request,{params}:Context){
     return response.ok;
    }catch(err){console.error("Signed PDF notification error",err);return false;}
   };
-  const owner=await getSupabaseAdmin().auth.admin.getUserById(row.owner_id);
-  const ownerEmail=owner.data.user?.email;
+  let ownerEmail:string|undefined;
+  try {const owner=await getSupabaseAdmin().auth.admin.getUserById(row.owner_id);ownerEmail=owner.data.user?.email;}catch(err){console.error("Could not resolve agency owner email",err);}
   const ownerMessage=`Good news! ${row.signer_name} has signed the document ${row.title}. You can download the signed PDF here: ${downloadUrl}`;
   const clientMessage=`Your signed document "${row.title}" is attached. You can also download it here: ${downloadUrl}`;
   const notifications=await Promise.all([

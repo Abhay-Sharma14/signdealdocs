@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function Page(){return <main className="mx-auto max-w-3xl px-6 py-20 text-slate-900"><Link href="/" className="text-sm font-semibold text-indigo-700">← SignDealDocs</Link><h1 className="mt-8 text-3xl font-bold">Terms of Service</h1><p className="mt-5 leading-7 text-slate-600">Our terms of service are being finalized. For questions about service terms, contact hello@signdealdocs.com.</p></main>;}

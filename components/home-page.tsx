@@ -4,17 +4,18 @@ import Link from "next/link";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { PricingCheckoutButton } from "@/components/pricing-checkout-button";
-import { useLocale } from "@/components/locale-provider";
+import {useTranslations} from "next-intl";
+import {LandingLanguageSwitcher} from "@/components/landing-language-switcher";
 
 export default function HomePage() {
-  const { t } = useLocale();
+  const t=useTranslations("Landing");
   const year = new Date().getFullYear();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const features = [
-    { number: "01", icon: "✦", title: "Branded Deal Rooms", copy: "Send one secure link for the proposal, contract signing and deposit step." },
-    { number: "02", icon: "✍", title: "White-labeling", copy: "Put your agency name, logo and brand colors front and center." },
-    { number: "03", icon: "▤", title: "Client Onboarding", copy: "Collect project files and assets directly inside each client portal." },
+    { number: "01", icon: "✦", title: t("feature1"), copy: t("feature1d") },
+    { number: "02", icon: "✍", title: t("feature2"), copy: t("feature2d") },
+    { number: "03", icon: "▤", title: t("feature3"), copy: t("feature3d") },
   ];
   const steps = [
     { icon: "✎", title: t("how1"), copy: t("how1d") },
@@ -28,25 +29,26 @@ export default function HomePage() {
         <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
           <Logo />
           <nav aria-label="Main navigation" className="hidden items-center gap-8 lg:flex">
-            <a href="#product" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">Features</a>
-            <Link href="/signatures/new" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">Quick Sign</Link>
+            <a href="#product" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">{t("navFeatures")}</a>
+            <Link href="/signatures/new" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">{t("navQuick")}</Link>
             <a href="#how-it-works" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">{t("navHow")}</a>
             <a href="#pricing" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">{t("navPricing")}</a>
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <LandingLanguageSwitcher />
             <Link href="/login" className="hidden rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 md:inline-flex">{t("login")}</Link>
-            <Link href="/login" className="hidden rounded-xl bg-[#4338CA] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#3730A3] sm:inline-flex">Get started free</Link>
+            <Link href="/login" className="hidden rounded-xl bg-[#4338CA] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#3730A3] sm:inline-flex">{t("getStarted")}</Link>
             <button type="button" aria-label={mobileMenuOpen ? "Close menu" : "Open menu"} aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-xl text-slate-800 lg:hidden">{mobileMenuOpen ? "×" : "☰"}</button>
           </div>
         </div>
         {mobileMenuOpen && <nav id="mobile-navigation" aria-label="Mobile navigation" className="border-t border-slate-100 bg-white px-5 py-4 shadow-lg lg:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-1">
-            <a href="#product" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">Features</a>
-            <Link href="/signatures/new" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">Quick Sign</Link>
+            <a href="#product" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">{t("navFeatures")}</a>
+            <Link href="/signatures/new" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">{t("navQuick")}</Link>
             <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">{t("navHow")}</a>
             <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">{t("navPricing")}</a>
             <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">Log in</Link>
-            <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-xl bg-indigo-600 px-4 py-3 text-center text-sm font-bold text-white">Get started free</Link>
+            <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-xl bg-indigo-600 px-4 py-3 text-center text-sm font-bold text-white">{t("getStarted")}</Link>
           </div>
         </nav>}
       </header>
@@ -56,11 +58,11 @@ export default function HomePage() {
           <div className="mx-auto grid max-w-7xl items-start gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[.95fr_1.05fr] lg:gap-12 lg:px-8 lg:py-20">
             <div className="space-y-5 lg:pt-5">
               <p className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2 text-xs font-extrabold uppercase tracking-[.12em] text-indigo-700"><span aria-hidden="true">✦</span> Proposals · Signatures · Client Documents</p>
-              <h1 className="max-w-2xl text-[clamp(2.5rem,4.3vw,4rem)] font-extrabold leading-[1.07] tracking-[-.055em] text-[#101A33]">Send one link.<br /><span className="text-indigo-600">Get your proposal signed, deposit paid, and client onboarded.</span></h1>
-              <p className="max-w-xl text-base leading-8 text-slate-600 sm:text-lg">The white-labeled client portal for modern agencies.</p>
+              <h1 className="max-w-2xl text-[clamp(2.5rem,4.3vw,4rem)] font-extrabold leading-[1.07] tracking-[-.055em] text-[#101A33]">{t("heroLead")}<br /><span className="text-indigo-600">{t("heroRest")}</span></h1>
+              <p className="max-w-xl text-base leading-8 text-slate-600 sm:text-lg">{t("heroSub")}</p>
               <div className="flex flex-wrap gap-3">
-                <Link href="/login" className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200/70 transition hover:bg-indigo-700">Get started free <span className="ml-2" aria-hidden="true">→</span></Link>
-                <a href="#how-it-works" className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 transition hover:border-indigo-200 hover:bg-indigo-50">See how it works</a>
+                <Link href="/login" className="inline-flex flex-wrap items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200/70 transition hover:bg-indigo-700">Get started free <span className="ml-2" aria-hidden="true">→</span></Link>
+                <a href="#how-it-works" className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 transition hover:border-indigo-200 hover:bg-indigo-50">{t("seeHow")}</a>
               </div>
               <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium text-slate-600"><span>✓ Free to get started</span><span>✓ No credit card required</span><span>✓ Simple client sharing</span></div>
             </div>
@@ -106,9 +108,9 @@ export default function HomePage() {
         <section className="border-y border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50">
           <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[.95fr_1.05fr] lg:gap-12 lg:px-8 lg:py-12">
             <div>
-              <p className="text-xs font-extrabold uppercase tracking-[.17em] text-indigo-700">Quick Sign</p>
-              <h2 className="mt-3 max-w-xl text-3xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-4xl">Only need a signature? Skip the proposal.</h2>
-              <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">Upload a PDF, add signer details, and share a private link. Your client can sign legally in seconds.</p>
+              <p className="text-xs font-extrabold uppercase tracking-[.17em] text-indigo-700">{t("navQuick")}</p>
+              <h2 className="mt-3 max-w-xl text-3xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-4xl">{t("quickHeading")}</h2>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">{t("quickDesc")}</p>
               <Link href="/signatures/new" className="mt-6 inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-indigo-700">Try Quick Sign <span aria-hidden="true" className="ml-2">→</span></Link>
             </div>
             <div className="overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-[0_18px_55px_-30px_rgba(79,70,229,.35)]">
@@ -135,7 +137,7 @@ export default function HomePage() {
         <section id="how-it-works" className="border-y border-slate-200 bg-white">
           <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
             <p className="text-center text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">How it works</p>
-            <h2 className="mt-2 text-center text-2xl font-extrabold tracking-tight text-[#101A33] sm:text-3xl">From draft to signed deal in 3 simple steps.</h2>
+            <h2 className="mt-2 text-center text-2xl font-extrabold tracking-tight text-[#101A33] sm:text-3xl">{t("howHeading")}</h2>
             <div className="mt-6 grid gap-3 md:grid-cols-3">
               {steps.map((step)=><article key={step.title} className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-sm font-extrabold text-indigo-700">{step.icon}</span>
@@ -144,13 +146,13 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <section id="pricing" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">Built for agencies of every size</p><h2 className="mt-3 text-3xl font-extrabold text-slate-950 sm:text-4xl">Simple pricing. A premium client experience.</h2><p className="mt-3 text-sm text-slate-600">Start with three deals free, then upgrade when your agency grows.</p></div><div className="mt-8 grid gap-4 md:grid-cols-3">{[{name:"Starter",price:"$0",features:["3 deal rooms","SignDealDocs watermark"]},{name:"Pro",price:"$29",features:["Unlimited deal rooms","Custom logo and colors","No watermark"]},{name:"Agency",price:"$49",features:["Everything in Pro","Custom domain support"]}].map(plan=><article key={plan.name} className={`flex flex-col rounded-2xl border bg-white p-7 shadow-sm ${plan.name==="Pro"?"border-indigo-400 ring-1 ring-indigo-100":"border-slate-200"}`}><h3 className="text-xl font-extrabold">{plan.name}</h3><p className="mt-4 text-4xl font-extrabold">{plan.price}<span className="text-sm font-medium text-slate-500">/mo</span></p><ul className="my-7 flex-1 space-y-3">{plan.features.map(feature=><li key={feature} className="text-sm text-slate-600">✓ {feature}</li>)}</ul><PricingCheckoutButton plan={plan.name==="Starter"?"starter":plan.name==="Pro"?"pro":"agency"}/></article>)}</div><p className="mt-6 text-center"><Link href="/pricing" className="text-sm font-bold text-indigo-700 hover:underline">Compare all plans →</Link></p></section>
+        <section id="pricing" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">{t("pricingTag")}</p><h2 className="mt-3 text-3xl font-extrabold text-slate-950 sm:text-4xl">{t("pricingHeading")}</h2><p className="mt-3 text-sm text-slate-600">{t("pricingDesc")}</p></div><div className="mt-8 grid gap-4 md:grid-cols-3">{[{name:t("starter"),id:"starter",price:"$0",features:[t("threeDeals"),t("watermark")]},{name:t("pro"),id:"pro",price:"$29",features:[t("unlimited"),t("customBrand"),t("noWatermark")]},{name:t("agency"),id:"agency",price:"$49",features:[t("everythingPro"),t("customDomain")]}].map(plan=><article key={plan.name} className={`flex flex-col rounded-2xl border bg-white p-7 shadow-sm ${plan.id==="pro"?"border-indigo-400 ring-1 ring-indigo-100":"border-slate-200"}`}><h3 className="text-xl font-extrabold">{plan.name}</h3><p className="mt-4 text-4xl font-extrabold">{plan.price}<span className="text-sm font-medium text-slate-500">{t("monthly")}</span></p><ul className="my-7 flex-1 space-y-3">{plan.features.map(feature=><li key={feature} className="text-sm text-slate-600">✓ {feature}</li>)}</ul><PricingCheckoutButton plan={plan.id as "starter"|"pro"|"agency"}/></article>)}</div><p className="mt-6 text-center"><Link href="/pricing" className="text-sm font-bold text-indigo-700 hover:underline">{t("compare")}</Link></p></section>
       </main>
 
       <footer className="border-t border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-8 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><Logo /><p className="mt-2 text-xs text-slate-500">{t("footerLine")}</p></div><div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-500"><a href="mailto:hello@signdealdocs.com" className="hover:text-slate-900">{t("contact")}</a></div></div>
-          <div className="flex flex-col gap-2 border-t border-slate-100 pt-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between"><span>{t("copyright").replace("{year}", String(year))}</span><span>{t("footerLine")}</span></div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><Logo /><p className="mt-2 text-xs text-slate-500">{t("heroSub")}</p></div><div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-500"><a href="mailto:hello@signdealdocs.com" className="hover:text-slate-900">{t("footerContact")}</a></div></div>
+          <div className="flex flex-col gap-2 border-t border-slate-100 pt-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between"><span>{t("footerCopy",{year})}</span><span>{t("footerLine")}</span></div>
         </div>
       </footer>
     </div>

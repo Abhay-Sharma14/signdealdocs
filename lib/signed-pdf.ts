@@ -43,7 +43,11 @@ export async function createSignedPdf(original: Uint8Array, signature: Uint8Arra
  page.drawImage(image,{x:65,y:439,width:fit.width,height:fit.height});
  label(`Original PDF SHA-256: ${digest(original)}`, 381, 9);
  label(`Signature PNG SHA-256: ${digest(signature)}`, 363, 9);
- label("Electronic signature image and audit record; not a certificate-based digital signature.", 325, 9);
+ label("HOW TO VERIFY", 332, 10);
+ label("Compare the Original PDF SHA-256 hash above with the original file.", 315, 9);
+ label("The signature image hash can also be checked against the captured PNG.", 298, 9);
+ label("Electronic signatures may be legally recognized under the ESIGN Act (US)", 263, 9);
+ label("and UETA where applicable. Hashes help detect changes to source files.", 247, 9);
  pdf.setTitle(row.title.slice(0,160));
  pdf.setSubject("Electronic signature record appended by SignDealDocs");
  return Buffer.from(await pdf.save());

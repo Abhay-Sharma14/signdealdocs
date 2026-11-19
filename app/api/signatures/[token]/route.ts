@@ -73,7 +73,7 @@ export async function POST(request:Request,{params}:Context){
  }
  let pdfReady=false;
  let completedPdf:Buffer|null=null;
- try {const result=await ensureSignedPdf({...row,signature_page:null,signature_x:null,signature_y:null,signature_width:null,signature_height:null,signature_path:path,signed_at:signedAt});completedPdf=result.bytes;pdfReady=true;}catch(error){console.error("Completed PDF generation failed",error);}
+ try {const result=await ensureSignedPdf({...row,signature_page:null,signature_x:null,signature_y:null,signature_width:null,signature_height:null,signature_path:path,signed_at:signedAt});completedPdf=result.bytes;pdfReady=true;const {error:recordError}=await getSupabaseAdmin().from("signature_requests").update({completed_pdf_path:result.path}).eq("id",row.id);if(recordError)console.error("Could not record completed PDF path",recordError);}catch(error){console.error("Completed PDF generation failed",error);}
  let clientEmailSent=false,agencyEmailSent=false;
  const apiKey=process.env.RESEND_API_KEY,from=process.env.RESEND_FROM_EMAIL;
  if(apiKey&&from&&completedPdf){

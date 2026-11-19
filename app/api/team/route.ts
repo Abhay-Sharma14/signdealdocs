@@ -23,7 +23,7 @@ export async function POST(request:Request){
   const input=body as Record<string,unknown>;
   const email=typeof input.email==="string"?input.email.trim().toLowerCase():"";
   const role=input.role==="admin"?"admin":input.role==="member"?"member":null;
-  if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)||email.length>254||!role)return jsonError("Valid email and role are required.",400);
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254||!role)return jsonError("Valid email and role are required.",400);
   if(email===ctx.user.email?.toLowerCase())return jsonError("The owner is already a team member.",409);
   const {data,error}=await admin().rpc("invite_team_member",{p_owner:ctx.user.id,p_email:email,p_role:role});
   if(error){if(error.code==="P0001"||error.message.includes("Upgrade required"))return jsonError("Upgrade required",403);if(error.code==="23505")return jsonError("Member already exists.",409);console.error("Team invite failed",error.code,error.message);return jsonError("Could not add member.",503);}

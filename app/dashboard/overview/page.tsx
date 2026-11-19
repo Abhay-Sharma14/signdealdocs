@@ -1,5 +1,5 @@
-import {dealStatusBadge} from "@/lib/deal-status";
 "use client";
+import {dealStatusBadge} from "@/lib/deal-status";
 import {useEffect,useState} from "react";
 import Link from "next/link";
 import {useRouter} from "next/navigation";

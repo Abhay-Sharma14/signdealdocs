@@ -10,9 +10,12 @@ export async function POST(request:Request){
   let body:unknown;
   try{body=await request.json();}catch{return jsonError("Invalid JSON.",400);}
   const plan=(body as {productId?:unknown})?.productId;
+  const currency=(body as {currency?:unknown})?.currency??"USD";
+  if(currency!=="USD"&&currency!=="INR")return jsonError("Unsupported billing currency.",400);
   if(plan!=="pro"&&plan!=="agency")return jsonError("Invalid productId.",400);
 
-  const productId=plan==="pro"?process.env.DODO_PRO_PRODUCT_ID:process.env.DODO_AGENCY_PRODUCT_ID;
+  const productId=currency==="INR"?(plan==="pro"?process.env.DODO_PRO_INR_PRODUCT_ID:process.env.DODO_AGENCY_INR_PRODUCT_ID):(plan==="pro"?process.env.DODO_PRO_PRODUCT_ID:process.env.DODO_AGENCY_PRODUCT_ID);
+  if(currency==="INR"&&!productId)return jsonError("INR checkout is not available yet. Select United States (USD) or contact support.",503);
   const apiKey=process.env.DODO_PAYMENTS_API_KEY;
   if(!productId||!apiKey){
    console.error("Checkout configuration missing",{
@@ -33,7 +36,7 @@ export async function POST(request:Request){
    :"https://test.dodopayments.com/checkouts";
   const payload={
    product_cart:[{product_id:productId,quantity:1}],
-   metadata:{user_id:user.id,plan},
+   metadata:{user_id:user.id,plan,currency},
    ...(user.email?{customer:{email:user.email}}:{}),
    ...(process.env.DODO_PAYMENTS_RETURN_URL?{return_url:process.env.DODO_PAYMENTS_RETURN_URL}:{})
   };

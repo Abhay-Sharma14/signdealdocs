@@ -29,7 +29,7 @@ export async function POST(request:Request){
  if(!paid){
   const {count,error:countError}=await admin().from("deals").select("id",{count:"exact",head:true}).eq("user_id",user.id);
   if(countError)return jsonError("Could not check Starter plan limit.",503);
-  if((count||0)>=3)return jsonError("Starter includes 3 deal rooms. Upgrade to Pro for unlimited deals.",403);
+  if((count||0)>=3)return jsonError("Upgrade required",403);
 
  }
  const proposal=form.get("proposal"),contract=form.get("contract");
@@ -60,7 +60,7 @@ export async function POST(request:Request){
   slug=newDealSlug();
   const {error}=await admin().from("deals").insert({id:dealId,user_id:user.id,slug,client_name,client_email,project_title,amount,currency:payment_method==="manual_upi"?"INR":"USD",payment_method,upi_qr_path:payment_method==="manual_upi"?uploads.find(u=>u.type==="upi_qr")?.path:null,status:"sent",brand_name,brand_color:paid?brand_color:"#4f46e5",required_documents:[],proposal:null});
   if(!error){inserted=true;break;}
-  if(error.code!=="23505"){console.error("Deal insert failed",{code:error.code,message:error.message,details:error.details});await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError(error.code==="PGRST204"||error.code==="42703"?"Deal database columns are missing. Apply migration 202611180008_manual_upi_payments.sql.":"Could not create deal. Check database migration and server logs.",500);}
+  if(error.code!=="23505"){if(error.code==="P0001"){await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError("Upgrade required",403);}console.error("Deal insert failed",{code:error.code,message:error.message,details:error.details});await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError(error.code==="PGRST204"||error.code==="42703"?"Deal database columns are missing. Apply migration 202611180008_manual_upi_payments.sql.":"Could not create deal. Check database migration and server logs.",500);}
  }
  if(!inserted){await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError("Could not generate unique deal link. Retry.",503);}
  const rows=[

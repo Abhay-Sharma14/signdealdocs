@@ -27,7 +27,16 @@ export async function POST(request:Request){
   if(email===ctx.user.email?.toLowerCase())return jsonError("The owner is already a team member.",409);
   const {data,error}=await admin().rpc("invite_team_member",{p_owner:ctx.user.id,p_email:email,p_role:role});
   if(error){if(error.code==="P0001"||error.message.includes("Upgrade required"))return jsonError("Upgrade required",403);if(error.code==="23505")return jsonError("Member already exists.",409);console.error("Team invite failed",error.code,error.message);return jsonError("Could not add member.",503);}
-  return Response.json({id:data,member_email:email,role,status:"recorded"},{status:201});
+  const apiKey=process.env.RESEND_API_KEY,from=process.env.RESEND_FROM_EMAIL;
+  if(!apiKey||!from){await admin().from("team_members").delete().eq("id",data).eq("agency_id",ctx.user.id);return jsonError("Team invitations require email configuration.",503);}
+  const base=(process.env.NEXT_PUBLIC_APP_URL||new URL(request.url).origin).replace(/\/$/,"");
+  const agency=(await admin().from("agency_settings").select("agency_name").eq("owner_id",ctx.user.id).maybeSingle()).data?.agency_name||"your agency";
+  const message=`You've been invited to join ${agency} on SignDealDocs as a ${role}. To get started, visit ${base}/login and create or sign in to your account.`;
+  try{
+   const response=await fetch("https://api.resend.com/emails",{method:"POST",headers:{Authorization:`Bearer ${apiKey}`,"Content-Type":"application/json"},body:JSON.stringify({from,to:[email],subject:`Invitation to ${agency} on SignDealDocs`,text:message})});
+   if(!response.ok){console.error("Team invitation email failed",response.status,(await response.text()).slice(0,300));await admin().from("team_members").delete().eq("id",data).eq("agency_id",ctx.user.id);return jsonError("Invitation email could not be sent.",503);}
+  }catch(err){console.error("Team invitation email error",err);await admin().from("team_members").delete().eq("id",data).eq("agency_id",ctx.user.id);return jsonError("Invitation email could not be sent.",503);}
+  return Response.json({id:data,member_email:email,role,status:"email_accepted"},{status:201});
  }catch{return jsonError("Team service unavailable.",503);}
 }
 export async function DELETE(request:Request){

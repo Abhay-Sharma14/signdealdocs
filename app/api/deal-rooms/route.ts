@@ -1,3 +1,4 @@
+import {validCurrency} from "@/lib/deal-currency";
 import {validatePaymentLink} from "@/lib/payment-link";
 import { randomUUID } from "node:crypto";
 import {newDealSlug} from "@/lib/deal-slug";
@@ -15,6 +16,8 @@ export async function POST(request:Request){
 
  const payment_method=String(form.get("payment_method")||"auto");
  if(!["auto","manual_upi","payment_link"].includes(payment_method))return jsonError("Invalid payment method.",400);
+ const currency=payment_method==="manual_upi"?"INR":String(form.get("currency")||"USD");
+ if(!validCurrency(currency))return jsonError("Invalid deal currency.",400);
  const payment_link=payment_method==="payment_link"?validatePaymentLink(String(form.get("payment_link")||"")):null;
  if(payment_method==="payment_link"&&!payment_link)return jsonError("Enter a valid HTTPS payment link.",400);
  const qr=form.get("upi_qr");
@@ -61,7 +64,7 @@ export async function POST(request:Request){
  let inserted=false;
  for(let attempt=0;attempt<5;attempt++){
   slug=newDealSlug();
-  const {error}=await admin().from("deals").insert({id:dealId,user_id:user.id,slug,client_name,client_email,project_title,amount,currency:payment_method==="manual_upi"?"INR":"USD",payment_method,payment_link,upi_qr_path:payment_method==="manual_upi"?uploads.find(u=>u.type==="upi_qr")?.path:null,status:"sent",brand_name,brand_color:paid?brand_color:"#4f46e5",required_documents:[],proposal:null});
+  const {error}=await admin().from("deals").insert({id:dealId,user_id:user.id,slug,client_name,client_email,project_title,amount,currency,payment_method,payment_link,upi_qr_path:payment_method==="manual_upi"?uploads.find(u=>u.type==="upi_qr")?.path:null,status:"sent",brand_name,brand_color:paid?brand_color:"#4f46e5",required_documents:[],proposal:null});
   if(!error){inserted=true;break;}
   if(error.code!=="23505"){if(error.code==="P0001"){await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError("Upgrade required",403);}console.error("Deal insert failed",{code:error.code,message:error.message,details:error.details});await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError(error.code==="PGRST204"||error.code==="42703"?"Deal database columns are missing. Apply migration 202611180008_manual_upi_payments.sql.":"Could not create deal. Check database migration and server logs.",500);}
  }

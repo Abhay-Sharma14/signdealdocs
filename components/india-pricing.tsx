@@ -14,6 +14,8 @@ function visitorCurrency():Currency{
  if(isIndiaVisitor())return "INR";
  let zone="";try{zone=Intl.DateTimeFormat().resolvedOptions().timeZone;}catch{}
  if(zone==="Europe/London")return "GBP";
+ if(zone==="Asia/Tokyo")return "JPY";
+ if(zone.startsWith("Europe/")&&zone!=="Europe/London")return "EUR";
  if(zone.startsWith("Australia/"))return "AUD";
  if(zone.startsWith("America/Toronto")||zone.startsWith("America/Vancouver")||zone.startsWith("America/Edmonton")||zone.startsWith("America/Winnipeg")||zone.startsWith("America/Halifax")||zone.startsWith("America/St_Johns"))return "CAD";
  const language=navigator.language.toUpperCase();

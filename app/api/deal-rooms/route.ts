@@ -1,3 +1,4 @@
+import {validatePaymentLink} from "@/lib/payment-link";
 import { randomUUID } from "node:crypto";
 import {newDealSlug} from "@/lib/deal-slug";
 import {PDFDocument} from "pdf-lib";
@@ -13,7 +14,9 @@ export async function POST(request:Request){
  const amount=Number(form.get("amount")||0);
 
  const payment_method=String(form.get("payment_method")||"auto");
- if(!["auto","manual_upi"].includes(payment_method))return jsonError("Invalid payment method.",400);
+ if(!["auto","manual_upi","payment_link"].includes(payment_method))return jsonError("Invalid payment method.",400);
+ const payment_link=payment_method==="payment_link"?validatePaymentLink(String(form.get("payment_link")||"")):null;
+ if(payment_method==="payment_link"&&!payment_link)return jsonError("Enter a valid HTTPS payment link.",400);
  const qr=form.get("upi_qr");
  if(payment_method==="manual_upi"&&(!(qr instanceof File)||qr.size<100||qr.size>1_000_000||!["image/png","image/jpeg"].includes(qr.type)))return jsonError("Upload a PNG or JPG UPI QR image under 1 MB.",400);
  if(!client_name||!/^\S+@\S+\.\S+$/.test(client_email)||!Number.isFinite(amount)||amount<0||amount>1e9)return jsonError("Check client, amount and brand color.",400);
@@ -58,7 +61,7 @@ export async function POST(request:Request){
  let inserted=false;
  for(let attempt=0;attempt<5;attempt++){
   slug=newDealSlug();
-  const {error}=await admin().from("deals").insert({id:dealId,user_id:user.id,slug,client_name,client_email,project_title,amount,currency:payment_method==="manual_upi"?"INR":"USD",payment_method,upi_qr_path:payment_method==="manual_upi"?uploads.find(u=>u.type==="upi_qr")?.path:null,status:"sent",brand_name,brand_color:paid?brand_color:"#4f46e5",required_documents:[],proposal:null});
+  const {error}=await admin().from("deals").insert({id:dealId,user_id:user.id,slug,client_name,client_email,project_title,amount,currency:payment_method==="manual_upi"?"INR":"USD",payment_method,payment_link,upi_qr_path:payment_method==="manual_upi"?uploads.find(u=>u.type==="upi_qr")?.path:null,status:"sent",brand_name,brand_color:paid?brand_color:"#4f46e5",required_documents:[],proposal:null});
   if(!error){inserted=true;break;}
   if(error.code!=="23505"){if(error.code==="P0001"){await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError("Upgrade required",403);}console.error("Deal insert failed",{code:error.code,message:error.message,details:error.details});await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError(error.code==="PGRST204"||error.code==="42703"?"Deal database columns are missing. Apply migration 202611180008_manual_upi_payments.sql.":"Could not create deal. Check database migration and server logs.",500);}
  }
@@ -82,7 +85,7 @@ export async function PATCH(request:Request){
  const {data:deal,error:readError}=await admin().from("deals").select("id,status,payment_method,paid_at").eq("id",body.id).eq("user_id",user.id).maybeSingle();
  if(readError)return jsonError("Could not load deal.",500);
  if(!deal)return jsonError("Deal not found.",404);
- if(deal.payment_method!=="manual_upi")return jsonError("Only manual UPI deals can be marked paid.",400);
+ if(!["manual_upi","payment_link"].includes(deal.payment_method))return jsonError("Only manually verified payments can be marked paid.",400);
  if(deal.paid_at||deal.status==="paid")return Response.json({ok:true,already_paid:true});
  const {data:contract}=await admin().from("deal_items").select("status").eq("deal_id",deal.id).eq("type","contract").maybeSingle();
  if(contract?.status!=="signed")return jsonError("Contract must be signed before confirming payment.",409);
@@ -90,7 +93,7 @@ export async function PATCH(request:Request){
  if(error)return jsonError("Could not confirm payment.",500);
  if(!updated)return jsonError("Payment already updated. Refresh.",409);
  const {error:auditError}=await admin().from("audit_log").insert({deal_id:deal.id,action:"paid",actor_email:user.email});
- if(auditError)console.error("UPI payment audit insert failed",auditError);
+ if(auditError)console.error("Payment audit insert failed",auditError);
  return Response.json({ok:true});
 }
 export async function DELETE(request:Request){

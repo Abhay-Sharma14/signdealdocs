@@ -4,6 +4,7 @@ import {useCurrency} from "@/lib/use-currency";
 import {dealStatusBadge} from "@/lib/deal-status";
 import {useEffect,useState,type FormEvent} from "react";
 import Link from "next/link";
+import {WorkspaceSidebarProfile} from "@/components/workspace-profile-header";
 import {useRouter} from "next/navigation";
 import {supabase} from "@/lib/supabase";
 type Deal={id:string;slug:string;client_name:string;client_email:string|null;amount:number;status:string;created_at:string;last_activity:string|null;payment_method?:string;payment_link?:string|null;currency?:string;payment_notified_at?:string|null};
@@ -36,7 +37,7 @@ export default function Dashboard(){
  const money=formatDealAmount;
  const recent=(d:string|null)=>d?new Date(d).toLocaleString():"No activity yet";
  return <div className="flex flex-1 flex-col bg-slate-50 text-slate-900 lg:flex-row">
- <aside className="w-full bg-[#101b31] text-white lg:w-64 lg:shrink-0"><div className="border-b border-white/10 px-6 py-6 text-xl font-extrabold">✦ SignDealDocs</div><nav aria-label="Main navigation" className="flex gap-2 px-4 py-5 lg:flex-col"><Link href="/dashboard/overview" className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-white/10">▦ Dashboard</Link><Link href="/dashboard" className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white">▣ Deal Rooms</Link><Link href="/settings" className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-white/10">⚙ Settings</Link></nav><p className="hidden px-8 pt-8 text-xs text-slate-400 lg:block">Your client workspace, beautifully organized.</p></aside>
+ <aside className="flex min-h-0 flex-col w-full bg-[#101b31] text-white lg:w-64 lg:shrink-0"><div className="border-b border-white/10 px-6 py-6 text-xl font-extrabold">✦ SignDealDocs</div><nav aria-label="Main navigation" className="flex gap-2 px-4 py-5 lg:flex-col"><Link href="/dashboard/overview" className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-white/10">▦ Dashboard</Link><Link href="/dashboard" className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white">▣ Deal Rooms</Link><Link href="/settings" className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-white/10">⚙ Settings</Link></nav><div className="mt-auto border-t border-white/10 px-3 py-3"><WorkspaceSidebarProfile/></div></aside>
  <main className="min-w-0 flex-1 px-4 py-8 sm:px-8 lg:px-10"><div className="mx-auto max-w-7xl space-y-7">
  <div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-widest text-indigo-600">Workspace overview</p><h1 className="mt-1 text-3xl font-extrabold">Deal Rooms</h1><p className="mt-2 text-sm text-slate-500">Track every proposal, signature, and client action.</p></div><button onClick={()=>{if(plan==="starter"&&deals.length>=3)setUpgrade(true);else setModal(true);}} className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-indigo-700">＋ Create New Deal</button></div>
  {error&&<p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</p>}

@@ -3,6 +3,7 @@ import Link from "next/link";
 import {useEffect,useState,type FormEvent} from "react";
 import {useRouter} from "next/navigation";
 import {Logo} from "@/components/logo";
+import {SiteFooter} from "@/components/site-footer";
 import {supabase} from "@/lib/supabase";
 type Item={id:string;token:string;title:string;signer_name:string;signer_email:string;signed_at:string|null;expires_at:string;revoked_at:string|null};
 export default function NewSignaturePage(){
@@ -41,8 +42,8 @@ export default function NewSignaturePage(){
  setTitle("");setName("");setEmail("");setFile(null);
  }catch(cause){setError(cause instanceof Error?cause.message:"Request failed.");}finally{setBusy(false);}
  }
- return <div className="min-h-screen bg-slate-50"><header className="border-b bg-white"><div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-5"><Logo href="/dashboard"/><Link href="/dashboard" className="text-sm font-semibold text-indigo-700">Dashboard</Link></div></header>
- <main className="mx-auto max-w-5xl space-y-7 px-5 py-10"><div><p className="text-xs font-bold uppercase tracking-widest text-indigo-600">Standalone e-sign</p><h1 className="mt-2 text-3xl font-extrabold text-slate-950">Send for E-Signature</h1><p className="mt-2 text-sm text-slate-600">Send documents for electronic signature in minutes. Upload your PDF, enter signer details, and share a private link.</p></div>
+ return <div className="flex min-h-screen flex-col bg-slate-50"><header className="border-b bg-white"><div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-5"><Logo href="/dashboard"/><Link href="/dashboard" className="text-sm font-semibold text-indigo-700">Dashboard</Link></div></header>
+ <main className="mx-auto w-full max-w-5xl flex-1 space-y-7 px-5 py-10"><div><p className="text-xs font-bold uppercase tracking-widest text-indigo-600">Standalone e-sign</p><h1 className="mt-2 text-3xl font-extrabold text-slate-950">Send for E-Signature</h1><p className="mt-2 text-sm text-slate-600">Send documents for electronic signature in minutes. Upload your PDF, enter signer details, and share a private link.</p></div>
  {!ready?<p>Checking your session…</p>:<div className="grid gap-6 md:grid-cols-[1fr_1fr]"><form onSubmit={submit} className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
  <label className="block text-sm font-semibold">Document title<input required maxLength={160} value={title} onChange={e=>setTitle(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="Service Agreement"/></label>
  <label className="block text-sm font-semibold">Signer name<input required value={name} onChange={e=>setName(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="Full legal name"/></label>
@@ -65,7 +66,7 @@ export default function NewSignaturePage(){
  </div>}
  </form><aside className="space-y-5">
 
- <section className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">Why use SignDealDocs?</p><h2 className="mt-3 text-xl font-extrabold text-slate-950">Legally binding &amp; secure</h2><ul className="mt-5 space-y-3 text-sm font-medium text-slate-700"><li>✓ ESIGN &amp; UETA compliant signatures</li><li>✓ Tamper-proof audit trail</li><li>✓ Instant PDF flattening</li></ul></section>
+ <section className="rounded-2xl border border-slate-200 bg-gray-50 p-6 shadow-sm"><p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-indigo-600"><span aria-hidden="true" className="text-lg">🛡</span>Why use SignDealDocs?</p><h2 className="mt-3 text-xl font-extrabold text-slate-950">Legally binding &amp; secure</h2><ul className="mt-5 space-y-3 text-sm font-semibold text-slate-700"><li>✓ ESIGN &amp; UETA compliant signatures</li><li>✓ Tamper-proof audit trail</li><li>✓ Instant PDF flattening</li></ul></section>
  </aside></div>}
- </main></div>;
+ </main><SiteFooter compact /></div>;
 }

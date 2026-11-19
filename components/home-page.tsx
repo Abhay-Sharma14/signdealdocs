@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { PricingCheckoutButton } from "@/components/pricing-checkout-button";
 import {useTranslations} from "next-intl";
+import {IndiaPricing} from "@/components/india-pricing";
 import {LandingLanguageSwitcher} from "@/components/landing-language-switcher";
 
 export default function HomePage() {
@@ -61,10 +62,10 @@ export default function HomePage() {
               <h1 className="max-w-2xl text-[clamp(2.5rem,4.3vw,4rem)] font-extrabold leading-[1.07] tracking-[-.055em] text-[#101A33]">{t("heroLead")}<br /><span className="text-indigo-600">{t("heroRest")}</span></h1>
               <p className="max-w-xl text-base leading-8 text-slate-600 sm:text-lg">{t("heroSub")}</p>
               <div className="flex flex-wrap gap-3">
-                <Link href="/login" className="inline-flex flex-wrap items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200/70 transition hover:bg-indigo-700">Get started free <span className="ml-2" aria-hidden="true">→</span></Link>
+                <Link href="/login" className="inline-flex flex-wrap items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200/70 transition hover:bg-indigo-700">{t("getStarted")} <span className="ml-2" aria-hidden="true">→</span></Link>
                 <a href="#how-it-works" className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 transition hover:border-indigo-200 hover:bg-indigo-50">{t("seeHow")}</a>
               </div>
-              <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium text-slate-600"><span>✓ Free to get started</span><span>✓ No credit card required</span><span>✓ Simple client sharing</span></div>
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium text-slate-600"><span>✓ {t("freeStart")}</span><span>✓ {t("noCard")}</span><span>✓ {t("simpleSharing")}</span></div>
             </div>
             <div className="relative min-w-0">
               <div className="absolute -inset-3 rounded-[2rem] bg-indigo-100/70 blur-2xl" />
@@ -111,7 +112,7 @@ export default function HomePage() {
               <p className="text-xs font-extrabold uppercase tracking-[.17em] text-indigo-700">{t("navQuick")}</p>
               <h2 className="mt-3 max-w-xl text-3xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-4xl">{t("quickHeading")}</h2>
               <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">{t("quickDesc")}</p>
-              <Link href="/signatures/new" className="mt-6 inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-indigo-700">Try Quick Sign <span aria-hidden="true" className="ml-2">→</span></Link>
+              <Link href="/signatures/new" className="mt-6 inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-indigo-700">{t("quickCTA")} <span aria-hidden="true" className="ml-2">→</span></Link>
             </div>
             <div className="overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-[0_18px_55px_-30px_rgba(79,70,229,.35)]">
               <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4"><span className="text-sm font-bold text-slate-900">Signature request</span><span className="rounded-full bg-indigo-50 px-3 py-1 text-[10px] font-bold text-indigo-700">Illustrative preview</span></div>
@@ -136,7 +137,7 @@ export default function HomePage() {
         </section>
         <section id="how-it-works" className="border-y border-slate-200 bg-white">
           <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
-            <p className="text-center text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">How it works</p>
+            <p className="text-center text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">{t("navHow")}</p>
             <h2 className="mt-2 text-center text-2xl font-extrabold tracking-tight text-[#101A33] sm:text-3xl">{t("howHeading")}</h2>
             <div className="mt-6 grid gap-3 md:grid-cols-3">
               {steps.map((step)=><article key={step.title} className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -146,7 +147,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <section id="pricing" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">{t("pricingTag")}</p><h2 className="mt-3 text-3xl font-extrabold text-slate-950 sm:text-4xl">{t("pricingHeading")}</h2><p className="mt-3 text-sm text-slate-600">{t("pricingDesc")}</p></div><div className="mt-8 grid gap-4 md:grid-cols-3">{[{name:t("starter"),id:"starter",price:"$0",features:[t("threeDeals"),t("watermark")]},{name:t("pro"),id:"pro",price:"$29",features:[t("unlimited"),t("customBrand"),t("noWatermark")]},{name:t("agency"),id:"agency",price:"$49",features:[t("everythingPro"),t("customDomain")]}].map(plan=><article key={plan.name} className={`flex flex-col rounded-2xl border bg-white p-7 shadow-sm ${plan.id==="pro"?"border-indigo-400 ring-1 ring-indigo-100":"border-slate-200"}`}><h3 className="text-xl font-extrabold">{plan.name}</h3><p className="mt-4 text-4xl font-extrabold">{plan.price}<span className="text-sm font-medium text-slate-500">{t("monthly")}</span></p><ul className="my-7 flex-1 space-y-3">{plan.features.map(feature=><li key={feature} className="text-sm text-slate-600">✓ {feature}</li>)}</ul><PricingCheckoutButton plan={plan.id as "starter"|"pro"|"agency"}/></article>)}</div><p className="mt-6 text-center"><Link href="/pricing" className="text-sm font-bold text-indigo-700 hover:underline">{t("compare")}</Link></p></section>
+        <section id="pricing" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">{t("pricingTag")}</p><h2 className="mt-3 text-3xl font-extrabold text-slate-950 sm:text-4xl">{t("pricingHeading")}</h2><p className="mt-3 text-sm text-slate-600">{t("pricingDesc")}</p></div><div className="mt-8 grid gap-4 md:grid-cols-3">{[{name:t("starter"),id:"starter",price:"$0",features:[t("threeDeals"),t("watermark")]},{name:t("pro"),id:"pro",price:"$29",features:[t("unlimited"),t("customBrand"),t("noWatermark")]},{name:t("agency"),id:"agency",price:"$49",features:[t("everythingPro"),t("customDomain")]}].map(plan=><article key={plan.name} className={`flex flex-col rounded-2xl border bg-white p-7 shadow-sm ${plan.id==="pro"?"border-indigo-400 ring-1 ring-indigo-100":"border-slate-200"}`}><h3 className="text-xl font-extrabold">{plan.name}</h3><IndiaPricing plan={plan.id as "starter"|"pro"|"agency"} monthlyLabel={t("monthly")}/><ul className="my-7 flex-1 space-y-3">{plan.features.map(feature=><li key={feature} className="text-sm text-slate-600">✓ {feature}</li>)}</ul><PricingCheckoutButton plan={plan.id as "starter"|"pro"|"agency"}/></article>)}</div><p className="mt-6 text-center"><Link href="/pricing" className="text-sm font-bold text-indigo-700 hover:underline">{t("compare")}</Link></p></section>
       </main>
 
       <footer className="border-t border-slate-200 bg-white">

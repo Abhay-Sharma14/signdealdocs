@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import {siteUrl} from "@/lib/site-url";
 import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import {FeedbackWidget} from "@/components/feedback-widget";
@@ -21,9 +22,14 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SignDealDocs | Proposals, E-Signatures & Client Onboarding",
-  description:
-    "Create client proposals, collect electronic signatures, and request onboarding documents through a single private link.",
+ metadataBase:siteUrl(),
+ title:{default:"SignDealDocs | Client Deal Rooms, E-Signatures & Proposals",template:"%s | SignDealDocs"},
+ description:"Create branded client deal rooms, share proposals, collect electronic signatures, request onboarding documents, and manage payment steps in one place.",
+ applicationName:"SignDealDocs",
+ alternates:{canonical:"/",languages:{"en":"/","fr":"/fr","de":"/de","ja":"/ja"}},
+ openGraph:{type:"website",siteName:"SignDealDocs",url:"/",title:"SignDealDocs | Client Deal Rooms & E-Signatures",description:"Share proposals, collect e-signatures, and organize client onboarding in one deal room."},
+ twitter:{card:"summary",title:"SignDealDocs | Client Deal Rooms & E-Signatures",description:"Proposals, electronic signatures, and client onboarding in one deal room."},
+ robots:{index:true,follow:true},
 };
 
 export default function RootLayout({

@@ -13,6 +13,13 @@ export async function POST(request:Request){
  const jwt=request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
  if(jwt){const {data:user,error}=await admin().auth.getUser(jwt);if(error||!user.user)return jsonError("Invalid session.",401);email=user.user.email||email;}
  const {error}=await admin().from("feedback").insert({email:email||null,type:body.type,message:body.message.trim()});
- if(error){console.error("Feedback storage failed",error);return jsonError("Feedback could not be saved. Check migration.",500);}
+ if(error){
+  console.error("Feedback storage failed",{code:error.code,message:error.message,details:error.details});
+  if(error.code==="42P01"||error.code==="PGRST205"||error.code==="PGRST204"||error.code==="42703"){
+   return jsonError("Feedback storage is not set up yet. The site administrator needs to apply the feedback database migration.",503);
+  }
+  if(error.code==="42501")return jsonError("Feedback storage permissions are not configured. Please contact support.",503);
+  return jsonError("We couldn't save your feedback right now. Please try again later.",500);
+ }
  return Response.json({ok:true},{status:201});
 }

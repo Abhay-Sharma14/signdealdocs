@@ -64,7 +64,7 @@ export function AgencyDealRoom({token}:{token:string}){
     <span className="shrink-0 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-2 text-[10px] font-semibold text-slate-600 sm:px-4 sm:text-xs">🔒 Secure Client Portal</span>
    </div>
   </header>
-  <main className="mx-auto w-full max-w-[800px] flex-1 space-y-6 px-4 pb-14 pt-10 sm:px-6 sm:pt-14">
+  <main className="mx-auto min-h-0 w-full max-w-[800px] flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 pb-8 pt-8 sm:px-6 sm:pt-10">
    {projectConfirmed&&<div role="status" className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-7 text-center shadow-sm"><p className="text-2xl font-extrabold text-emerald-800">🎉 Project Confirmed! You&apos;re all set.</p><p className="mt-2 text-sm text-emerald-700">Your contract is signed, payment is confirmed, and requested files have been uploaded.</p></div>}
    <div className="pb-2 text-center"><p className="mb-3 text-xs font-bold uppercase tracking-[.18em]" style={{color}}>Your project workspace</p><h1 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">Project Proposal for <span style={{color}}>{deal.client_name}</span></h1><p className="mt-4 text-sm text-slate-500 sm:text-base">Prepared by {brand} <span className="px-1">·</span> Valid until {expiry}</p></div>
    {error&&<p role="status" className="rounded-xl border border-indigo-200 bg-white px-5 py-4 text-sm text-slate-700 shadow-sm">{error}</p>}

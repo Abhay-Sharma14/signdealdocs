@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
+import { SiteFooter } from "@/components/site-footer";
 import { PricingCheckoutButton } from "@/components/pricing-checkout-button";
 import {useTranslations} from "next-intl";
 import {IndiaPricing} from "@/components/india-pricing";

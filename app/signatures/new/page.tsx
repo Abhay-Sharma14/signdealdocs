@@ -69,7 +69,7 @@ export default function NewSignaturePage(){
  {error&&<p role="alert" className="text-sm text-rose-700">{error}</p>}
  <button disabled={busy} className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold text-white disabled:opacity-50">{busy?"Creating…":"Create Secure Signing Link"}</button>
  <p className="text-xs text-slate-500">Signing links expire after 7 days for security. We will automatically email the link to your signer.</p>
- <p className="text-center text-xs font-medium text-slate-500">Built for modern agencies in India, the US, and Europe.</p>
+ <p className="text-center text-sm text-gray-500">Designed for modern agencies in India, the US, and Europe.</p>
  {created&&<div className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
  <div className="flex items-center gap-2"><span aria-hidden="true" className="text-xl">✅</span><h2 className="text-base font-extrabold text-slate-900">Secure signing link created</h2></div>
  <label htmlFor="created-signing-link" className="mt-4 block text-xs font-semibold text-slate-500">Your secure signing link</label>

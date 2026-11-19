@@ -5,6 +5,7 @@ import {useRouter} from "next/navigation";
 import {supabase} from "@/lib/supabase";
 export default function SettingsPage(){
  const router=useRouter();
+ // The live preview reads the same controlled name/color state as the form.
  const [name,setName]=useState(""),[color,setColor]=useState("#4f46e5"),[email,setEmail]=useState("");
  const [plan,setPlan]=useState("starter");
  const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(""),[success,setSuccess]=useState("");

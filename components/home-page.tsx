@@ -18,11 +18,6 @@ export default function HomePage() {
     { number: "02", icon: "✍", title: t("feature2"), copy: t("feature2d") },
     { number: "03", icon: "▤", title: t("feature3"), copy: t("feature3d") },
   ];
-  const steps = [
-    { icon: "✎", title: t("how1"), copy: t("how1d") },
-    { icon: "↗", title: t("how2"), copy: t("how2d") },
-    { icon: "✓", title: t("how3"), copy: t("how3d") },
-  ];
 
   return (
     <div className="flex min-h-screen flex-col overflow-hidden">
@@ -32,7 +27,6 @@ export default function HomePage() {
           <nav aria-label="Main navigation" className="hidden items-center gap-8 lg:flex">
             <a href="#product" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">{t("navFeatures")}</a>
             <Link href="/signatures/new" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">{t("navQuick")}</Link>
-            <a href="#how-it-works" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">{t("navHow")}</a>
             <a href="#pricing" className="text-sm font-semibold text-slate-700 hover:text-indigo-700">{t("navPricing")}</a>
           </nav>
           <div className="flex flex-wrap items-center justify-end gap-2">
@@ -46,7 +40,6 @@ export default function HomePage() {
           <div className="mx-auto flex max-w-7xl flex-col gap-1">
             <a href="#product" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">{t("navFeatures")}</a>
             <Link href="/signatures/new" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">{t("navQuick")}</Link>
-            <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">{t("navHow")}</a>
             <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">{t("navPricing")}</a>
             <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold text-slate-800">Log in</Link>
             <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-xl bg-indigo-600 px-4 py-3 text-center text-sm font-bold text-white">{t("getStarted")}</Link>
@@ -63,7 +56,7 @@ export default function HomePage() {
               <p className="max-w-xl text-base leading-8 text-slate-600 sm:text-lg">{t("heroSub")}</p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/login" className="inline-flex flex-wrap items-center justify-center rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200/70 transition hover:bg-indigo-700">{t("getStarted")} <span className="ml-2" aria-hidden="true">→</span></Link>
-                <a href="#how-it-works" className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 transition hover:border-indigo-200 hover:bg-indigo-50">{t("seeHow")}</a>
+                <a href="#quick-sign" className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 transition hover:border-indigo-200 hover:bg-indigo-50">{t("seeHow")}</a>
               </div>
               <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium text-slate-600"><span>✓ {t("freeStart")}</span><span>✓ {t("noCard")}</span><span>✓ {t("simpleSharing")}</span></div>
             </div>
@@ -106,7 +99,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="border-y border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50">
+        <section id="quick-sign" className="border-y border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50">
           <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[.95fr_1.05fr] lg:gap-12 lg:px-8 lg:py-12">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[.17em] text-indigo-700">{t("navQuick")}</p>
@@ -135,25 +128,26 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <section id="how-it-works" className="border-y border-slate-200 bg-white">
-          <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
-            <p className="text-center text-xs font-extrabold uppercase tracking-[.18em] text-indigo-600">{t("navHow")}</p>
-            <h2 className="mt-2 text-center text-2xl font-extrabold tracking-tight text-[#101A33] sm:text-3xl">{t("howHeading")}</h2>
-            <div className="mt-6 grid gap-3 md:grid-cols-3">
-              {steps.map((step)=><article key={step.title} className="flex items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-sm font-extrabold text-indigo-700">{step.icon}</span>
-                <div><h3 className="text-base font-extrabold text-[#101A33]">{step.title}</h3><p className="mt-1 text-sm leading-6 text-slate-600">{step.copy}</p></div>
-              </article>)}
-            </div>
+        <section aria-label="Customer testimonial example" className="mx-auto max-w-5xl px-4 py-9 sm:px-6 lg:px-8">
+          <div className="rounded-2xl border border-indigo-100 bg-indigo-50/40 px-6 py-7 text-center sm:px-10">
+            <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">Illustrative testimonial · Pending customer verification</p>
+            <blockquote className="mx-auto mt-3 max-w-3xl text-sm italic leading-7 text-slate-700">“SignDealDocs saved our agency hours of back-and-forth. Sending one link for the proposal, contract, and payment is a game-changer.”</blockquote>
+            <div className="mt-4 flex items-center justify-center gap-3"><span aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">RS</span><span className="text-xs font-semibold text-slate-700">Rahul Sharma, Founder @ XYZ Design Studio</span></div>
           </div>
         </section>
-        <section id="pricing" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">{t("pricingTag")}</p><h2 className="mt-3 text-3xl font-extrabold text-slate-950 sm:text-4xl">{t("pricingHeading")}</h2><p className="mt-3 text-sm text-slate-600">{t("pricingDesc")}</p></div><div className="mt-8 grid gap-4 md:grid-cols-3">{[{name:t("starter"),id:"starter",price:"$0",features:[t("threeDeals"),t("watermark")]},{name:t("pro"),id:"pro",price:"$29",features:[t("unlimited"),t("customBrand"),t("noWatermark")]},{name:t("agency"),id:"agency",price:"$49",features:[t("everythingPro"),t("customDomain")]}].map(plan=><article key={plan.name} className={`flex flex-col rounded-2xl border bg-white p-7 shadow-sm ${plan.id==="pro"?"border-indigo-400 ring-1 ring-indigo-100":"border-slate-200"}`}><h3 className="text-xl font-extrabold">{plan.name}</h3><IndiaPricing plan={plan.id as "starter"|"pro"|"agency"} monthlyLabel={t("monthly")}/><ul className="my-7 flex-1 space-y-3">{plan.features.map(feature=><li key={feature} className="text-sm text-slate-600">✓ {feature}</li>)}</ul><PricingCheckoutButton plan={plan.id as "starter"|"pro"|"agency"}/></article>)}</div></section>
+        <section id="pricing" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">{t("pricingTag")}</p><h2 className="mt-3 text-3xl font-extrabold text-slate-950 sm:text-4xl">{t("pricingHeading")}</h2><p className="mt-3 text-sm text-slate-600">{t("pricingDesc")}</p></div><div className="mt-8 grid gap-4 md:grid-cols-3">{[{name:t("starter"),id:"starter",price:"$0",features:[t("threeDeals"),t("watermark")]},{name:t("pro"),id:"pro",price:"$29",features:[t("unlimited"),t("customBrand"),t("noWatermark")]},{name:t("agency"),id:"agency",price:"$49",features:[t("everythingPro"),"Priority Support","Up to 3 Team Members"]}].map(plan=><article key={plan.name} className={`flex flex-col rounded-2xl border bg-white p-7 shadow-sm ${plan.id==="pro"?"border-indigo-400 ring-1 ring-indigo-100":"border-slate-200"}`}><h3 className="text-xl font-extrabold">{plan.name}</h3><IndiaPricing plan={plan.id as "starter"|"pro"|"agency"} monthlyLabel={t("monthly")}/><ul className="my-7 flex-1 space-y-3">{plan.features.map(feature=><li key={feature} className="text-sm text-slate-600">✓ {feature}</li>)}</ul><PricingCheckoutButton plan={plan.id as "starter"|"pro"|"agency"}/></article>)}</div></section>
       </main>
 
       <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 pt-8 pb-28 sm:px-6 sm:pb-24 lg:px-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><Logo /><p className="mt-2 text-xs text-slate-500">{t("heroSub")}</p></div><div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-500"><a href="mailto:hello@signdealdocs.com" className="hover:text-slate-900">{t("footerContact")}</a></div></div>
-          <div className="flex flex-col gap-2 border-t border-slate-100 pt-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between"><span>{t("footerCopy",{year})}</span><span>{t("footerLine")}</span></div>
+        <div className="mx-auto max-w-7xl px-4 pt-7 pb-20 sm:px-6 sm:pb-16 lg:px-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div><Logo /><p className="mt-1 text-xs text-slate-500">{t("heroSub")}</p></div>
+            <a href="mailto:hello@signdealdocs.com" className="text-xs font-semibold text-slate-600 hover:text-indigo-700">{t("footerContact")}</a>
+          </div>
+          <div className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+            <span>{t("footerCopy",{year})}</span>
+            <div className="flex flex-wrap gap-4 sm:pr-32"><Link href="/privacy" className="hover:text-indigo-700">Privacy Policy</Link><Link href="/terms" className="hover:text-indigo-700">Terms of Service</Link></div>
+          </div>
         </div>
       </footer>
     </div>

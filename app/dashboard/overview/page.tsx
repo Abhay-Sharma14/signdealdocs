@@ -1,5 +1,6 @@
 "use client";
-import {useCurrency,formatDealAmount,totalsByCurrency} from "@/lib/deal-currency";
+import {formatDealAmount,totalsByCurrency} from "@/lib/deal-currency";
+import {useCurrency} from "@/lib/use-currency";
 import {dealStatusBadge} from "@/lib/deal-status";
 import {useEffect,useState} from "react";
 import Link from "next/link";

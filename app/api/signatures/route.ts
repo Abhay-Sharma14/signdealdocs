@@ -14,10 +14,28 @@ export async function GET(request: Request) {
  const user = await owner(request);
  if (!user) return NextResponse.json({error:"Sign in required."},{status:401});
  const completedOnly=new URL(request.url).searchParams.get("status")==="signed";
- let query=getSupabaseAdmin().from("signature_requests").select("id,token,title,signer_name,signer_email,original_name,signed_at,created_at,expires_at,revoked_at,type,completed_pdf_path").eq("owner_id",user.id).eq("type","quick_sign").is("revoked_at",null).order("created_at",{ascending:false}).limit(100);
- if(completedOnly)query=query.not("signed_at","is",null);
- const {data,error}=await query;
- return error?NextResponse.json({error:"Could not load requests."},{status:500}):NextResponse.json({requests:data},{headers:{"Cache-Control":"no-store"}});
+ const db=getSupabaseAdmin();
+ // Base columns are available in the original standalone-signatures migration.
+ // Keep history readable if the optional quick_sign classification migration is pending.
+ const baseColumns="id,token,title,signer_name,signer_email,original_name,signed_at,created_at,expires_at,revoked_at";
+ const fetchHistory=async(withType:boolean)=>{
+  let query=db.from("signature_requests").select(withType?`${baseColumns},type,completed_pdf_path`:baseColumns)
+   .eq("owner_id",user.id).is("revoked_at",null)
+   .order("created_at",{ascending:false}).limit(100);
+  if(withType)query=query.eq("type","quick_sign");
+  if(completedOnly)query=query.not("signed_at","is",null);
+  return await query;
+ };
+ let {data,error}=await fetchHistory(true);
+ if(error&&["42703","PGRST204","PGRST205"].includes(error.code||"")){
+  console.warn("Quick Sign history migration columns unavailable; using legacy signature fields.",error.code);
+  ({data,error}=await fetchHistory(false));
+ }
+ if(error){
+  console.error("Quick Sign history query failed",{code:error.code,message:error.message,details:error.details});
+  return NextResponse.json({error:"Could not load Quick Sign History. Check the signature_requests database migration.",code:error.code||"DATABASE_ERROR"},{status:503,headers:{"Cache-Control":"no-store"}});
+ }
+ return NextResponse.json({requests:data||[]},{headers:{"Cache-Control":"no-store"}});
 }
 export async function POST(request: Request) {
  const user=await owner(request);

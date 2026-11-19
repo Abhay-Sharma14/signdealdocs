@@ -34,9 +34,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${inter.variable} ${display.variable} ${mono.variable} h-full antialiased`}
     >
-      <body className="saas-grid-bg min-h-full text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
+      <body suppressHydrationWarning className="saas-grid-bg min-h-full text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
         <LocaleProvider>{children}<FeedbackWidget/></LocaleProvider>
       </body>
     </html>

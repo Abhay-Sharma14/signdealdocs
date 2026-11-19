@@ -72,6 +72,30 @@ export async function POST(request:Request,{params}:Context){
   evidenceSaved=!auditError;
  }
  let pdfReady=false;
- try {await ensureSignedPdf({...row,signature_page:null,signature_x:null,signature_y:null,signature_width:null,signature_height:null,signature_path:path,signed_at:signedAt});pdfReady=true;}catch(error){console.error("Completed PDF generation failed",error);}
- return NextResponse.json({signed_at:signedAt,evidence_saved:evidenceSaved,pdf_ready:pdfReady},{headers:{"Cache-Control":"no-store"}});
+ let completedPdf:Buffer|null=null;
+ try {const result=await ensureSignedPdf({...row,signature_page:null,signature_x:null,signature_y:null,signature_width:null,signature_height:null,signature_path:path,signed_at:signedAt});completedPdf=result.bytes;pdfReady=true;}catch(error){console.error("Completed PDF generation failed",error);}
+ let clientEmailSent=false,agencyEmailSent=false;
+ const apiKey=process.env.RESEND_API_KEY,from=process.env.RESEND_FROM_EMAIL;
+ if(apiKey&&from&&completedPdf){
+  const base=(process.env.NEXT_PUBLIC_APP_URL||process.env.NEXT_PUBLIC_SITE_URL||new URL(request.url).origin).replace(/\\/$/,"");
+  const downloadUrl=`${base}/api/signatures/${encodeURIComponent(token)}/download`;
+  const escape=(value:string)=>value.replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]||ch));
+  const send=async(to:string,subject:string,message:string)=>{
+   try{
+    const response=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"Authorization":`Bearer ${apiKey}`,"Content-Type":"application/json"},body:JSON.stringify({from,to:[to],subject,text:message,html:`<p>${escape(message).replace(/\\n/g,"<br/>")}</p><p><a href="${escape(downloadUrl)}">Download signed PDF</a></p>`,attachments:[{filename:"signed-document.pdf",content:completedPdf!.toString("base64")}]})});
+    if(!response.ok)console.error("Signed PDF notification failed",{status:response.status,detail:(await response.text()).slice(0,400)});
+    return response.ok;
+   }catch(err){console.error("Signed PDF notification error",err);return false;}
+  };
+  const owner=await getSupabaseAdmin().auth.admin.getUserById(row.owner_id);
+  const ownerEmail=owner.data.user?.email;
+  const ownerMessage=`Good news! ${row.signer_name} has signed the document ${row.title}. You can download the signed PDF here: ${downloadUrl}`;
+  const clientMessage=`Your signed document "${row.title}" is attached. You can also download it here: ${downloadUrl}`;
+  const notifications=await Promise.all([
+   row.signer_email?send(row.signer_email,`Your signed document: ${row.title}`,clientMessage):Promise.resolve(false),
+   ownerEmail?send(ownerEmail,`Document signed: ${row.title}`,ownerMessage):Promise.resolve(false)
+  ]);
+  [clientEmailSent,agencyEmailSent]=notifications;
+ }
+ return NextResponse.json({signed_at:signedAt,evidence_saved:evidenceSaved,pdf_ready:pdfReady,client_email_sent:clientEmailSent,agency_email_sent:agencyEmailSent},{headers:{"Cache-Control":"no-store"}});
 }

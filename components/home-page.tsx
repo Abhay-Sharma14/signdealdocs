@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { PricingCheckoutButton } from "@/components/pricing-checkout-button";
+import {BillingCountrySelect,type BillingCountry} from "@/components/billing-country-select";
 import { useLocale } from "@/components/locale-provider";
 
 export default function HomePage() {
   const { t } = useLocale();
   const year = new Date().getFullYear();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [billingCountry,setBillingCountry]=useState<BillingCountry>("US");
 
   const features = [
     { number: "01", icon: "✦", title: "Branded Deal Rooms", copy: "Send one secure link for the proposal, contract signing and deposit step." },
@@ -144,7 +146,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <section id="pricing" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">Built for agencies of every size</p><h2 className="mt-3 text-3xl font-extrabold text-slate-950 sm:text-4xl">Simple pricing. A premium client experience.</h2><p className="mt-3 text-sm text-slate-600">Start with three deals free, then upgrade when your agency grows.</p></div><div className="mt-8 grid gap-4 md:grid-cols-3">{[{name:"Starter",price:"$0",features:["3 deal rooms","SignDealDocs watermark"]},{name:"Pro",price:"$29",features:["Unlimited deal rooms","Custom logo and colors","No watermark"]},{name:"Agency",price:"$49",features:["Everything in Pro","Custom domain support"]}].map(plan=><article key={plan.name} className={`flex flex-col rounded-2xl border bg-white p-7 shadow-sm ${plan.name==="Pro"?"border-indigo-400 ring-1 ring-indigo-100":"border-slate-200"}`}><h3 className="text-xl font-extrabold">{plan.name}</h3><p className="mt-4 text-4xl font-extrabold">{plan.price}<span className="text-sm font-medium text-slate-500">/mo</span></p><ul className="my-7 flex-1 space-y-3">{plan.features.map(feature=><li key={feature} className="text-sm text-slate-600">✓ {feature}</li>)}</ul><PricingCheckoutButton plan={plan.name==="Starter"?"starter":plan.name==="Pro"?"pro":"agency"}/></article>)}</div><p className="mt-6 text-center"><Link href="/pricing" className="text-sm font-bold text-indigo-700 hover:underline">Compare all plans →</Link></p></section>
+        <section id="pricing" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-extrabold uppercase tracking-widest text-indigo-600">Built for agencies of every size</p><h2 className="mt-3 text-3xl font-extrabold text-slate-950 sm:text-4xl">Simple pricing. A premium client experience.</h2><p className="mt-3 text-sm text-slate-600">Start with three deals free, then upgrade when your agency grows.</p></div><div className="mt-7 flex justify-center"><BillingCountrySelect value={billingCountry} onChange={setBillingCountry}/></div><div className="mt-8 grid gap-4 md:grid-cols-3">{[{name:"Starter",price:"$0",features:["3 deal rooms","SignDealDocs watermark"]},{name:"Pro",price:"$29",features:["Unlimited deal rooms","Custom logo and colors","No watermark"]},{name:"Agency",price:"$49",features:["Everything in Pro","Custom domain support"]}].map(plan=><article key={plan.name} className={`flex flex-col rounded-2xl border bg-white p-7 shadow-sm ${plan.name==="Pro"?"border-indigo-400 ring-1 ring-indigo-100":"border-slate-200"}`}><h3 className="text-xl font-extrabold">{plan.name}</h3><p className="mt-4 text-4xl font-extrabold">{plan.name==="Starter"?(billingCountry==="IN"?"₹0":"$0"):plan.name==="Pro"?(billingCountry==="IN"?"₹2,499":"$29"):(billingCountry==="IN"?"₹4,199":"$49")}<span className="text-sm font-medium text-slate-500">/mo</span></p><ul className="my-7 flex-1 space-y-3">{plan.features.map(feature=><li key={feature} className="text-sm text-slate-600">✓ {feature}</li>)}</ul><PricingCheckoutButton plan={plan.name==="Starter"?"starter":plan.name==="Pro"?"pro":"agency"} currency={billingCountry==="IN"?"INR":"USD"}/></article>)}</div><p className="mt-6 text-center"><Link href="/pricing" className="text-sm font-bold text-indigo-700 hover:underline">Compare all plans →</Link></p></section>
       </main>
 
       <footer className="border-t border-slate-200 bg-white">

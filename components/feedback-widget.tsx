@@ -1,0 +1,16 @@
+"use client";
+import {useState,type FormEvent} from "react";
+import {usePathname} from "next/navigation";
+import {supabase} from "@/lib/supabase";
+export function FeedbackWidget(){
+ const pathname=usePathname();
+ const [open,setOpen]=useState(false),[type,setType]=useState<"feature"|"bug">("feature"),[message,setMessage]=useState(""),[saving,setSaving]=useState(false),[notice,setNotice]=useState("");
+ if(!pathname||!(pathname==="/"||pathname==="/pricing"||pathname.startsWith("/dashboard")))return null;
+ async function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();setSaving(true);setNotice("");try{
+  const {data}=await supabase.auth.getSession();
+  const response=await fetch("/api/feedback",{method:"POST",headers:{"Content-Type":"application/json",...(data.session?{Authorization:`Bearer ${data.session.access_token}`}:{})},body:JSON.stringify({type,message})});
+  const result=await response.json();if(!response.ok)throw Error(result.error||"Feedback failed.");
+  setOpen(false);setMessage("");setNotice("Thanks! Feedback submitted.");
+ }catch(e){setNotice(e instanceof Error?e.message:"Could not submit feedback.");}finally{setSaving(false);}}
+ return <><div className="fixed bottom-5 right-5 z-[70] flex flex-col items-end gap-2">{notice&&<p role="status" className="max-w-xs rounded-lg border bg-white px-3 py-2 text-xs shadow-lg">{notice}</p>}<button type="button" onClick={()=>{setOpen(true);setNotice("");}} className="rounded-full bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-xl hover:bg-indigo-700">✦ Feedback</button></div>{open&&<div role="presentation" className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/60 p-4"><form role="dialog" aria-modal="true" aria-label="Send feedback" onSubmit={submit} className="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-2xl"><div className="flex items-center justify-between"><h2 className="text-xl font-extrabold">Share your feedback</h2><button type="button" aria-label="Close feedback" onClick={()=>setOpen(false)}>✕</button></div><fieldset><legend className="mb-2 text-sm font-semibold">What would you like to share?</legend><div className="grid grid-cols-2 gap-2"><button type="button" aria-pressed={type==="feature"} onClick={()=>setType("feature")} className={`rounded-xl border p-3 text-sm font-semibold ${type==="feature"?"border-indigo-600 bg-indigo-50 text-indigo-700":"border-slate-200"}`}>Request a Feature</button><button type="button" aria-pressed={type==="bug"} onClick={()=>setType("bug")} className={`rounded-xl border p-3 text-sm font-semibold ${type==="bug"?"border-indigo-600 bg-indigo-50 text-indigo-700":"border-slate-200"}`}>Report a Bug</button></div></fieldset><label className="block text-sm font-semibold">Your message<textarea required minLength={10} maxLength={3000} value={message} onChange={e=>setMessage(e.target.value)} rows={5} placeholder="Tell us what would make SignDealDocs better…" className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-sm"/></label>{notice&&<p role="alert" className="text-xs text-rose-700">{notice}</p>}<button disabled={saving||message.trim().length<10} className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold text-white disabled:opacity-50">{saving?"Submitting…":"Submit Feedback"}</button></form></div>}</>;
+}

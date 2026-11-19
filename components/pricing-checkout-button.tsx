@@ -3,7 +3,7 @@ import {useState} from "react";
 import {useRouter} from "next/navigation";
 import {supabase} from "@/lib/supabase";
 type Plan="starter"|"pro"|"agency";
-export function PricingCheckoutButton({plan,className=""}:{plan:Plan;region?:"india"|"global";className?:string}){
+export function PricingCheckoutButton({plan,currency="USD",className=""}:{plan:Plan;currency?:"USD"|"INR";className?:string}){
  const [loading,setLoading]=useState(false),[error,setError]=useState("");
  const router=useRouter();
  async function start(){
@@ -13,7 +13,7 @@ export function PricingCheckoutButton({plan,className=""}:{plan:Plan;region?:"in
    const {data,error:authError}=await supabase.auth.getSession();
    if(authError)throw Error("Could not verify session.");
    if(!data.session){router.push("/login?next="+encodeURIComponent("/pricing"));return;}
-   const response=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${data.session.access_token}`},body:JSON.stringify({productId:plan})});
+   const response=await fetch("/api/checkout",{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${data.session.access_token}`},body:JSON.stringify({productId:plan,currency})});
    const raw=await response.text();
    let result:Record<string,unknown>={};
    try{result=JSON.parse(raw) as Record<string,unknown>;}catch{

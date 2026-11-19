@@ -152,7 +152,7 @@ export default function HomePage() {
 
       <footer className="border-t border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 pt-8 pb-28 sm:px-6 sm:pb-24 lg:px-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><Logo /><p className="mt-2 text-xs text-slate-500">{t("heroSub")}</p></div><div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-500"><a href="mailto:hello@signdealdocs.com" className="hover:text-slate-900">{t("footerContact")}</a><button type="button" onClick={()=>window.dispatchEvent(new Event("signdealdocs:open-feedback"))} className="text-left hover:text-indigo-700">Feedback</button></div></div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><Logo /><p className="mt-2 text-xs text-slate-500">{t("heroSub")}</p></div><div className="flex flex-wrap gap-4 text-xs font-semibold text-slate-500"><a href="mailto:hello@signdealdocs.com" className="hover:text-slate-900">{t("footerContact")}</a></div></div>
           <div className="flex flex-col gap-2 border-t border-slate-100 pt-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between"><span>{t("footerCopy",{year})}</span><span>{t("footerLine")}</span></div>
         </div>
       </footer>

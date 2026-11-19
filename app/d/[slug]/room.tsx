@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useState} from "react";
+import {useEffect,useRef,useState} from "react";
 import {Portal as LegacyPortal} from "./legacy-portal";
 import {SignContractModal} from "@/components/sign-contract-modal";
 
@@ -17,20 +17,55 @@ export function AgencyDealRoom({token}:{token:string}){
  const [busy,setBusy]=useState("");
  const [notifying,setNotifying]=useState(false);
  const [uploadSuccess,setUploadSuccess]=useState("");
+ const [toast,setToast]=useState("");
+ const scrollRef=useRef<HTMLElement|null>(null);
+ const loadId=useRef(0);
  async function load(){
+  const requestId=++loadId.current;
+  const scrollPosition=scrollRef.current?.scrollTop;
   const r=await fetch(`/api/deal-rooms/${encodeURIComponent(token)}`,{cache:"no-store"});
   const p=await r.json();
   if(!r.ok)throw Error(p.error||"Deal unavailable.");
+  if(requestId!==loadId.current)return;
   setDeal(p.deal);setItems(p.items);setEvents(p.events);
+  // Preserve the independent deal-room scroller when signing/uploading refreshes data.
+  if(scrollPosition!==undefined&&scrollRef.current)scrollRef.current.scrollTop=scrollPosition;
  }
- useEffect(()=>{let mounted=true;void (async()=>{try{await load();}catch(e){if(mounted)setError(e instanceof Error?e.message:"Deal unavailable.");}finally{if(mounted)setLoading(false);}})();return()=>{mounted=false;};},[token]);
+ useEffect(()=>{
+  let cancelled=false;
+  const controller=new AbortController();
+  const init=async()=>{
+   try{
+    const r=await fetch(`/api/deal-rooms/${encodeURIComponent(token)}`,{cache:"no-store",signal:controller.signal});
+    const p=await r.json();
+    if(!r.ok)throw Error(p.error||"Deal unavailable.");
+    if(cancelled)return;
+    setDeal(p.deal);setItems(p.items);setEvents(p.events);
+   }catch(e){if(!cancelled)setError(e instanceof Error?e.message:"Deal unavailable.");}
+   finally{if(!cancelled)setLoading(false);}
+  };
+  void init();
+  return()=>{cancelled=true;controller.abort();};
+ },[token]);
  async function sign(png:string){
   if(!active)return;
   const r=await fetch(`/api/deal-rooms/${encodeURIComponent(token)}/items/${active.id}/sign`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({signatureImage:png,consent:true})});
   const p=await r.json();if(!r.ok)throw Error(p.error||"Signing failed.");
   setActive(null);await load();setError("Contract Signed! Your deposit step is now available for review.");
  }
- async function notifyAgency(){setNotifying(true);setError("");try{const r=await fetch(`/api/deal-rooms/${encodeURIComponent(token)}/payment-notification`,{method:"POST"});const p=await r.json();if(!r.ok)throw Error(p.error||"Could not notify agency.");await load();if(p.emailSent===false)setError("Payment notification recorded, but the email could not be delivered. The agency can still see your notification in their dashboard.");}catch(e){setError(e instanceof Error?e.message:"Notification failed.");}finally{setNotifying(false);}}
+ async function notifyAgency(){
+  if(notifying||deal?.payment_notified_at)return;
+  setNotifying(true);setError("");
+  try{
+   const r=await fetch(`/api/deal-rooms/${encodeURIComponent(token)}/payment-notification`,{method:"POST"});
+   const p=await r.json();if(!r.ok)throw Error(p.error||"Could not notify agency.");
+   // Update local state only: do not reload the deal room or reset its scroll position.
+   setDeal(current=>current?{...current,payment_notified_at:new Date().toISOString()}:current);
+   setToast("Notification sent to agency.");
+   if(p.emailSent===false&&!p.already_notified)setError("Your payment report was recorded, but the agency email could not be delivered. The agency can still see it in the dashboard.");
+  }catch(e){setError(e instanceof Error?e.message:"Notification failed.");}
+  finally{setNotifying(false);}
+ }
  async function upload(item:Item,file?:File){
   if(!file)return;setBusy(item.id);setError("");setUploadSuccess("");
   try{
@@ -64,7 +99,7 @@ export function AgencyDealRoom({token}:{token:string}){
     <span className="shrink-0 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-2 text-[10px] font-semibold text-slate-600 sm:px-4 sm:text-xs">🔒 Secure Client Portal</span>
    </div>
   </header>
-  <main className="mx-auto min-h-0 w-full max-w-[800px] flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 pb-8 pt-8 sm:px-6 sm:pt-10">
+  <main ref={scrollRef} className="mx-auto min-h-0 w-full max-w-[800px] flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 pb-8 pt-8 sm:px-6 sm:pt-10">
    {projectConfirmed&&<div role="status" className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-7 text-center shadow-sm"><p className="text-2xl font-extrabold text-emerald-800">🎉 Project Confirmed! You&apos;re All Set.</p><p className="mt-2 text-sm text-emerald-700">Your contract is signed, payment is confirmed, and all requested files have been uploaded.</p></div>}
    <div className="pb-2 text-center"><p className="mb-3 text-xs font-bold uppercase tracking-[.18em]" style={{color}}>Your project workspace</p><h1 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">Project Proposal for <span className="font-bold" style={{color}}>{deal.client_name}</span></h1><p className="mt-4 text-sm text-slate-500 sm:text-base">Prepared by {brand} <span className="px-1">·</span> Valid until {expiry}</p></div>
    {error&&<p role="status" className="rounded-xl border border-indigo-200 bg-white px-5 py-4 text-sm text-slate-700 shadow-sm">{error}</p>}
@@ -81,13 +116,14 @@ export function AgencyDealRoom({token}:{token:string}){
    <section aria-labelledby="payment-title" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
     <div className="mb-4 flex flex-wrap items-start justify-between gap-3"><div><p className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-400">Step 03 · Payment</p><h2 id="payment-title" className="text-xl font-extrabold">3. Initial Deposit</h2></div><span className={`rounded-full px-3 py-1 text-xs font-bold ${deal.status==="paid"?"bg-emerald-100 text-emerald-700":signed?"bg-amber-100 text-amber-700":"bg-slate-100 text-slate-500"}`}>{deal.status==="paid"?"✓ Paid":signed?("Pending Payment"):"🔒 Locked"}</span></div>
     <p className="mb-5 text-sm leading-7 text-slate-600">A 50% deposit (<strong className="text-slate-900">{money(deposit)}</strong>) is required to secure your spot.</p>
-    {deal.status==="paid"?<p className="rounded-xl bg-emerald-50 p-4 text-center font-bold text-emerald-700">✓ Payment confirmed by agency</p>:deal.payment_notified_at&&deal.payment_method==="manual_upi"?<div role="status" className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white px-6 py-10 text-center shadow-sm"><div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-4xl font-bold text-emerald-700" aria-hidden="true">✓</div><h3 className="mt-5 text-2xl font-extrabold text-emerald-800">Payment Notification Sent</h3><p className="mx-auto mt-3 max-w-md text-sm leading-7 text-slate-600">The agency has been notified. They will verify your payment and update the status shortly. You can safely close this window.</p><p className="mt-3 text-xs text-slate-500">Your payment is not confirmed until the agency verifies it.</p></div>:!signed?<p className="rounded-xl bg-slate-100 p-4 text-center text-sm text-slate-500">🔒 Payment unlocks after signing</p>:deal.payment_method==="payment_link"?<div className="text-center">{deal.payment_link?<><a href={deal.payment_link} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer" className="flex w-full items-center justify-center rounded-xl bg-indigo-600 px-5 py-4 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700">Pay {money(deposit)} via Agency&apos;s Gateway ↗</a><p className="mt-3 text-xs text-slate-500">Payment is processed securely by the agency.</p><p className="mt-2 text-xs text-slate-500">After paying, the agency will verify your payment and update its status. Opening the payment link does not confirm payment.</p></>:<p className="text-sm text-rose-700">Payment link unavailable. Please contact the agency.</p>}</div>:deal.payment_method==="manual_upi"?<div className="text-center">{deal.upi_qr_url?<><img src={deal.upi_qr_url} alt={`UPI payment QR code for ${brand}`} className="mx-auto h-64 w-64 rounded-xl border border-slate-200 bg-white object-contain p-3"/><p className="mx-auto mt-4 max-w-md text-sm font-semibold text-slate-800">Scan this QR code with any UPI app (GPay, PhonePe, Paytm) to pay {money(deposit)}.</p><p className="mt-2 text-xs text-slate-500">Verify the recipient name and amount in your UPI app before paying.</p><button type="button" disabled={notifying||Boolean(deal.payment_notified_at)} onClick={()=>void notifyAgency()} className="mt-5 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white disabled:opacity-50">{deal.payment_notified_at?"Agency notified":notifying?"Notifying…":"I have paid — Notify Agency"}</button><p className="mt-2 text-xs text-slate-500">After paying, notify the agency here. Your payment will be confirmed once the agency verifies receipt.</p></>:<p className="text-sm text-rose-700">UPI QR code unavailable. Please contact the agency.</p>}</div>:<><button type="button" disabled className="w-full cursor-not-allowed rounded-xl bg-indigo-600 px-5 py-4 text-sm font-bold text-white opacity-60">Pay {money(deposit)} via Credit Card</button><p className="mt-3 text-center text-xs text-slate-500">Agency checkout setup is required before card payments can be accepted.</p></>}
+    {deal.status==="paid"?<p className="rounded-xl bg-emerald-50 p-4 text-center font-bold text-emerald-700">✓ Payment confirmed by agency</p>:!signed?<p className="rounded-xl bg-slate-100 p-4 text-center text-sm text-slate-500">🔒 Payment unlocks after signing</p>:deal.payment_method==="payment_link"?<div className="text-center">{deal.payment_link?<><a href={deal.payment_link} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer" className="flex w-full items-center justify-center rounded-xl bg-indigo-600 px-5 py-4 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700">Pay {money(deposit)} via Agency&apos;s Gateway ↗</a><p className="mt-3 text-xs text-slate-500">Payment is processed securely by the agency.</p><p className="mt-2 text-xs text-slate-500">After paying, the agency will verify your payment and update its status. Opening the payment link does not confirm payment.</p></>:<p className="text-sm text-rose-700">Payment link unavailable. Please contact the agency.</p>}</div>:deal.payment_method==="manual_upi"?<div className="text-center">{deal.upi_qr_url?<><img src={deal.upi_qr_url} alt={`UPI payment QR code for ${brand}`} className="mx-auto h-64 w-64 rounded-xl border border-slate-200 bg-white object-contain p-3 shadow-sm"/><p className="mx-auto mt-4 max-w-md text-sm font-semibold text-slate-800">Scan with any UPI app (GPay, PhonePe, Paytm).</p><p className="mt-2 text-sm font-semibold text-slate-700">Deposit: {money(deposit)}</p><p className="mt-2 text-xs text-slate-500">Verify the recipient name and amount in your UPI app before paying.</p><button type="button" disabled={notifying||Boolean(deal.payment_notified_at)} onClick={()=>void notifyAgency()} className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-indigo-300 bg-white px-5 py-3 text-sm font-bold text-indigo-700 transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:border-emerald-200 disabled:bg-emerald-50 disabled:text-emerald-700">{notifying?<><span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-200 border-t-indigo-600"/>Sending notification…</>:deal.payment_notified_at?"Agency Notified ✓":`I have paid ${money(deposit)} — Notify Agency`}</button><p className="mt-2 text-xs text-slate-500">{deal.payment_notified_at?"Your report has been recorded. Payment remains pending until the agency verifies receipt.":"After paying, notify the agency here. Your payment will be confirmed once the agency verifies receipt."}</p></>:<p className="text-sm text-rose-700">UPI QR code unavailable. Please contact the agency.</p>}</div>:<><button type="button" disabled className="w-full cursor-not-allowed rounded-xl bg-indigo-600 px-5 py-4 text-sm font-bold text-white opacity-60">Pay {money(deposit)} via Credit Card</button><p className="mt-3 text-center text-xs text-slate-500">Agency checkout setup is required before card payments can be accepted.</p></>}
    </section>
    {uploadSuccess&&<p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-800">✓ {uploadSuccess}</p>}
    {uploads.map(item=><section key={item.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8"><p className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-400">Step 04 · Onboarding</p><h2 className="text-lg font-bold">{item.title}</h2><p className="mt-2 text-sm text-slate-500">Upload a PDF, PNG, JPG, or WebP file (up to 8 MB).</p><label className="mt-5 block cursor-pointer rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 px-5 py-8 text-center text-sm font-bold text-slate-600 hover:bg-slate-100">{busy===item.id?"Uploading…":item.status==="uploaded"?"✓ Uploaded · Upload Files":"Choose a file to upload"}<input type="file" className="sr-only" accept=".pdf,.png,.jpg,.jpeg,.webp" disabled={Boolean(busy)} onChange={e=>{void upload(item,e.target.files?.[0]);e.target.value="";}}/></label></section>)}
    {events.length>0&&<section className="rounded-xl border border-slate-200 bg-white px-6 py-5"><h2 className="text-sm font-bold text-slate-700">Recent activity</h2><div className="mt-3 space-y-2">{events.slice(0,4).map(e=><p key={e.id} className="flex items-center gap-2 text-xs text-slate-500"><span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${e.action==="signed"?"bg-emerald-500":"bg-slate-400"}`}/>{new Date(e.created_at).toLocaleString()} · {e.action.replace(/_/g," ").replace(/\b\w/g,letter=>letter.toUpperCase())}</p>)}</div></section>}
   </main>
   <footer className="shrink-0 border-t border-slate-200 bg-white px-4 py-3 text-center text-xs text-slate-400">Powered securely by <a href="https://www.signdealdocs.com" target="_blank" rel="noopener noreferrer" className="font-semibold text-slate-500 underline-offset-2 hover:underline">SignDealDocs</a></footer>
+  {toast&&<div role="status" aria-live="polite" className="pointer-events-none fixed bottom-16 right-4 z-50 max-w-sm rounded-xl border border-emerald-200 bg-white px-5 py-3 text-sm font-semibold text-emerald-800 shadow-lg">✓ {toast}<button type="button" aria-label="Dismiss notification" onClick={()=>setToast("")} className="pointer-events-auto ml-4 text-slate-500 hover:text-slate-900">✕</button></div>}
   {active&&<SignContractModal pdfUrl={active.pdf_url} brandColor={color} onClose={()=>setActive(null)} onSign={sign}/>}
  </div>;
 }

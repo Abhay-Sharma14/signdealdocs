@@ -13,7 +13,7 @@ async function owner(request: Request) {
 export async function GET(request: Request) {
  const user = await owner(request);
  if (!user) return NextResponse.json({error:"Sign in required."},{status:401});
- const {data,error}=await getSupabaseAdmin().from("signature_requests").select("id,token,title,signer_name,signer_email,original_name,signed_at,created_at,expires_at,revoked_at").eq("owner_id",user.id).order("created_at",{ascending:false}).limit(100);
+ const {data,error}=await getSupabaseAdmin().from("signature_requests").select("id,token,title,signer_name,signer_email,original_name,signed_at,created_at,expires_at,revoked_at,type,completed_pdf_path").eq("owner_id",user.id).eq("type","quick_sign").is("revoked_at",null).order("created_at",{ascending:false}).limit(100);
  return error?NextResponse.json({error:"Could not load requests."},{status:500}):NextResponse.json({requests:data},{headers:{"Cache-Control":"no-store"}});
 }
 export async function POST(request: Request) {
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
  const storage=getSupabaseAdmin().storage.from(bucket);
  const {error:uploadError}=await storage.upload(path,bytes,{contentType:"application/pdf",upsert:false});
  if(uploadError)return NextResponse.json({error:"Could not upload PDF."},{status:500});
- const {data,error}=await getSupabaseAdmin().from("signature_requests").insert({owner_id:user.id,token,title,signer_name:signerName,signer_email:signerEmail,original_name:file.name.slice(0,180),document_path:path}).select("id,token").single();
+ const {data,error}=await getSupabaseAdmin().from("signature_requests").insert({owner_id:user.id,type:"quick_sign",token,title,signer_name:signerName,signer_email:signerEmail,original_name:file.name.slice(0,180),document_path:path}).select("id,token").single();
  if(error){await storage.remove([path]);return NextResponse.json({error:"Could not create signature request. Apply the database migration first."},{status:500});}
  const {data:settings}=await getSupabaseAdmin().from("agency_settings").select("agency_name").eq("owner_id",user.id).maybeSingle();
  const agencyName=(settings?.agency_name||"SignDealDocs").slice(0,100);

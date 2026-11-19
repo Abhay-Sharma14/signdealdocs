@@ -54,8 +54,8 @@ export function AgencyDealRoom({token}:{token:string}){
  const deposit=Number(deal.amount||0)*0.5;
  const money=(value:number)=>new Intl.NumberFormat("en-US",{style:"currency",currency:deal.currency||"USD",maximumFractionDigits:2}).format(value);
  const expiry=deal.valid_until?new Date(deal.valid_until).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):"Date to be confirmed";
- return <div className="flex min-h-screen flex-col bg-[#f7f8fc] text-slate-900">
-  <header className="sticky top-0 z-30 border-b border-slate-200/90 bg-white/95 shadow-sm backdrop-blur">
+ return <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-[#f7f8fc] text-slate-900">
+  <header className="z-30 shrink-0 border-b border-slate-200/90 bg-white/95 shadow-sm backdrop-blur">
    <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-8">
     <div className="flex min-w-0 items-center gap-3">
      {deal.logo_url?<img src={deal.logo_url} alt={`${brand} logo`} className="h-11 w-11 rounded-xl border border-slate-100 object-contain p-1"/>:<div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg font-extrabold text-white shadow-sm" style={{backgroundColor:color}}>{brand.slice(0,1).toUpperCase()}</div>}
@@ -64,7 +64,7 @@ export function AgencyDealRoom({token}:{token:string}){
     <span className="shrink-0 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-2 text-[10px] font-semibold text-slate-600 sm:px-4 sm:text-xs">🔒 Secure Client Portal</span>
    </div>
   </header>
-  <main className="mx-auto w-full max-w-[800px] flex-1 space-y-6 px-4 pb-14 pt-10 sm:px-6 sm:pt-14">
+  <main className="mx-auto min-h-0 w-full max-w-[800px] flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 pb-8 pt-8 sm:px-6 sm:pt-10">
    {projectConfirmed&&<div role="status" className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-7 text-center shadow-sm"><p className="text-2xl font-extrabold text-emerald-800">🎉 Project Confirmed! You&apos;re all set.</p><p className="mt-2 text-sm text-emerald-700">Your contract is signed, payment is confirmed, and requested files have been uploaded.</p></div>}
    <div className="pb-2 text-center"><p className="mb-3 text-xs font-bold uppercase tracking-[.18em]" style={{color}}>Your project workspace</p><h1 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">Project Proposal for <span style={{color}}>{deal.client_name}</span></h1><p className="mt-4 text-sm text-slate-500 sm:text-base">Prepared by {brand} <span className="px-1">·</span> Valid until {expiry}</p></div>
    {error&&<p role="status" className="rounded-xl border border-indigo-200 bg-white px-5 py-4 text-sm text-slate-700 shadow-sm">{error}</p>}
@@ -87,7 +87,7 @@ export function AgencyDealRoom({token}:{token:string}){
    {uploads.map(item=><section key={item.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8"><p className="mb-1 text-xs font-bold uppercase tracking-wider text-slate-400">Step 04 · Onboarding</p><h2 className="text-lg font-bold">{item.title}</h2><p className="mt-2 text-sm text-slate-500">Upload PDF, PNG, JPG or WebP (up to 8 MB).</p><label className="mt-5 block cursor-pointer rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 px-5 py-8 text-center text-sm font-bold text-slate-600 hover:bg-slate-100">{busy===item.id?"Uploading…":item.status==="uploaded"?"✓ Uploaded · Add another file":"Choose a file to upload"}<input type="file" className="sr-only" accept=".pdf,.png,.jpg,.jpeg,.webp" disabled={Boolean(busy)} onChange={e=>{void upload(item,e.target.files?.[0]);e.target.value="";}}/></label></section>)}
    {events.length>0&&<section className="rounded-xl border border-slate-200 bg-white px-6 py-5"><h2 className="text-sm font-bold text-slate-700">Recent activity</h2><div className="mt-3 space-y-2">{events.slice(0,4).map(e=><p key={e.id} className="flex items-center gap-2 text-xs text-slate-500"><span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${e.action==="signed"?"bg-emerald-500":"bg-slate-400"}`}/>{new Date(e.created_at).toLocaleString()} · {e.action}</p>)}</div></section>}
   </main>
-  <footer className="border-t border-slate-200 bg-white px-4 py-6 text-center text-xs text-slate-400">Powered securely by <a href="https://www.signdealdocs.com" target="_blank" rel="noopener noreferrer" className="font-semibold text-slate-500 underline-offset-2 hover:underline">SignDealDocs</a></footer>
+  <footer className="shrink-0 border-t border-slate-200 bg-white px-4 py-3 text-center text-xs text-slate-400">Powered securely by <a href="https://www.signdealdocs.com" target="_blank" rel="noopener noreferrer" className="font-semibold text-slate-500 underline-offset-2 hover:underline">SignDealDocs</a></footer>
   {active&&<SignContractModal pdfUrl={active.pdf_url} brandColor={color} onClose={()=>setActive(null)} onSign={sign}/>}
  </div>;
 }

@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+// Pricing is a public search landing page; metadata is inherited from the root layout.
 import {IndiaPricing} from "@/components/india-pricing";
 import {PricingCheckoutButton} from "@/components/pricing-checkout-button";
 const plans=[{name:"Starter",price:"$0",description:"Try the agency workflow",features:["3 deal rooms","Signatures and document requests","SignDealDocs watermark"],plan:"starter"},{name:"Pro",price:"$29",description:"For independent agencies",features:["Unlimited deal rooms","Custom agency logo and colors","No SignDealDocs watermark"],plan:"pro"},{name:"Agency",price:"$49",description:"For growing agencies",features:["Everything in Pro","Priority Support","Up to 3 Team Members"],plan:"agency"}] as const;

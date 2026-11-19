@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import {useEffect,useState,type FormEvent} from "react";
+import {useEffect,useRef,useState,type ChangeEvent,type DragEvent,type FormEvent} from "react";
 import {useRouter} from "next/navigation";
 import {Logo} from "@/components/logo";
 import {SiteFooter} from "@/components/site-footer";
@@ -13,6 +13,16 @@ export default function NewSignaturePage(){
  const [name,setName]=useState("");
  const [email,setEmail]=useState("");
  const [file,setFile]=useState<File|null>(null);
+ const [dragging,setDragging]=useState(false);
+ const fileInput=useRef<HTMLInputElement>(null);
+ function chooseFile(next:File|null){
+  if(next && (next.size>3_000_000 || (!next.name.toLowerCase().endsWith(".pdf") && next.type!=="application/pdf"))){setError("Choose a PDF smaller than 3 MB.");return;}
+  setFile(next);setError("");
+ }
+ function onFileChange(event:ChangeEvent<HTMLInputElement>){chooseFile(event.target.files?.[0]??null);}
+ function onFileDrop(event:DragEvent<HTMLDivElement>){event.preventDefault();setDragging(false);chooseFile(event.dataTransfer.files?.[0]??null);}
+ function removeFile(){setFile(null);if(fileInput.current)fileInput.current.value="";}
+
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState("");
  const [created,setCreated]=useState("");
@@ -39,7 +49,7 @@ export default function NewSignaturePage(){
  const res=await fetch("/api/signatures",{method:"POST",headers:{Authorization:`Bearer ${data.session.access_token}`},body:form});
  const payload=await res.json();if(!res.ok)throw Error(payload.error??"Could not create request.");
  const url=`${window.location.origin}/sign/${payload.request.token}`;setCreated(url);setShareTitle(title);setShareEmail(email);setEmailSent(payload.email_sent===true);setEmailStatus(payload.email_sent?"Invitation emailed to signer.":"Email delivery could not be confirmed. Please share the link manually.");
- setTitle("");setName("");setEmail("");setFile(null);
+ setTitle("");setName("");setEmail("");removeFile();
  }catch(cause){setError(cause instanceof Error?cause.message:"Request failed.");}finally{setBusy(false);}
  }
  return <div className="flex min-h-screen flex-col bg-slate-50"><header className="border-b bg-white"><div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-5"><Logo href="/dashboard"/><Link href="/dashboard" className="text-sm font-semibold text-indigo-700">Dashboard</Link></div></header>
@@ -48,10 +58,18 @@ export default function NewSignaturePage(){
  <label className="block text-sm font-semibold">Document title<input required maxLength={160} value={title} onChange={e=>setTitle(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="Service Agreement"/></label>
  <label className="block text-sm font-semibold">Signer name<input required value={name} onChange={e=>setName(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="Full legal name"/></label>
  <label className="block text-sm font-semibold">Signer email<input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="client@example.com"/></label>
- <label className="block text-sm font-semibold">PDF document (max 3 MB)<input required type="file" accept="application/pdf,.pdf" onChange={e=>setFile(e.target.files?.[0]??null)} className="mt-2 block w-full rounded-xl border border-slate-200 p-3 text-sm"/></label>
+ <div><p className="mb-2 text-sm font-semibold">PDF document (max 3 MB)</p>
+ <div onDragOver={event=>{event.preventDefault();setDragging(true);}} onDragLeave={event=>{event.preventDefault();setDragging(false);}} onDrop={onFileDrop} className={`relative rounded-lg border-2 border-dashed p-6 text-center transition-colors ${dragging?"border-indigo-500 bg-indigo-50":"border-gray-300 bg-gray-50 hover:border-indigo-300"}`}>
+ <input ref={fileInput} id="signature-pdf" type="file" accept="application/pdf,.pdf" onChange={onFileChange} className="sr-only" aria-describedby="signature-pdf-help"/>
+ {!file?<label htmlFor="signature-pdf" className="block cursor-pointer rounded-md focus-within:ring-2 focus-within:ring-indigo-500">
+ <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-3 h-9 w-9 text-indigo-500"><path d="M7 18a5 5 0 0 1-.5-10A6.5 6.5 0 0 1 19 10a4 4 0 0 1-1 8"/><path d="M12 21V11m-4 4 4-4 4 4"/></svg>
+ <span id="signature-pdf-help" className="text-sm font-semibold text-slate-700">Click to upload or drag and drop</span><span className="mt-1 block text-xs text-slate-500">PDF max 3MB</span>
+ </label>:<div className="flex items-center justify-between gap-3 rounded-lg border border-indigo-100 bg-white px-3 py-3 text-left"><div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-800">📄 {file.name}</p><p className="text-xs text-slate-500">{(file.size/1024/1024).toFixed(2)} MB · PDF selected</p></div><button type="button" onClick={removeFile} aria-label="Remove selected PDF" className="shrink-0 rounded-lg p-2 font-bold text-slate-500 hover:bg-rose-50 hover:text-rose-600">✕</button></div>}
+ </div></div>
  {error&&<p role="alert" className="text-sm text-rose-700">{error}</p>}
  <button disabled={busy} className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold text-white disabled:opacity-50">{busy?"Creating…":"Create Secure Signing Link"}</button>
  <p className="text-xs text-slate-500">Signing links expire after 7 days for security. We will automatically email the link to your signer.</p>
+ <p className="text-center text-xs font-medium text-slate-500">Built for modern agencies in India, the US, and Europe.</p>
  {created&&<div className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
  <div className="flex items-center gap-2"><span aria-hidden="true" className="text-xl">✅</span><h2 className="text-base font-extrabold text-slate-900">Secure signing link created</h2></div>
  <label htmlFor="created-signing-link" className="mt-4 block text-xs font-semibold text-slate-500">Your secure signing link</label>
@@ -67,6 +85,7 @@ export default function NewSignaturePage(){
  </form><aside className="space-y-5">
 
  <section className="rounded-2xl border border-slate-200 bg-gray-50 p-6 shadow-sm"><p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-indigo-600"><span aria-hidden="true" className="text-lg">🛡</span>Why use SignDealDocs?</p><h2 className="mt-3 text-xl font-extrabold text-slate-950">Legally binding &amp; secure</h2><ul className="mt-5 space-y-3 text-sm font-semibold text-slate-700"><li>✓ ESIGN &amp; UETA compliant signatures</li><li>✓ Tamper-proof audit trail</li><li>✓ Instant PDF flattening</li></ul></section>
+ <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><h3 className="text-sm font-extrabold text-slate-900">How it works</h3><ol className="mt-5 space-y-4">{["Upload your PDF.","Share the private link.","Client signs securely."].map((step,index)=><li key={step} className="flex items-center gap-3 text-sm font-medium text-slate-500"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-indigo-100 bg-indigo-50 text-xs font-bold text-indigo-700">{index+1}</span>{step}</li>)}</ol></section>
  </aside></div>}
  </main><SiteFooter compact /></div>;
 }

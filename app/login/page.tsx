@@ -10,7 +10,7 @@ type Mode = "sign-in" | "sign-up";
 
 export default function LoginPage() {
   const nextPath = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("next") === "/signatures/new" ? "/signatures/new" : "/dashboard";
-  const [mode, setMode] = useState<Mode>("sign-in");
+  const [mode, setMode] = useState<Mode>(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("mode") === "signup" ? "sign-up" : "sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

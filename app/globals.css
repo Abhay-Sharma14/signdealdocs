@@ -115,7 +115,7 @@ body {
 }
 @keyframes testimonial-marquee-scroll {
   from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  to { transform: translateX(calc(-50% - 8px)); }
 }
 @media (prefers-reduced-motion: reduce) {
   .testimonial-marquee-track { animation: none; }

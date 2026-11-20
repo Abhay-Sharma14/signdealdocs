@@ -7,12 +7,16 @@ import {admin,BUCKET,owner,jsonError} from "@/lib/deal-room";
 export const runtime="nodejs";
 export async function POST(request:Request){
  const user=await owner(request);if(!user)return jsonError("Sign in required.",401);
- if(Number(request.headers.get("content-length")||0)>7_000_000)return jsonError("Uploads too large.",413);
+ if(Number(request.headers.get("content-length")||0)>8_000_000)return jsonError("Uploads too large.",413);
  let form:FormData;try{form=await request.formData();}catch{return jsonError("Invalid form.",400);}
  const client_name=String(form.get("client_name")||"").trim().slice(0,120);
  const client_email=String(form.get("client_email")||"").trim().toLowerCase();
  const project_title=String(form.get("project_title")||"Project Proposal").trim().slice(0,160);
  const amount=Number(form.get("amount")||0);
+ const deposit_percent=Number(form.get("deposit_percent")||50);
+ const valid_until=String(form.get("valid_until")||"");
+ if(!Number.isFinite(deposit_percent)||deposit_percent<=0||deposit_percent>100)return jsonError("Deposit must be between 0 and 100 percent.",400);
+ if(valid_until&&(!/^\d{4}-\d{2}-\d{2}$/.test(valid_until)||Number.isNaN(Date.parse(valid_until))||Date.parse(valid_until+"T23:59:59Z")<=Date.now()))return jsonError("Choose a future expiry date.",400);
 
  const payment_method=String(form.get("payment_method")||"auto");
  if(!["auto","manual_upi","payment_link"].includes(payment_method))return jsonError("Invalid payment method.",400);
@@ -64,7 +68,7 @@ export async function POST(request:Request){
  let inserted=false;
  for(let attempt=0;attempt<5;attempt++){
   slug=newDealSlug();
-  const {error}=await admin().from("deals").insert({id:dealId,user_id:user.id,slug,client_name,client_email,project_title,amount,currency,payment_method,payment_link,upi_qr_path:payment_method==="manual_upi"?uploads.find(u=>u.type==="upi_qr")?.path:null,status:"sent",brand_name,brand_color:paid?brand_color:"#4f46e5",required_documents:[],proposal:null});
+  const {error}=await admin().from("deals").insert({id:dealId,user_id:user.id,slug,client_name,client_email,project_title,amount,currency,deposit_percent,link_expires_at:valid_until?valid_until+"T23:59:59Z":null,payment_method,payment_link,upi_qr_path:payment_method==="manual_upi"?uploads.find(u=>u.type==="upi_qr")?.path:null,status:"sent",brand_name,brand_color:paid?brand_color:"#4f46e5",required_documents:[],proposal:null});
   if(!error){inserted=true;break;}
   if(error.code!=="23505"){if(error.code==="P0001"){await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError("Upgrade required",403);}console.error("Deal insert failed",{code:error.code,message:error.message,details:error.details});await admin().storage.from(BUCKET).remove(uploads.map(u=>u.path));return jsonError(error.code==="PGRST204"||error.code==="42703"?"Deal database columns are missing. Apply migration 202611180008_manual_upi_payments.sql.":"Could not create deal. Check database migration and server logs.",500);}
  }
@@ -85,7 +89,7 @@ export async function PATCH(request:Request){
  const user=await owner(request);if(!user)return jsonError("Sign in required.",401);
  let body:{id?:string};try{body=await request.json();}catch{return jsonError("Invalid request.",400);}
  if(!body.id||!/^[a-f0-9-]{36}$/i.test(body.id))return jsonError("Invalid deal.",400);
- const {data:deal,error:readError}=await admin().from("deals").select("id,status,payment_method,paid_at").eq("id",body.id).eq("user_id",user.id).maybeSingle();
+ const {data:deal,error:readError}=await admin().from("deals").select("id,status,payment_method,paid_at,client_email,client_name,project_title,amount,currency,slug").eq("id",body.id).eq("user_id",user.id).maybeSingle();
  if(readError)return jsonError("Could not load deal.",500);
  if(!deal)return jsonError("Deal not found.",404);
  if(!["manual_upi","payment_link"].includes(deal.payment_method))return jsonError("Only manually verified payments can be marked paid.",400);
@@ -97,7 +101,18 @@ export async function PATCH(request:Request){
  if(!updated)return jsonError("Payment already updated. Refresh.",409);
  const {error:auditError}=await admin().from("audit_log").insert({deal_id:deal.id,action:"paid",actor_email:user.email});
  if(auditError)console.error("Payment audit insert failed",auditError);
- return Response.json({ok:true});
+ // Payment confirmation is authoritative even if email delivery fails.
+ let emailSent=false;
+ const key=process.env.RESEND_API_KEY,from=process.env.RESEND_FROM_EMAIL;
+ if(key&&from&&deal.client_email){
+  try{
+   const base=process.env.NEXT_PUBLIC_SITE_URL||new URL(request.url).origin;
+   const response=await fetch("https://api.resend.com/emails",{method:"POST",headers:{Authorization:`Bearer ${key}`,"Content-Type":"application/json"},body:JSON.stringify({from,to:[deal.client_email],subject:"Payment confirmed — "+deal.project_title,text:`Hello ${deal.client_name},\n\nYour agency has verified the payment for ${deal.project_title}.\n\nYou can view your signed agreement and upload requested documents in your secure Deal Room:\n${base}/d/${deal.slug}\n\nThis is a payment acknowledgement from your agency's workflow, not a tax invoice.\n\nSignDealDocs`})});
+   emailSent=response.ok;
+   if(!response.ok)console.error("Payment confirmation email failed",response.status);
+  }catch(error){console.error("Payment confirmation email error",error);}
+ }
+ return Response.json({ok:true,emailSent});
 }
 export async function DELETE(request:Request){
  const user=await owner(request);if(!user)return jsonError("Sign in required.",401);

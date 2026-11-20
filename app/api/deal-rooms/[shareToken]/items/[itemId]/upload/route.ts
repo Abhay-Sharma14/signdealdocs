@@ -9,6 +9,9 @@ export async function POST(request:Request,{params}:C){
  if(Number(request.headers.get("content-length")||0)>10_000_000)return jsonError("File exceeds 8 MB.",413);
  const {data:item}=await admin().from("deal_items").select("*").eq("id",itemId).eq("deal_id",deal.id).eq("type","file_request").maybeSingle();
  if(!item)return jsonError("File request unavailable.",404);
+ if(!deal.payment_notified_at&&!deal.paid_at&&deal.status!=="paid")return jsonError("Submit deposit payment details before uploading assets.",409);
+ const {data:contract}=await admin().from("deal_items").select("status").eq("deal_id",deal.id).eq("type","contract").maybeSingle();
+ if(contract?.status!=="signed")return jsonError("Sign the agreement before uploading assets.",409);
  let form:FormData;try{form=await request.formData();}catch{return jsonError("Invalid upload.",400);}
  const file=form.get("file");if(!(file instanceof File)||file.size<1||file.size>8_000_000)return jsonError("Choose a file under 8 MB.",400);
  const types=new Set(["application/pdf","image/png","image/jpeg","image/webp"]);

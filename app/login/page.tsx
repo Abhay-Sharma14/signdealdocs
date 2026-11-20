@@ -18,6 +18,7 @@ export default function LoginPage() {
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("mode") === "signup") void Promise.resolve().then(() => setMode("sign-up"));
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) window.location.replace(nextPath);
     });

@@ -10,7 +10,7 @@ type Mode = "sign-in" | "sign-up";
 
 export default function LoginPage() {
   const nextPath = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("next") === "/signatures/new" ? "/signatures/new" : "/dashboard";
-  const [mode, setMode] = useState<Mode>(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("mode") === "signup" ? "sign-up" : "sign-in");
+  const [mode, setMode] = useState<Mode>("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,6 +18,7 @@ export default function LoginPage() {
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("mode") === "signup") void Promise.resolve().then(() => setMode("sign-up"));
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) window.location.replace(nextPath);
     });

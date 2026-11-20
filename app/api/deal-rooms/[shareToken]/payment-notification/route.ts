@@ -12,7 +12,7 @@ export async function POST(request:Request,{params}:C){
  if(deal.payment_notified_at)return Response.json({ok:true,already_notified:true});
  let body:unknown;try{body=await request.json();}catch{return jsonError("Invalid payment report.",400);}
  const reference=typeof (body as {reference?:unknown})?.reference==="string"?(body as {reference:string}).reference.trim():"";
- if(reference.length>120||reference&&!/^[a-zA-Z0-9 ._/#-]+$/.test(reference))return jsonError("Enter a valid transaction reference (up to 120 characters).",400);
+ if(!/^[a-zA-Z0-9 ._/#-]{10,120}$/.test(reference))return jsonError("Enter a valid payment transaction reference (10–120 characters).",400);
  const now=new Date().toISOString();
  const {data:updated,error}=await admin().from("deals").update({payment_notified_at:now,payment_reference:reference||null,payment_reported_method:deal.payment_method}).eq("id",deal.id).is("payment_notified_at",null).select("id").maybeSingle();
  if(error)return jsonError("Could not record notification.",500);

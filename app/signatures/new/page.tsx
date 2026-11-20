@@ -25,7 +25,7 @@ export default function NewSignaturePage(){
  const [agencyName,setAgencyName]=useState("Your Agency");
  const [generating,setGenerating]=useState(false);
  const [pdfBusy,setPdfBusy]=useState(false);
- useEffect(()=>{if(!file){setPreviewUrl("");setPageCount(null);return;}const url=URL.createObjectURL(file);setPreviewUrl(url);void file.arrayBuffer().then(bytes=>PDFDocument.load(bytes).then(pdf=>setPageCount(pdf.getPageCount())).catch(()=>setPageCount(null)));return()=>URL.revokeObjectURL(url);},[file]);
+ useEffect(()=>{if(!file)return;const url=URL.createObjectURL(file);let cancelled=false;void file.arrayBuffer().then(bytes=>PDFDocument.load(bytes)).then(pdf=>{if(!cancelled){setPreviewUrl(url);setPageCount(pdf.getPageCount());}}).catch(()=>{if(!cancelled){setPreviewUrl(url);setPageCount(null);}});return()=>{cancelled=true;URL.revokeObjectURL(url);};},[file]);
  async function generate(refinement=""){setGenerating(true);setError("");try{const {data}=await supabase.auth.getSession();if(!data.session)throw Error("Sign in again.");const res=await fetch("/api/signatures/draft",{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${data.session.access_token}`},body:JSON.stringify({type:documentType,law,scope,title,signer:name,refinement,previous:draft})});const payload=await res.json();if(!res.ok)throw Error(payload.error||"Draft failed.");setDraft(payload.draft);setAgencyName(payload.agencyName||"Your Agency");}catch(e){setError(e instanceof Error?e.message:"AI drafting failed.");}finally{setGenerating(false);}}
  async function draftPdf(){const pdf=await PDFDocument.create();const font=await pdf.embedFont(StandardFonts.Helvetica);const bold=await pdf.embedFont(StandardFonts.HelveticaBold);const margin=46;const width=595;const maxWidth=width-margin*2;let page=pdf.addPage([595,842]);let y=792;
  const addLine=(text:string,size=10,heavy=false)=>{const face=heavy?bold:font;const sanitized=text.replace(/[^\x20-\x7E]/g," ").trim();if(!sanitized){y-=12;return;}const words=sanitized.split(/\s+/);let line="";const flush=()=>{if(!line)return;if(y<60){page=pdf.addPage([595,842]);y=792;}page.drawText(line,{x:margin,y,size,font:face,color:rgb(0.15,0.2,0.3)});y-=size+6;line="";};for(const word of words){const test=line?line+" "+word:word;if(face.widthOfTextAtSize(test,size)>maxWidth&&line)flush();line=line?line+" "+word:word;}flush();};
@@ -34,7 +34,7 @@ export default function NewSignaturePage(){
  const fileInput=useRef<HTMLInputElement>(null);
  function chooseFile(next:File|null){
   if(next && (next.size>15_000_000 || (!next.name.toLowerCase().endsWith(".pdf") && next.type!=="application/pdf"))){setError("Choose a PDF smaller than 15 MB.");return;}
-  setFile(next);setError("");
+  setPreviewUrl("");setPageCount(null);setFile(next);setError("");
  }
  function onFileChange(event:ChangeEvent<HTMLInputElement>){chooseFile(event.target.files?.[0]??null);}
  function onFileDrop(event:DragEvent<HTMLDivElement>){event.preventDefault();setDragging(false);chooseFile(event.dataTransfer.files?.[0]??null);}

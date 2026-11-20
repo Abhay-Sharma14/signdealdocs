@@ -35,7 +35,8 @@ export function magicLink(slug: string) {
   return `https://signdealdocs.com/d/${slug}`;
 }
 
-export function makeSlug(_title: string) {
+export function makeSlug(title: string) {
+  void title;
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }

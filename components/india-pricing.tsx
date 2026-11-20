@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useState} from "react";
+import {useSyncExternalStore} from "react";
 import {usePathname} from "next/navigation";
 import {isIndiaVisitor} from "@/lib/visitor-region";
 
@@ -24,16 +24,12 @@ function visitorCurrency():Currency{
  if(language.endsWith("-CA"))return "CAD";
  return "USD";
 }
-function selectedCurrency(pathname:string|null):Currency{
- // Explicit language selection takes precedence over location.
- if(/^\/(fr|de)(?:\/|$)/.test(pathname||""))return "EUR";
- if(/^\/ja(?:\/|$)/.test(pathname||""))return "JPY";
- return visitorCurrency();
-}
+function subscribeVisitor(){return ()=>{};}
+function serverCurrency():Currency{return "USD";}
 export function IndiaPricing({plan,monthlyLabel="/mo"}:{plan:Plan;monthlyLabel?:string}){
  const pathname=usePathname();
- const [currency,setCurrency]=useState<Currency>("USD");
- useEffect(()=>{setCurrency(selectedCurrency(pathname));},[pathname]);
+ const visitor=useSyncExternalStore(subscribeVisitor,visitorCurrency,serverCurrency);
+ const currency=/^\/(fr|de)(?:\/|$)/.test(pathname||"")?"EUR":/^\/ja(?:\/|$)/.test(pathname||"")?"JPY":visitor;
  const usd=usdPrices[plan];
  const amount=currency==="INR"?indiaPrices[plan]:Math.round(usd*rates[currency]);
  const display=new Intl.NumberFormat(currency==="INR"?"en-IN":currency==="JPY"?"ja-JP":currency==="EUR"?"de-DE":"en-US",{style:"currency",currency,maximumFractionDigits:0}).format(amount);

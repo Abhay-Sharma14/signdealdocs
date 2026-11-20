@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useState} from "react";
+import {useSyncExternalStore} from "react";
 import {isIndiaVisitor} from "@/lib/visitor-region";
 import type {DealCurrency} from "@/lib/deal-currency";
 
@@ -20,8 +20,8 @@ export function detectCurrency():DealCurrency{
  if(language.endsWith("-CA"))return "CAD";
  return "USD";
 }
+function subscribeCurrency(){return ()=>{};}
+function serverCurrency():DealCurrency{return "USD";}
 export function useCurrency():DealCurrency{
- const [currency,setCurrency]=useState<DealCurrency>("USD");
- useEffect(()=>{setCurrency(detectCurrency());},[]);
- return currency;
+ return useSyncExternalStore(subscribeCurrency,detectCurrency,serverCurrency);
 }

@@ -7,6 +7,21 @@ import {SignatureCapture} from "@/components/signature-capture";
 type RequestData={title:string;signer_name:string;original_name:string;pdf_url:string|null;signature_url:string|null;signed_at:string|null;pages:{width:number;height:number}[]};
 export default function SignPage(){
  const params=useParams<{token:string}>();
+ useEffect(()=>{
+  // This page has its own content scroller; prevent the document behind it from scrolling.
+  const html=document.documentElement;
+  const body=document.body;
+  const previousHtmlOverflow=html.style.overflow;
+  const previousBodyOverflow=body.style.overflow;
+  html.style.overflow="hidden";
+  body.style.overflow="hidden";
+  window.scrollTo(0,0);
+  return ()=>{
+   html.style.overflow=previousHtmlOverflow;
+   body.style.overflow=previousBodyOverflow;
+  };
+ },[]);
+
 
  const [data,setData]=useState<RequestData|null>(null);
  const [name,setName]=useState("");

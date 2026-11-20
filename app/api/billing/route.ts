@@ -11,6 +11,7 @@ async function providerSubscription(id:string,method:"GET"|"PATCH"="GET"){
   cache:"no-store",signal:AbortSignal.timeout(15000)
  });
  if(!response.ok){console.error("Dodo subscription request failed",method,response.status);throw Error("Dodo subscription request failed");}
+ if(method==="PATCH")return {} as DodoSubscription;
  const result=await response.json() as DodoSubscription;
  if(!result||typeof result!=="object")throw Error("Invalid provider subscription response");
  return result;

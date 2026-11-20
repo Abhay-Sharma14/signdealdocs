@@ -18,7 +18,7 @@ export function SiteFooter({tagline="The white-label client portal for modern ag
    </div>}
    <div className={`border-t border-gray-200 pt-4 text-xs text-slate-500 ${compact?"flex flex-wrap items-center justify-between gap-2":"flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"}`}>
     <span>{copyright}</span>
-    <div className="flex flex-wrap gap-x-4 gap-y-2">
+    <div className={`flex flex-wrap gap-x-4 gap-y-2 ${compact?"":"hidden"}`}>
      {compact&&<a href="mailto:hello@signdealdocs.com" className="hover:text-indigo-700">{contactLabel}</a>}
      <Link href="/privacy" className="hover:text-indigo-700">Privacy Policy</Link>
      <Link href="/terms" className="hover:text-indigo-700">Terms of Service</Link>

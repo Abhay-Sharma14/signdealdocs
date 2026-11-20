@@ -20,9 +20,9 @@ const makeHandler=()=>Webhooks({
   const configured=meta?.plan==="pro"?process.env.DODO_PRO_PRODUCT_ID:meta?.plan==="agency"?process.env.DODO_AGENCY_PRODUCT_ID:null;
   const productId=typeof data.product_id==="string"?data.product_id:null;
   if(event.type==="subscription.active"&&(!configured||productId&&productId!==configured))throw Error("Unknown subscription product");
-  const plan=event.type==="subscription.cancelled"?"free":event.type==="subscription.on_hold"?"past_due":meta?.plan;
-  if(plan!=="free"&&plan!=="past_due"&&plan!=="pro"&&plan!=="agency")throw Error("Unknown plan");
-  const {error}=await admin().from("billing_profiles").upsert({user_id:userId,plan,dodo_subscription_id:subscription,dodo_customer_id:typeof data.customer_id==="string"?data.customer_id:null,subscription_status:event.type.split(".")[1],billing_provider:"dodo",updated_at:new Date().toISOString()},{onConflict:"user_id"});
+  const plan=event.type==="subscription.cancelled"?"starter":event.type==="subscription.on_hold"?"past_due":meta?.plan;
+  if(plan!=="starter"&&plan!=="past_due"&&plan!=="pro"&&plan!=="agency")throw Error("Unknown plan");
+  const {error}=await admin().from("billing_profiles").upsert({user_id:userId,plan,dodo_subscription_id:subscription,dodo_customer_id:typeof data.customer_id==="string"?data.customer_id:null,subscription_status:event.type.split(".")[1],cancel_at_period_end:event.type==="subscription.cancelled"?false:data.cancel_at_next_billing_date===true,current_period_end:typeof data.next_billing_date==="string"?data.next_billing_date:null,billing_provider:"dodo",updated_at:new Date().toISOString()},{onConflict:"user_id"});
   if(error)throw error;
  }
 });

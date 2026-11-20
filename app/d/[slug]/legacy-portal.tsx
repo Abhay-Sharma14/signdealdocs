@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { Logo } from "@/components/logo";
 import { ProposalView } from "@/components/proposal-view";
 import { SignaturePad, type SignaturePadHandle } from "@/components/signature-pad";
@@ -193,7 +194,7 @@ export function Portal({ slug }: { slug: string }) {
             {deal.signature_url ? (
               <div className="border-t border-dashed border-slate-200 pt-5">
                 <h2 className="text-sm font-bold text-slate-950">Accepted signature</h2>
-                <img
+                <Image unoptimized width={900} height={220}
                   src={deal.signature_url}
                   alt={`Signature of ${deal.client_name}`}
                   className="mt-3 max-h-40 rounded-xl border border-slate-200 bg-white object-contain"

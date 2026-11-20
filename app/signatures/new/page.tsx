@@ -5,7 +5,6 @@ import {useRouter} from "next/navigation";
 import {Logo} from "@/components/logo";
 import {SiteFooter} from "@/components/site-footer";
 import {supabase} from "@/lib/supabase";
-type Item={id:string;token:string;title:string;signer_name:string;signer_email:string;signed_at:string|null;expires_at:string;revoked_at:string|null};
 export default function NewSignaturePage(){
  const router=useRouter();
  const [ready,setReady]=useState(false);

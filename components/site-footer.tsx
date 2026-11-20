@@ -4,8 +4,8 @@ import {Logo} from "@/components/logo";
 type Props={tagline?:string;contactLabel?:string;copyright?:string;compact?:boolean};
 export function SiteFooter({tagline="The white-label client portal for modern agencies.",contactLabel="Contact",copyright="© 2026 SignDealDocs. All rights reserved.",compact=false}:Props){
  return <footer className={`border-t border-gray-200 bg-white ${compact?"shrink-0":""}`}>
-  <div className={`mx-auto w-full px-4 sm:px-6 lg:px-8 ${compact?"max-w-5xl py-3":"max-w-7xl pt-8 pb-28 sm:pb-24"}`}>
-   {!compact&&<div className="grid grid-cols-2 items-start gap-x-4 gap-y-6 pb-7 sm:gap-x-8">
+  <div className={`mx-auto w-full px-4 sm:px-6 lg:px-8 ${compact?"max-w-5xl py-3":"max-w-7xl pt-6 pb-6 sm:pt-7 sm:pb-7"}`}>
+   {!compact&&<div className="grid grid-cols-2 items-start gap-x-4 gap-y-4 pb-5 sm:gap-x-8 sm:pb-6">
     <div className="min-w-0">
      <div className="[&_svg]:!h-8 [&_svg]:!w-8 [&_span]:text-base sm:[&_span]:text-lg"><Logo/></div>
      <p className="mt-2 max-w-xs text-xs leading-relaxed text-slate-500 sm:text-sm">{tagline}</p>

@@ -14,7 +14,7 @@ type ClientUpload={id:string;name:string;created_at:string;uploaded_by:string;ur
 export default function Dashboard(){
  const router=useRouter();const detectedCurrency=useCurrency();const [dealCurrencyOverride,setDealCurrencyOverride]=useState<DealCurrency|null>(null);const dealCurrency=dealCurrencyOverride??detectedCurrency;const setDealCurrency=setDealCurrencyOverride;const [editCurrency,setEditCurrency]=useState<DealCurrency>("USD");
  const [deals,setDeals]=useState<Deal[]>([]),[ready,setReady]=useState(false),[modal,setModal]=useState(false),[error,setError]=useState("");
- const [paymentMethod,setPaymentMethod]=useState("payment_link");
+ const paymentMethod="payment_link";
  const [activeTab,setActiveTab]=useState<"deals"|"quick">("deals"),[quickSigns,setQuickSigns]=useState<QuickSign[]>([]),[quickLoading,setQuickLoading]=useState(false),[quickLoaded,setQuickLoaded]=useState(false),[quickError,setQuickError]=useState("");
  const [search,setSearch]=useState("");
  const [statusFilter,setStatusFilter]=useState("all");

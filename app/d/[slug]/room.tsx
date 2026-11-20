@@ -18,6 +18,20 @@ export function AgencyDealRoom({token}:{token:string}){
  const [notifying,setNotifying]=useState(false);
  const [uploadSuccess,setUploadSuccess]=useState("");
  const [toast,setToast]=useState("");
+ useEffect(()=>{
+  // This page has its own content scroller; prevent the document behind it from scrolling.
+  const html=document.documentElement;
+  const body=document.body;
+  const previousHtmlOverflow=html.style.overflow;
+  const previousBodyOverflow=body.style.overflow;
+  html.style.overflow="hidden";
+  body.style.overflow="hidden";
+  window.scrollTo(0,0);
+  return ()=>{
+   html.style.overflow=previousHtmlOverflow;
+   body.style.overflow=previousBodyOverflow;
+  };
+ },[]);
  const scrollRef=useRef<HTMLElement|null>(null);
  const loadId=useRef(0);
  async function load(){

@@ -99,3 +99,25 @@ body {
     display: none !important;
   }
 }
+
+
+/* Seamless two-copy testimonial marquee; hover/focus pause and motion accessibility. */
+.testimonial-marquee-mask {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+.testimonial-marquee-track {
+  animation: testimonial-marquee-scroll 42s linear infinite;
+}
+.testimonial-marquee-mask:hover .testimonial-marquee-track,
+.testimonial-marquee-mask:focus-within .testimonial-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes testimonial-marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-50% - 8px)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .testimonial-marquee-track { animation: none; }
+  .testimonial-marquee-mask { overflow-x: auto; mask-image: none; -webkit-mask-image: none; }
+}

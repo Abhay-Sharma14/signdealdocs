@@ -7,7 +7,7 @@ import {admin,BUCKET,owner,jsonError} from "@/lib/deal-room";
 export const runtime="nodejs";
 export async function POST(request:Request){
  const user=await owner(request);if(!user)return jsonError("Sign in required.",401);
- if(Number(request.headers.get("content-length")||0)>7_000_000)return jsonError("Uploads too large.",413);
+ if(Number(request.headers.get("content-length")||0)>8_000_000)return jsonError("Uploads too large.",413);
  let form:FormData;try{form=await request.formData();}catch{return jsonError("Invalid form.",400);}
  const client_name=String(form.get("client_name")||"").trim().slice(0,120);
  const client_email=String(form.get("client_email")||"").trim().toLowerCase();

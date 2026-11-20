@@ -5,7 +5,7 @@ import {Portal as LegacyPortal} from "./legacy-portal";
 import {SignContractModal} from "@/components/sign-contract-modal";
 
 type Item={id:string;type:"proposal"|"contract"|"invoice"|"file_request";title:string;pdf_url:string|null;signed_pdf_url:string|null;status:string};
-type Deal={client_name:string;project_title:string;amount:number;currency:string;status:string;brand_name:string;brand_color:string;logo_url:string|null;valid_until:string|null;payment_method?:string;payment_link?:string|null;upi_qr_url?:string|null;payment_notified_at?:string|null;payment_reference?:string|null};
+type Deal={client_name:string;project_title:string;amount:number;currency:string;deposit_percent?:number;status:string;brand_name:string;brand_color:string;logo_url:string|null;valid_until:string|null;payment_method?:string;payment_link?:string|null;upi_qr_url?:string|null;payment_notified_at?:string|null;payment_reference?:string|null};
 type Event={id:string;action:string;created_at:string};
 type UploadedAsset={id:string;deal_item_id:string;name:string;size:number|null};
 
